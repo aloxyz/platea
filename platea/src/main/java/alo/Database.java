@@ -9,7 +9,7 @@ public class Database {
     String url;
     String user;
     String password;
-    Connection conn;
+    public Connection conn;
     
     public Database(String url, String user, String password) {
         this.url = url;
@@ -17,13 +17,14 @@ public class Database {
         this.password = password;
     }
 
-    void connect() {
+    Connection connect() {
         try {
             this.conn = DriverManager.getConnection(
                 this.url, this.user, this.password);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return this.conn;
     }
 
     String query(String query) {
