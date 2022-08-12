@@ -7,7 +7,7 @@ public class App
     {
         try {
             Mapper m = new Mapper();
-            Instance c = m.InstanceFromFile("/home/alo/Documenti/platea-configs/test.json");
+            Container c = m.ContainerFromFile("/home/alo/Documenti/platea-configs/test.json");
             System.out.print(c);
 
             FileIO.wget("https://gitlab.com/aloxyz/platea-configs/-/raw/main/lcarnevale.json", "../json/");

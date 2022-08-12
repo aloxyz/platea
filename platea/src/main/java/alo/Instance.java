@@ -1,5 +1,5 @@
 package alo;
 
 public class Instance {
-    public URL endpoint;
+    public Container[] apps;
 }
