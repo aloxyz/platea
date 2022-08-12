@@ -7,16 +7,16 @@ public class App
     {
         try {
             Mapper m = new Mapper();
-            Container c = m.ContainerFromFile("/home/alo/Documenti/platea-configs/test.json");
-            System.out.print(c);
-
-            FileIO.wget("https://gitlab.com/aloxyz/platea-configs/-/raw/main/lcarnevale.json", "../json/");
-
+            Instance i = m.InstanceFromFile("json/lcarnevale.json");
+            i.build();
+            
+            /*
             Database db = new Database("jdbc:postgresql://localhost/platea", "postgres", "postgres");
             
             if(db.connect() != null) {
                 System.out.println("Connected to database "+ db +" successfully");
             }
+            */
     
         } catch (Exception e) {
             e.printStackTrace();
