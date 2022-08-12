@@ -31,10 +31,11 @@ public class FileIO {
         return data;
     }
 
-    public void wget(URL url, String path) {
+    public static void wget(String url, String path) {
         // Download a file from given URL to specified path
         try {
-            ReadableByteChannel rbc = Channels.newChannel(url.openStream());
+            URL endpoint = new URL(url);
+            ReadableByteChannel rbc = Channels.newChannel(endpoint.openStream());
             FileOutputStream fos = new FileOutputStream(path);
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
             fos.close();    
