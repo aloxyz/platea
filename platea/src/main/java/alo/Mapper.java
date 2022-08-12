@@ -8,6 +8,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class Mapper {
     ObjectMapper mapper = new ObjectMapper();
 
+    public Instance InstanceFromFile(String path) {
+        Instance i = new Instance();
+        try {
+            i = mapper.readValue(
+                Paths.get(path).toFile(), 
+                Instance.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return i;
+    }
+
     public Container ContainerFromFile(String path) {
         Container c = new Container();
         try {
