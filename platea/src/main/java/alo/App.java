@@ -7,9 +7,13 @@ public class App
     {
         try {
             Mapper m = new Mapper();
+            FileIO.wget("https://gitlab.com/aloxyz/platea-configs/-/raw/main/lcarnevale.json", "json/lcarnevale.json");
             Instance i = m.InstanceFromFile("json/lcarnevale.json");
+            System.out.println(i.getContainers().name);
+
             i.build();
             
+
             /*
             Database db = new Database("jdbc:postgresql://localhost/platea", "postgres", "postgres");
             

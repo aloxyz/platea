@@ -4,34 +4,26 @@ import java.io.File;
 import java.net.URL;
 import java.nio.file.Paths;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 public class Mapper {
     ObjectMapper mapper = new ObjectMapper();
 
     public Instance InstanceFromFile(String path) {
-        Instance i = new Instance();
+        Instance i = new Instance();     
         try {
-            i = mapper.readValue(
-                Paths.get(path).toFile(), 
-                Instance.class);
+            Container c = new Container();
+            ArrayList<LinkedHashMap<String,String>> tmp = mapper.readValue(Paths.get(path).toFile(),ArrayList.class);
+            for (LinkedHashMap<String,String> e : tmp) {
+                c.InitializeFromLHM(e);
+                i.containers.add(c);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return i;
     }
-
-    public Instance InstanceFromURL(String url) {
-        Instance i = new Instance();
-        try {
-            i = mapper.readValue(
-                new URL(url), 
-                Instance.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return i;
-    }
-
 
     public Container ContainerFromFile(String path) {
         Container c = new Container();

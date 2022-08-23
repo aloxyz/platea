@@ -1,8 +1,10 @@
-{
-    "docker-file-server": {
+[
+   {    
+        "name" : "docker-file-server",
         "endpoint": "https://github.com/lcarnevale/docker-file-server/archive/refs/tags/v1.0.0.tar.gz"
     },
-    "smtpclient-microservice": {
+    {    
+        "name" : "smtpclient-microservice",
         "endpoint": "https://github.com/lcarnevale/smtpclient-microservice/archive/refs/heads/master.zip"
     }
-}
+]
