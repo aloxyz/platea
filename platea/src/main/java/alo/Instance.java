@@ -1,9 +1,10 @@
 package alo;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Instance {
-    public Container[] containers;
+    private ArrayList<Container> containers;
 
     public void build() {
         try {

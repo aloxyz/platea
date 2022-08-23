@@ -1,8 +1,5 @@
 package alo;
 
-import java.io.File;
-import java.util.Arrays;
-
 public class Container {
     public String name;
     public String endpoint;
@@ -12,7 +9,11 @@ public class Container {
     }
 
     public void build() {
-        String[] cmd = new String[]{ "/bin/sh", "scripts/"+s.getName() };
-        Runtime.getRuntime().exec(cmd);
+        try {
+            String[] cmd = new String[]{ "/bin/sh", "scripts/"+this.name };
+            Runtime.getRuntime().exec(cmd);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

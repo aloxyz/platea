@@ -20,6 +20,19 @@ public class Mapper {
         return i;
     }
 
+    public Instance InstanceFromURL(String url) {
+        Instance i = new Instance();
+        try {
+            i = mapper.readValue(
+                new URL(url), 
+                Instance.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return i;
+    }
+
+
     public Container ContainerFromFile(String path) {
         Container c = new Container();
         try {
