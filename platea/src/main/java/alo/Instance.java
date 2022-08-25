@@ -26,10 +26,9 @@ public class Instance {
     public void build() {
         try {
             File[] scripts = new File("scripts").listFiles();
-            
+
             for (Container c : this.containers) {
-                System.out.println(c.name);
-                if (Arrays.asList(scripts).contains(c.name)) {
+                if (Arrays.asList(scripts).contains(c.getName())) {
                     c.build();
                 } else {
                     System.out.println("scripts/"+c.name+".sh : file not found");

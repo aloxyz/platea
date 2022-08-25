@@ -13,9 +13,10 @@ public class Mapper {
     public Instance InstanceFromFile(String path) {
         Instance i = new Instance();     
         try {
-            Container c = new Container();
+            Container c;
             ArrayList<LinkedHashMap<String,String>> tmp = mapper.readValue(Paths.get(path).toFile(),ArrayList.class);
             for (LinkedHashMap<String,String> e : tmp) {
+                c = new Container();
                 c.InitializeFromLHM(e);
                 i.containers.add(c);
             }
