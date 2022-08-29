@@ -1,7 +1,6 @@
 package alo;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Instance {
     public ArrayList<Container> containers;
@@ -26,9 +25,14 @@ public class Instance {
     public void build() {
         try {
             File[] scripts = new File("scripts").listFiles();
+            ArrayList<String> script_filenames = new ArrayList<String>();
+            for (File f : scripts) {
+                script_filenames.add(f.getName());
+            }
 
             for (Container c : this.containers) {
-                if (Arrays.asList(scripts).contains(c.getName())) {
+                if (script_filenames.contains(c.getName() + ".sh")) {
+                    System.out.println("Found script for "+c.getName()+". Building...");
                     c.build();
                 } else {
                     System.out.println("scripts/"+c.name+".sh : file not found");
