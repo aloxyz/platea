@@ -1,0 +1,1 @@
+echo "Hello from smtpclient-microservice.sh"

@@ -26,8 +26,17 @@ public class Container {
 
     public void build() {
         try {
-            String[] cmd = new String[]{ "/bin/sh", "scripts/"+this.name };
+            ProcessBuilder builder = new ProcessBuilder();
+            builder.inheritIO();
+            String[] cmd = {"/bin/sh", "scripts/"+this.name+".sh"};
+            builder.command(cmd);
+            Process p = builder.start();
+            p.waitFor();
+            System.out.println(p+" exited with value "+p.exitValue());
+            /*
+            String[] cmd = new String[]{ "/bin/sh", "scripts/"+this.name+".sh" };
             Runtime.getRuntime().exec(cmd);
+            */
         } catch (Exception e) {
             e.printStackTrace();
         }

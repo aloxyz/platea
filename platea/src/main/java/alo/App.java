@@ -10,9 +10,7 @@ public class App
             FileIO.wget("https://gitlab.com/aloxyz/platea-configs/-/raw/main/lcarnevale.json", "json/lcarnevale.json");
             Instance i = m.InstanceFromFile("json/lcarnevale.json");
             
-            System.out.println(i.getContainers().get(0).getName());
-            System.out.println(i.getContainers().get(1).getName());            
-
+            i.build();
             /*
             Database db = new Database("jdbc:postgresql://localhost/platea", "postgres", "postgres");
             
