@@ -1,14 +1,18 @@
 package alo;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
+import org.rauschig.jarchivelib.Archiver;
+import org.rauschig.jarchivelib.ArchiverFactory;
+
 public class FileIO {
-    public String readFile(String filePath) {
+    public static String readFile(String filePath) {
         // read file and return a String
         String data = "";
         try {        
@@ -43,5 +47,16 @@ public class FileIO {
         catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static void extractTarball(String tarballPath, String destinationPath) throws Exception {
+        File tarball = new File(tarballPath);
+        File destination = new File(destinationPath);
+    
+        Archiver archiver = 
+        ArchiverFactory
+        .createArchiver("tar", "gz");
+
+        archiver.extract(tarball, destination);
     }
 }
