@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.model.Volume;
+import com.google.common.io.Files;
 
 public class Container {
     private String platea_service_name;
@@ -87,7 +88,7 @@ public class Container {
         System.out.println("Running script for service: " + getPlateaServiceName());
         ProcessBuilder builder = new ProcessBuilder();
         builder.inheritIO();
-        String[] cmd = {"/bin/sh", "-c", Config.getConfig().instancesPath() + "scripts/"+this.platea_service_name+".sh"};
+        String[] cmd = {"/bin/sh", "-c", Config.getConfig().scriptsPath() + this.platea_service_name + ".sh"};
         builder.command(cmd);
         Process p = builder.start();
         p.waitFor();
@@ -98,7 +99,18 @@ public class Container {
         */
     }
 
+    public void importScript() throws Exception {
+        /*
+         * Moves script file from platea/instances/scripts to platea/scripts 
+         */
+        File scriptFile = new File(Config.getConfig().instancesPath() + "scripts/" + getPlateaServiceName() + ".sh");
+        File destPath = new File(Config.getConfig().scriptsPath() + getPlateaServiceName() + ".sh");
+
+        Files.move(scriptFile, destPath);
+    }
+
     public String getID() {
+        System.out.println(this.container.getId());
         return this.container.getId();
     }
 
@@ -163,12 +175,12 @@ public class Container {
         .exec();
     }
 
-    public void getSource() throws Exception {
+    public void fetchSource() throws Exception {
         String containersPath = Config.getConfig().containersPath();
         String archivePath = containersPath + "/" + getPlateaServiceName() + ".zip";
 
+        System.out.println("Fetching source for service: " + getPlateaServiceName());
         FileIO.wget(endpoint, archivePath);
-
         FileIO.extractArchive(archivePath, containersPath + "/" + getPlateaServiceName());
         
         new File(archivePath).delete();

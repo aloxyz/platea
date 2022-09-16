@@ -8,6 +8,7 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
+import org.rauschig.jarchivelib.ArchiveFormat;
 import org.rauschig.jarchivelib.Archiver;
 import org.rauschig.jarchivelib.ArchiverFactory;
 
@@ -55,7 +56,7 @@ public class FileIO {
     
         Archiver archiver = 
         ArchiverFactory
-        .createArchiver("zip");
+        .createArchiver(ArchiveFormat.ZIP);
 
         archiver.extract(archive, destination);
     }

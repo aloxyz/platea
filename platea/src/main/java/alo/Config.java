@@ -6,6 +6,7 @@ public class Config {
     private String basePath = System.getenv("XDG_CONFIG_HOME") + "/platea";
     private String instancesPath = basePath + "/instances/";
     private String containersPath = basePath + "/containers/";
+    private String scriptsPath = basePath + "/scripts/";
 
     private String remoteRepositoryURL = "git@gitlab.com:aloxyz/platea-configs.git";
     
@@ -41,4 +42,7 @@ public class Config {
     public String containersPath() {
         return this.containersPath;
     }
-}
+    
+    public String scriptsPath() {
+        return this.scriptsPath;
+    }

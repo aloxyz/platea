@@ -56,6 +56,12 @@ public class Instance extends Thread {
             c.delete();
         }
     }
+
+    public void fetchContainersSource() throws Exception {
+        for (Container c : this.containers) {
+            c.fetchSource();
+        }
+    }
 }
 
 

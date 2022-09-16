@@ -13,6 +13,8 @@ public class App
         //i.runContainers();
 
         Orchestrator.fetchRemoteInstances();
+
+        i.fetchContainersSource();
         i.buildContainers();
         i.getContainer(0).getID();
         i.deleteContainers();
