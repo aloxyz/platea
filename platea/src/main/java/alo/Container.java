@@ -1,5 +1,6 @@
 package alo;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -56,6 +57,10 @@ public class Container {
         return this.script;
     }
 
+    public CreateContainerResponse getContainer() {
+        return this.container;
+    }
+
     public void InitializeFromLHM(LinkedHashMap<String,Object> lhm) {
         //Initialize name and endpoint given a LinkedHashMap
 
@@ -79,17 +84,22 @@ public class Container {
     }
 
     public void runScript() throws Exception {
-            ProcessBuilder builder = new ProcessBuilder();
-            builder.inheritIO();
-            String[] cmd = {"/bin/sh", "-c", Config.getConfig().basePath() + "/scripts/"+this.platea_service_name+".sh"};
-            builder.command(cmd);
-            Process p = builder.start();
-            p.waitFor();
-            System.out.println(p+" exited with value "+p.exitValue());
-            /*
-            String[] cmd = new String[]{ "/bin/sh", "scripts/"+this.platea_service_name+".sh" };
-            Runtime.getRuntime().exec(cmd);
-            */
+        System.out.println("Running script for service: " + getPlateaServiceName());
+        ProcessBuilder builder = new ProcessBuilder();
+        builder.inheritIO();
+        String[] cmd = {"/bin/sh", "-c", Config.getConfig().instancesPath() + "scripts/"+this.platea_service_name+".sh"};
+        builder.command(cmd);
+        Process p = builder.start();
+        p.waitFor();
+        System.out.println(p+" exited with value "+p.exitValue());
+        /*
+        String[] cmd = new String[]{ "/bin/sh", "scripts/"+this.platea_service_name+".sh" };
+        Runtime.getRuntime().exec(cmd);
+        */
+    }
+
+    public String getID() {
+        return this.container.getId();
     }
 
     public void build() throws Exception {
@@ -99,6 +109,7 @@ public class Container {
             getVolume()             != null && 
             getPort()               != null) {
 
+            System.out.println("Building container: " + getPlateaServiceName());
             CreateContainerResponse container =
             Client
             .getClient()
@@ -116,16 +127,11 @@ public class Container {
             }
 
         this.container = container;
-        }
-        
-        
-    }
-
-    public String getID() {
-        return this.container.getId();
+        }        
     }
 
     public void start() throws Exception {
+        System.out.println("Starting container: " + getPlateaServiceName());
         Client
         .getClient()
         .getDockerClient()
@@ -139,6 +145,7 @@ public class Container {
     }
 
     public void stop() throws Exception {
+        System.out.println("Stopping container: " + getPlateaServiceName());
         Client
         .getClient()
         .getDockerClient()
@@ -147,6 +154,7 @@ public class Container {
     }
 
     public void delete() throws Exception {
+        System.out.println("Deleting container: " + getPlateaServiceName());
         Client
         .getClient()
         .getDockerClient()
@@ -155,4 +163,14 @@ public class Container {
         .exec();
     }
 
+    public void getSource() throws Exception {
+        String containersPath = Config.getConfig().containersPath();
+        String archivePath = containersPath + "/" + getPlateaServiceName() + ".zip";
+
+        FileIO.wget(endpoint, archivePath);
+
+        FileIO.extractArchive(archivePath, containersPath + "/" + getPlateaServiceName());
+        
+        new File(archivePath).delete();
+    }
 }

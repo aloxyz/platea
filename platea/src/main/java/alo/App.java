@@ -1,7 +1,5 @@
 package alo;
 
-import java.util.concurrent.TimeUnit;
-
 public class App
 
 {
@@ -12,11 +10,16 @@ public class App
         
         Instance i = Orchestrator.newInstance("lcarnevale.json");
         
-        i.runContainers();
+        //i.runContainers();
+
+        Orchestrator.fetchRemoteInstances();
+        i.buildContainers();
+        i.getContainer(0).getID();
+        i.deleteContainers();
 
         System.out.println(Orchestrator.listPlateaInstances());
         
-        i.deleteContainers();
+        //i.deleteContainers();
 
         System.out.println(Orchestrator.listPlateaInstances());
         

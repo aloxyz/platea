@@ -49,14 +49,14 @@ public class FileIO {
         }
     }
 
-    public static void extractTarball(String tarballPath, String destinationPath) throws Exception {
-        File tarball = new File(tarballPath);
+    public static void extractArchive(String archivePath, String destinationPath) throws Exception {
+        File archive = new File(archivePath);
         File destination = new File(destinationPath);
     
         Archiver archiver = 
         ArchiverFactory
-        .createArchiver("tar", "gz");
+        .createArchiver("zip");
 
-        archiver.extract(tarball, destination);
+        archiver.extract(archive, destination);
     }
 }

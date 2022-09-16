@@ -28,25 +28,18 @@ public class Instance extends Thread {
 
     public void buildContainers() throws Exception {
         for (Container c : this.containers) {
-            if (c.hasScript()) {
-                c.runScript();
-            }
-
-            System.out.println("Building container: "+c.getPlateaServiceName());
             c.build();
         }
     }
 
     public void startContainers() throws Exception {
         for (Container c : this.containers) {  
-            System.out.println("Starting container: "+c.getPlateaServiceName());
             c.start();
         }
     }
 
     public void runContainers() throws Exception {
         for (Container c : this.containers) {
-            System.out.println("Building and starting container: "+c.getPlateaServiceName());
             c.build();
             c.start();
         }
@@ -54,14 +47,12 @@ public class Instance extends Thread {
 
     public void stopContainers() throws Exception {
         for (Container c : this.containers) {
-            System.out.println("Stopping container: "+c.getPlateaServiceName());
             c.stop();
         }
     }
 
     public void deleteContainers() throws Exception {
         for (Container c : this.containers) {
-            System.out.println("Deleting container: "+c.getPlateaServiceName());
             c.delete();
         }
     }

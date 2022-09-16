@@ -3,9 +3,9 @@ package alo;
 public class Config {
     private static Config config;
     private String configPath = System.getenv("HOME") + ".platearc";
-    private String basePath = System.getenv("XDG_CONFIG_HOME") + "/platea/";
-    private String instancesPath = basePath + "instances/";
-    private String containersPath = basePath + "containers/";
+    private String basePath = System.getenv("XDG_CONFIG_HOME") + "/platea";
+    private String instancesPath = basePath + "/instances/";
+    private String containersPath = basePath + "/containers/";
 
     private String remoteRepositoryURL = "git@gitlab.com:aloxyz/platea-configs.git";
     
