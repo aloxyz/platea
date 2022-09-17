@@ -28,6 +28,7 @@ public class Instance extends Thread {
 
     public void buildContainers() throws Exception {
         for (Container c : this.containers) {
+            c.fetchSource();
             c.build();
         }
     }

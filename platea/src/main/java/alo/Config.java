@@ -9,7 +9,8 @@ public class Config {
     private String scriptsPath = basePath + "/scripts/";
 
     private String remoteRepositoryURL = "git@gitlab.com:aloxyz/platea-configs.git";
-    
+    private String databaseURL = "http://localhost:3000/instances";
+    private String dockerSocket = "http://localhost:2375";
     private Config() throws Exception {
     } 
 
@@ -46,3 +47,12 @@ public class Config {
     public String scriptsPath() {
         return this.scriptsPath;
     }
+
+    public String databaseURL() {
+        return this.databaseURL;
+    }
+
+    public String dockerSocket() {
+        return this.dockerSocket;
+    }
+}

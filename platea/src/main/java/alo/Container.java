@@ -1,11 +1,8 @@
 package alo;
 
 import java.io.File;
-import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.model.Volume;
 import com.google.common.io.Files;
@@ -106,11 +103,10 @@ public class Container {
         File scriptFile = new File(Config.getConfig().instancesPath() + "scripts/" + getPlateaServiceName() + ".sh");
         File destPath = new File(Config.getConfig().scriptsPath() + getPlateaServiceName() + ".sh");
 
-        Files.move(scriptFile, destPath);
+        Files.copy(scriptFile, destPath);
     }
 
     public String getID() {
-        System.out.println(this.container.getId());
         return this.container.getId();
     }
 
@@ -135,6 +131,7 @@ public class Container {
             .exec();
 
             if (hasScript()) {
+                importScript();
                 runScript();
             }
 
@@ -143,12 +140,15 @@ public class Container {
     }
 
     public void start() throws Exception {
-        System.out.println("Starting container: " + getPlateaServiceName());
-        Client
-        .getClient()
-        .getDockerClient()
-        .startContainerCmd
-        (getID());
+        if(getID() != null) {
+            System.out.println("Starting container: " + getPlateaServiceName());
+            Client
+            .getClient()
+            .getDockerClient()
+            .startContainerCmd
+            (getID());
+        }
+        
     }
 
     public void run() throws Exception {
@@ -157,22 +157,26 @@ public class Container {
     }
 
     public void stop() throws Exception {
-        System.out.println("Stopping container: " + getPlateaServiceName());
-        Client
-        .getClient()
-        .getDockerClient()
-        .stopContainerCmd
-        (getID());
+        if(getID() != null) {
+            System.out.println("Stopping container: " + getPlateaServiceName());
+            Client
+            .getClient()
+            .getDockerClient()
+            .stopContainerCmd
+            (getID());
+        }
     }
 
     public void delete() throws Exception {
-        System.out.println("Deleting container: " + getPlateaServiceName());
-        Client
-        .getClient()
-        .getDockerClient()
-        .removeContainerCmd
-        (getID())
-        .exec();
+        if(getID() != null) {
+            System.out.println("Deleting container: " + getPlateaServiceName());
+            Client
+            .getClient()
+            .getDockerClient()
+            .removeContainerCmd
+            (getID())
+            .exec();
+        }
     }
 
     public void fetchSource() throws Exception {
@@ -184,5 +188,14 @@ public class Container {
         FileIO.extractArchive(archivePath, containersPath + "/" + getPlateaServiceName());
         
         new File(archivePath).delete();
+    }
+
+    public void fetchRepo() throws Exception {
+        ProcessBuilder builder = new ProcessBuilder();
+        //builder.inheritIO();
+        String[] cmd = {"/bin/sh", "-c", "git clone " + endpoint + " " + Config.getConfig().containersPath() + this.platea_service_name};
+        builder.command(cmd);
+        Process p = builder.start();
+        p.waitFor();
     }
 }

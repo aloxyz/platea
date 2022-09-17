@@ -1,48 +1,51 @@
 package alo;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.HttpEntity;
+import org.json.*;
 
 public class Database {
-    String url;
-    String user;
-    String password;
-    public Connection conn;
+    private static Database database;
+    private static CloseableHttpClient client;
+
+    Database() {
+        client = HttpClients.createDefault();
+    }
     
-    public Database(String url, String user, String password) {
-        this.url = url;
-        this.user = user;
-        this.password = password;
+
+    public static synchronized Database getDatabase() throws Exception {
+        if (database == null) {
+            database = new Database();
+        }
+        return database;
     }
 
-    Connection connect() {
-        try {
-            this.conn = DriverManager.getConnection(
-                this.url, this.user, this.password);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return this.conn;
-    }
+    public  HttpEntity postRequest(String json) throws Exception {
+        HttpPost post = new HttpPost(Config.getConfig().databaseURL());
 
-    String query(String query) {
-        String response = "";
-        try {
-            Statement statement = this.conn.createStatement();
-            ResultSet result = statement.executeQuery(query);
-
-            /* 
-            while(result.next()) {
-                result.getString(arg0)
-            }
-            */
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return response;
+        StringEntity entity = new StringEntity(json);
+        post.setHeader("Accept", "application/json");
+        post.setHeader("Content-type", "application/json");
+        post.setEntity(entity);
         
+        return
+        client
+        .execute(post)
+        .getEntity();
     }
+
+    public HttpEntity getRequest() throws Exception {
+        HttpGet request = new HttpGet(Config.getConfig().databaseURL());
+        
+        return
+        client
+        .execute(request)
+        .getEntity();
+    }
+        
+    
 }

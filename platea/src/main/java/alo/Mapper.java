@@ -8,14 +8,14 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 public class Mapper {
-    ObjectMapper mapper = new ObjectMapper();
 
-    public Instance instanceFromFile(String name) throws Exception {
+    public static Instance instanceFromFile(String name) throws Exception {
         Instance i = new Instance(name);     
         Container c;
 
         ArrayList<LinkedHashMap<String,Object>> tmp = 
-            mapper.readValue(new File(name), ArrayList.class);
+            new ObjectMapper()
+            .readValue(new File(name), ArrayList.class);
 
         for (LinkedHashMap<String,Object> e : tmp) {
             c = new Container();
@@ -25,22 +25,22 @@ public class Mapper {
         return i;
     }
 
-    public void instanceToFile(Instance i, String path) throws Exception{
-        mapper.writeValue(new File(path), i);
+    public static void instanceToFile(Instance i, String path) throws Exception{
+        new ObjectMapper().writeValue(new File(path), i);
         
     }
 
 
-    public Container containerFromFile(String path) throws Exception {
-        return mapper.readValue(
+    public static Container containerFromFile(String path) throws Exception {
+        return new ObjectMapper().readValue(
             Paths.get(path).toFile(), 
             Container.class);
     }
 
-    public Container containerFromURL(String url) throws Exception {
+    public static Container containerFromURL(String url) throws Exception {
         Container c = new Container();
         try {
-            c = mapper.readValue(
+            c = new ObjectMapper().readValue(
                 new URL(url), 
                 Container.class);
         } catch (Exception e) {
@@ -49,12 +49,39 @@ public class Mapper {
         return c;
     }
 
-    public void containerToFile(Container c, String path) {
+    public static void containerToFile(Container c, String path) {
         try {
-            mapper.writeValue(new File(path), c);
+            new ObjectMapper().writeValue(new File(path), c);
         } catch (Exception e) {
             e.printStackTrace();
         }
         
+    }
+
+    public static String instanceToJSON(Instance i) throws Exception {
+        return
+
+        new ObjectMapper()
+        .writer()
+        .withDefaultPrettyPrinter()
+        .writeValueAsString(i);
+    }
+
+    public static String InstanceEntityToJSON(InstanceEntity e) throws Exception {
+        return
+
+        new ObjectMapper()
+        .writer()
+        .withDefaultPrettyPrinter()
+        .writeValueAsString(e);
+    }
+
+    public static String ContainerEntityToJSON(ContainerEntity c) throws Exception {
+        return
+
+        new ObjectMapper()
+        .writer()
+        .withDefaultPrettyPrinter()
+        .writeValueAsString(c);
     }
 }

@@ -1,9 +1,7 @@
 package alo;
 
-import org.json.*;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -74,10 +72,10 @@ public class Orchestrator {
         return instances;
     }
 
-    public static Instance newInstance(String name) throws Exception {
+    public static Instance newInstance(String instanceName) throws Exception {
         return
         new Mapper()
-        .instanceFromFile(Config.getConfig().instancesPath() + name);
+        .instanceFromFile(Config.getConfig().instancesPath() + instanceName + ".json");
     }
 
     public static List listPlateaInstances() throws Exception {
