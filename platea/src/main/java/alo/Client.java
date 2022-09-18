@@ -50,7 +50,6 @@ public class Client {
     }
 
     public HttpRequest get(URI uri) throws Exception {
-
         return
         HttpRequest.newBuilder(uri)
             .timeout(Duration.ofSeconds(10))
@@ -59,8 +58,6 @@ public class Client {
     }
 
     public HttpRequest post(URI uri, BodyPublisher body) throws Exception {
-        URI uri = uriBuilder(path, Collections.<String, String>emptyMap());
-
         return
         HttpRequest.newBuilder(uri)
             .timeout(Duration.ofSeconds(10))
@@ -78,6 +75,13 @@ public class Client {
         return
         sendRequest(
             get(uriBuilder(path, parameters)), 
+            BodyHandlers.ofString());
+    }
+
+    public HttpResponse postResource(String path, Map<String, String> parameters, BodyPublisher body) throws Exception {
+        return
+        sendRequest(
+            post(uriBuilder(path, parameters), body),
             BodyHandlers.ofString());
     }
 

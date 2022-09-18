@@ -4,12 +4,12 @@ import java.net.http.HttpResponse;
 
 public class DockerController {
 
-    public static HttpResponse getContainers(String id) throws Exception {
+    public static HttpResponse get(String object, String id) throws Exception {
         if (!id.isEmpty()) {
             return
                 Client.getClient()
                 .getResource(
-                    "/containers/"+ id +"/json",
+                    String.format("/%s/%s/json", object, id),
                     Client.getClient().noParameters());
         } 
         
@@ -17,10 +17,8 @@ public class DockerController {
             return
                 Client.getClient()
                 .getResource(
-                    "/containers/json",
+                    object + "/json",
                     Client.getClient().noParameters());
-        }
-
-            
+        }   
     }
 }
