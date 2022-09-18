@@ -10,7 +10,8 @@ public class Config {
 
     private String remoteRepositoryURL = "git@gitlab.com:aloxyz/platea-configs.git";
     private String databaseURL = "http://localhost:3000/instances";
-    private String dockerSocket = "http://localhost:2375";
+    private String dockerSocket = "unix:/var/run/docker.sock";
+    private String dockerURL = "localhost:2375";
     private Config() throws Exception {
     } 
 
@@ -54,5 +55,9 @@ public class Config {
 
     public String dockerSocket() {
         return this.dockerSocket;
+    }
+
+    public String dockerURL() {
+        return this.dockerURL;
     }
 }

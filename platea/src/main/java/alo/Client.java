@@ -15,7 +15,6 @@ import org.apache.http.client.utils.URIBuilder;
 
 
 public class Client {
-    private final BodyPublisher noBody = HttpRequest.BodyPublishers.noBody();
     private HttpClient httpClient;
     
     private static Client client;
@@ -35,7 +34,7 @@ public class Client {
 
     public URI uriBuilder(String path, Map<String, String> parameters) throws Exception{
         URIBuilder builder = new URIBuilder();
-        builder.setScheme("http").setHost(Config.getConfig().dockerSocket()).setPath(path);
+        builder.setScheme("http").setHost(Config.getConfig().dockerURL()).setPath(path);
 
         
 
@@ -79,6 +78,13 @@ public class Client {
             BodyHandlers.ofString());
     }
 
+    public Map noParameters() {
+        return Collections.<String, String>emptyMap();
+    }
+
+    public BodyPublisher noBody() {
+        return HttpRequest.BodyPublishers.noBody();
+    }
 }
     
 
