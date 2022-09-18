@@ -17,7 +17,7 @@ public class DockerController {
             return
                 Client.getClient()
                 .getResource(
-                    object + "/json",
+                    String.format("/%s/json", object),
                     Client.getClient().noParameters());
         }   
     }
