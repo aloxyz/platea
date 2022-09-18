@@ -18,11 +18,15 @@ public class Client {
     private HttpClient httpClient;
     
     private static Client client;
-    
-    //private DockerClient dockerClient;
 
     private Client() throws Exception {
         httpClient = HttpClient.newHttpClient();
+        // Map Unix socket to tcp address
+        String[] cmd = {"/bin/sh", "-c", "socat -v tcp-l:2375,reuseaddr unix:/var/run/docker.sock"};
+        new ProcessBuilder()
+        .inheritIO()
+        .command(cmd)
+        .start();
     } 
  
     public static synchronized Client getClient() throws Exception {
@@ -45,8 +49,7 @@ public class Client {
         return builder.build();
     }
 
-    public HttpRequest get(String path) throws Exception {
-        URI uri = uriBuilder(path, Collections.<String, String>emptyMap());
+    public HttpRequest get(URI uri) throws Exception {
 
         return
         HttpRequest.newBuilder(uri)
@@ -55,7 +58,7 @@ public class Client {
             .build();
     }
 
-    public HttpRequest post(String path, BodyPublisher body) throws Exception {
+    public HttpRequest post(URI uri, BodyPublisher body) throws Exception {
         URI uri = uriBuilder(path, Collections.<String, String>emptyMap());
 
         return
@@ -74,7 +77,7 @@ public class Client {
     public HttpResponse getResource(String path, Map<String, String> parameters) throws Exception{
         return
         sendRequest(
-            get(uriBuilder(path, parameters).toString()), 
+            get(uriBuilder(path, parameters)), 
             BodyHandlers.ofString());
     }
 
