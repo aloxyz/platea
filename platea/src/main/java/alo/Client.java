@@ -24,7 +24,7 @@ public class Client {
         // Map Unix socket to tcp address
         String[] cmd = {"/bin/sh", "-c", "socat -v tcp-l:2375,reuseaddr unix:/var/run/docker.sock"};
         new ProcessBuilder()
-        .inheritIO()
+        //.inheritIO()
         .command(cmd)
         .start();
     } 
@@ -62,6 +62,14 @@ public class Client {
         HttpRequest.newBuilder(uri)
             .timeout(Duration.ofSeconds(10))
             .POST(body)
+            .build();
+    }
+
+    public HttpRequest delete(URI uri) throws Exception {
+        return
+        HttpRequest.newBuilder(uri)
+            .timeout(Duration.ofSeconds(10))
+            .DELETE()
             .build();
     }
 

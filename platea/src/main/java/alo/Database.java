@@ -1,21 +1,16 @@
 package alo;
 
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.HttpEntity;
-import org.json.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 public class Database {
     private static Database database;
-    private static CloseableHttpClient client;
-
-    Database() {
-        client = HttpClients.createDefault();
-    }
-    
+    Connection conn;
+    String url;
+    String user;
+    String password;    
 
     public static synchronized Database getDatabase() throws Exception {
         if (database == null) {
@@ -24,28 +19,31 @@ public class Database {
         return database;
     }
 
-    public  HttpEntity postRequest(String json) throws Exception {
-        HttpPost post = new HttpPost(Config.getConfig().databaseURL());
-
-        StringEntity entity = new StringEntity(json);
-        post.setHeader("Accept", "application/json");
-        post.setHeader("Content-type", "application/json");
-        post.setEntity(entity);
-        
+    Connection connect() throws Exception {
         return
-        client
-        .execute(post)
-        .getEntity();
+        conn = 
+        DriverManager.getConnection(url, user, password);
     }
 
-    public HttpEntity getRequest() throws Exception {
-        HttpGet request = new HttpGet(Config.getConfig().databaseURL());
+    String query(String query) {
+        String response = "";
+        try {
+            Statement statement = this.conn.createStatement();
+            ResultSet result = statement.executeQuery(query);
+
+            /* 
+            while(result.next()) {
+                result.getString(arg0)
+            }
+            */
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return response;
         
-        return
-        client
-        .execute(request)
-        .getEntity();
     }
+
         
     
 }

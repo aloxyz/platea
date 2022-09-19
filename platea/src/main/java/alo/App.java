@@ -1,20 +1,36 @@
 package alo;
 
 
+import java.net.http.HttpRequest.BodyPublishers;
+import java.nio.file.Paths;
+import java.util.HashMap;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
 public class App
 
 {
     public static void main( String[] args) throws Exception
     {
+        System.out.println(
+            DockerController.listContainers()
+            .body().toString()
+        );         
 
-        DockerController
+        
+        /*String imagesJSON =
+            DockerController
             .get(
-                "containers",
-                "718ee08de89dcff8e9e132e60e40327b94227de9880c1d1cb36a5b0a0f514e11");
-            
-        DockerController
-        .get(
-            "images",
-            "");
+                "images",
+                "")
+                .body().toString();
+
+        JSONArray jsonDocument = (JSONArray)JSONValue.parse(imagesJSON);
+
+        for(JSONObject o : JSONController.JSONArrayToList(jsonDocument)) {
+            System.out.println(o.get("Id"));
+        } */
     }
 }
