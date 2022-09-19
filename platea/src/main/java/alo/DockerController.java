@@ -18,7 +18,7 @@ public class DockerController {
                 Client.getClient()
                 .getResource(
                     String.format("/%s/%s/json", endpoint, id),
-                    Client.getClient().noParameters());
+                    params);
         } 
         
         else {
@@ -26,7 +26,7 @@ public class DockerController {
                 Client.getClient()
                 .getResource(
                     String.format("/%s/json", endpoint),
-                    Client.getClient().noParameters());
+                    params);
         }   
     }
 
@@ -81,12 +81,10 @@ public class DockerController {
             );
     }
 
-
     public static HttpResponse deleteContainer(String id) throws Exception {
         return
             delete("containers", id);
     }
-
 
     public static HttpResponse pruneContainers() throws Exception {
         return 
@@ -124,7 +122,6 @@ public class DockerController {
         return
             delete("images", id);
     }
-
 
     public static HttpResponse pruneImages() throws Exception {
         return 

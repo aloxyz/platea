@@ -35,12 +35,15 @@ public class Tests {
     @Test
     public void listImages() throws Exception {
         HashMap<String,String> params = new HashMap<>();
-        params.put("filters", "label=\"service\"=\"platea\"");
+        params.put("filters", "{\"label\":[\"service\"]}");
 
         HttpResponse response =
             DockerController.listImages(params);
 
-        System.out.println(response.body());
+        System.out.println(
+            response.body()
+        );
+
         assertEquals(200, response.statusCode());
     }
 

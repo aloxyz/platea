@@ -9,6 +9,7 @@ import java.net.http.HttpResponse.BodyHandler;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.http.client.utils.URIBuilder;
@@ -39,8 +40,6 @@ public class Client {
     public URI uriBuilder(String path, Map<String, String> parameters) throws Exception{
         URIBuilder builder = new URIBuilder();
         builder.setScheme("http").setHost(Config.getConfig().dockerURL()).setPath(path);
-
-        
 
         for (Map.Entry<String, String> pair : parameters.entrySet()) {
             builder.setParameter(pair.getKey(), pair.getValue());
@@ -80,6 +79,7 @@ public class Client {
     }
 
     public HttpResponse getResource(String path, Map<String, String> parameters) throws Exception{
+        System.out.println(uriBuilder(path, parameters));
         return
         sendRequest(
             get(uriBuilder(path, parameters)), 
