@@ -93,6 +93,12 @@ public class Client {
             BodyHandlers.ofString());
     }
 
+    public HttpResponse deleteResource(String path, Map<String, String> parameters) throws Exception {
+        return
+        sendRequest(delete(uriBuilder(path, parameters)),
+        BodyHandlers.ofString());
+    }
+
     public Map noParameters() {
         return Collections.<String, String>emptyMap();
     }

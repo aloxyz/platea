@@ -26,10 +26,10 @@ public class Tests {
     @Test
     public void deleteImage() throws Exception {
         HttpResponse response =
-            DockerController.deleteImage("fileserver");
+            DockerController.deleteImage("42178f2d138c019afe09a26d74fcfc299d076d115fca2b9775fa460a4caca3a9");
 
         System.out.println(response.body().toString());
-        assertEquals(204, response.statusCode());
+        assertEquals(200, response.statusCode());
     }
 
     @Test

@@ -51,7 +51,7 @@ public class DockerController {
     public static HttpResponse delete(String endpoint, String id) throws Exception {
         return 
             Client.getClient()
-            .getResource(
+            .deleteResource(
                 String.format("/%s/%s", endpoint, id),
                 Client.getClient().noParameters());
 
@@ -122,7 +122,7 @@ public class DockerController {
 
     public static HttpResponse deleteImage(String id) throws Exception {
         return
-            delete("containers", id);
+            delete("images", id);
     }
 
 
