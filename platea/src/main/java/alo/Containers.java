@@ -9,22 +9,22 @@ import org.json.simple.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Containers {
-    public static HttpResponse create(String name, String configPath) throws Exception {
-        JSONObject body = new JSONObject();
-        body = JSONController.fileToJsonObject(configPath);
+    public static HttpResponse create(String name, JSONObject config) throws Exception {
 
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("name", name);
 
-        String jsonBody =
+        String body =
             new ObjectMapper()
             .writerWithDefaultPrettyPrinter()
-            .writeValueAsString(body);
+            .writeValueAsString(config);
+
+        
 
         return
             Docker.post("containers/create", "",
             params,
-            BodyPublishers.ofString(jsonBody),
+            BodyPublishers.ofString(body),
             "application/json;charset=UTF-8"
             );
     }
@@ -58,5 +58,14 @@ public class Containers {
         Client.getClient().noParameters(),
         Client.getClient().noBody(),
         "application/x-www-form-urlencoded");
+    }
+
+    public static HttpResponse start(String id) throws Exception {
+        return
+            Docker.post("containers/start", id,
+            Client.getClient().noParameters(),
+            Client.getClient().noBody(),
+            "application/json;charset=UTF-8"
+            );
     }
 }

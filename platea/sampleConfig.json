@@ -1,8 +1,7 @@
 {
     "instanceName": "lcarnevale",
-    "containers": [
-        {
-            "name":"docker-file-server",
+    "containers": {
+        "docker-file-server": {
             "endpoint": "https://github.com/lcarnevale/docker-file-server.git#main",
             
             "config": {
@@ -58,8 +57,7 @@
                 }
             }
         },
-        {
-            "name":"smtpclient-microservice",
+        "smtpclient-microservice": {
             "endpoint": "https://github.com/lcarnevale/smtpclient-microservice.git#main",
             
             "config": {
@@ -113,6 +111,5 @@
                 }
             }
         }
-
-    ]
+    }
 }
