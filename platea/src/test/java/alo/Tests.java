@@ -3,9 +3,6 @@ package alo;
 import static org.junit.Assert.assertEquals;
 
 import java.net.http.HttpResponse;
-import java.util.HashMap;
-
-import org.json.simple.JSONObject;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
@@ -23,12 +20,12 @@ public class Tests {
         String containerConfig = "/home/alo/Documenti/platea/platea/src/main/java/alo/docker-file-server.json";
 
         HttpResponse buildImageRemoteResponse = Images.buildRemote(imageName, instanceName, uri);
-        HttpResponse createContainerResponse = Containers.create(containerConfig);
+        HttpResponse createContainerResponse = Containers.create("fileserver", containerConfig);
         
-        String containerId = DockerController.getFromResponse(createContainerResponse, "Id");
+        String containerId = Docker.getFromResponse(createContainerResponse, "Id");
         
-        HttpResponse deleteContainerResponse = Containers.delete(containerId);
-        HttpResponse deleteImageResponse = Images.delete(imageName);
+        HttpResponse deleteContainerResponse = Containers.delete(containerId, "true");
+        HttpResponse deleteImageResponse = Images.delete(imageName, "true");
 
         assertEquals(200, buildImageRemoteResponse.statusCode());
         assertEquals(201, createContainerResponse.statusCode());

@@ -2,15 +2,9 @@ package alo;
 
 import java.net.http.HttpResponse;
 import java.net.http.HttpRequest.BodyPublisher;
-import java.net.http.HttpRequest.BodyPublishers;
-import java.util.HashMap;
 import java.util.Map;
 
-import org.json.simple.JSONObject;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-public class DockerController {
+public class Docker {
 
     public static HttpResponse get(String endpoint, String id, Map<String, String> params) throws Exception {
         if (!id.isEmpty()) {
@@ -64,49 +58,6 @@ public class DockerController {
                 .body()
                 .toString())
                 .get(key).toString();
-    }
-    
-    
-    // Container
-
-    public static HttpResponse listContainers(Map<String, String> params) throws Exception {
-        return get("containers", "", params);
-    }
-
-    public static HttpResponse inspectContainer(String id, Map<String, String> params) throws Exception {
-        return get("containers", id, params);
-    }
-
-    public static HttpResponse createContainer(String name, JSONObject body) throws Exception {
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put("name", name);
-
-        String jsonBody =
-            new ObjectMapper()
-            .writerWithDefaultPrettyPrinter()
-            .writeValueAsString(body);
-
-        return
-            DockerController.post("containers/create", "",
-            params,
-            BodyPublishers.ofString(jsonBody),
-            "application/json;charset=UTF-8"
-            );
-    }
-
-    public static HttpResponse deleteContainer(String id, String force) throws Exception {
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put("force", force);
-        return
-            delete("containers", id, params);
-    }
-
-    public static HttpResponse pruneContainers() throws Exception {
-        return 
-        post("/containers/prune", "",
-        Client.getClient().noParameters(),
-        Client.getClient().noBody(),
-        "application/x-www-form-urlencoded");
     }
 
 }

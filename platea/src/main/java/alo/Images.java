@@ -18,7 +18,7 @@ public class Images {
         params.put("labels", jsonLabels);
 
         return
-            DockerController.post("build", "",
+            Docker.post("build", "",
             params,
             Client.getClient().noBody(),
             "application/x-www-form-urlencoded");
@@ -29,7 +29,7 @@ public class Images {
         params.put("filters", "{\"label\":[\"service=platea\"]}");
 
         return
-            DockerController.get("images", "", params);
+            Docker.get("images", "", params);
     }
 
     public static HttpResponse inspect(String id) throws Exception {
@@ -37,19 +37,19 @@ public class Images {
         params.put("filters", "{\"label\":[\"service=platea\"]}");
 
         return
-            DockerController.get("images", id, params);
+            Docker.get("images", id, params);
     }    
 
     public static HttpResponse delete(String name, String force) throws Exception {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("force", force);
         return
-            DockerController.delete("images", name, params);
+            Docker.delete("images", name, params);
     }
 
     public static HttpResponse prune() throws Exception {
         return 
-            DockerController.post("/images/prune", "",
+            Docker.post("/images/prune", "",
             Client.getClient().noParameters(),
             Client.getClient().noBody(),
             "application/x-www-form-urlencoded");
