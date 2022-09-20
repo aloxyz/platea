@@ -63,8 +63,8 @@ public class DockerController {
         return get("containers", "", params);
     }
 
-    public static HttpResponse inspectContainer(String id) throws Exception {
-        return get("containers", id, Client.getClient().noParameters());
+    public static HttpResponse inspectContainer(String id, Map<String, String> params) throws Exception {
+        return get("containers", id, params);
     }
 
     public static HttpResponse createContainer(String name, JSONObject body) throws Exception {
@@ -100,15 +100,15 @@ public class DockerController {
     }
 
 
-    
+
     // Image
 
     public static HttpResponse listImages(Map<String, String> params) throws Exception {
         return get("images", "", params);
     }
 
-    public static HttpResponse inspectImage(String id) throws Exception {
-        return get("images", id, Client.getClient().noParameters());
+    public static HttpResponse inspectImage(String id, Map<String, String> params) throws Exception {
+        return get("images", id, params);
     }
 
     public static HttpResponse buildImageRemote(String name, String instance, String uri) throws Exception {

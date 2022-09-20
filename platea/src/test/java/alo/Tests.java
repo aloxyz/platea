@@ -38,47 +38,7 @@ public class Tests {
         System.out.println(response.body());
         assertEquals(200, response.statusCode());
         return response;
-    }
-
-
-    public HttpResponse createContainer(String path) throws Exception {
-        JSONObject body = new JSONObject();
-        body = JSONController.fileToJsonObject(path);
-
-        HttpResponse response =
-        DockerController.createContainer("", body);
-
-        System.out.println(response.body().toString());
-        assertEquals(201, response.statusCode());
-        return response;
-    }
-
-
-    public HttpResponse listContainers() throws Exception {
-        HashMap<String,String> params = new HashMap<>();
-        params.put("filters", "{\"label\":[\"service=platea\"]}");
-
-        HttpResponse response =
-            DockerController.listContainers(params);
-
-        System.out.println(
-            response.body()
-        );
-
-        assertEquals(200, response.statusCode());
-        return response;
-    }
-
-
-    public HttpResponse deleteContainer(String id) throws Exception {
-        HttpResponse response =
-            DockerController.deleteContainer(id, "true");
-
-        System.out.println(response.body().toString());
-        assertEquals(204, response.statusCode());
-        return response;
-    }
-    
+    }    
 
     public HttpResponse deleteImage(String name) throws Exception {
 
@@ -99,14 +59,14 @@ public class Tests {
         String containerConfig = "/home/alo/Documenti/platea/platea/src/main/java/alo/docker-file-server.json";
 
         HttpResponse buildImageRemoteResponse = buildImageRemote(imageName, instanceName, uri);
-        HttpResponse createContainerResponse = createContainer(containerConfig);
+        HttpResponse createContainerResponse = Containers.create(containerConfig);
         
         String containerId =
             JSONController.stringToJSONObject(
                 createContainerResponse.body().toString())
                 .get("Id").toString();
         
-        HttpResponse deleteContainerResponse = deleteContainer(containerId);
+        HttpResponse deleteContainerResponse = Containers.delete(containerId);
         HttpResponse deleteImageResponse = deleteImage(imageName);
 
         assertEquals(200, buildImageRemoteResponse.statusCode());

@@ -36,11 +36,11 @@ public class Client {
         return client;
     }
 
-    public URI uriBuilder(String path, Map<String, String> parameters) throws Exception{
+    public URI uriBuilder(String path, Map<String, String> params) throws Exception{
         URIBuilder builder = new URIBuilder();
         builder.setScheme("http").setHost(Config.getConfig().dockerURL()).setPath(path);
 
-        for (Map.Entry<String, String> pair : parameters.entrySet()) {
+        for (Map.Entry<String, String> pair : params.entrySet()) {
             builder.setParameter(pair.getKey(), pair.getValue());
         }
 
@@ -72,29 +72,23 @@ public class Client {
             .build();
     }
 
-    public HttpResponse sendRequest(HttpRequest method, BodyHandler bHandler) throws Exception {
-        return
-        this.httpClient
-        .send(method, bHandler);
-    }
-
-    public HttpResponse getResource(String path, Map<String, String> parameters) throws Exception{
+    public HttpResponse getResource(String path, Map<String, String> params) throws Exception{
         return
         sendRequest(
-            get(uriBuilder(path, parameters)), 
+            get(uriBuilder(path, params)), 
             BodyHandlers.ofString());
     }
 
-    public HttpResponse postResource(String path, Map<String, String> parameters, BodyPublisher body, String headers) throws Exception {
+    public HttpResponse postResource(String path, Map<String, String> params, BodyPublisher body, String headers) throws Exception {
         return
         sendRequest(
-            post(uriBuilder(path, parameters), body, headers),
+            post(uriBuilder(path, params), body, headers),
             BodyHandlers.ofString());
     }
 
-    public HttpResponse deleteResource(String path, Map<String, String> parameters) throws Exception {
+    public HttpResponse deleteResource(String path, Map<String, String> params) throws Exception {
         return
-        sendRequest(delete(uriBuilder(path, parameters)),
+        sendRequest(delete(uriBuilder(path, params)),
         BodyHandlers.ofString());
     }
 
@@ -104,6 +98,12 @@ public class Client {
 
     public BodyPublisher noBody() {
         return HttpRequest.BodyPublishers.noBody();
+    }
+
+    public HttpResponse sendRequest(HttpRequest method, BodyHandler bHandler) throws Exception {
+        return
+        this.httpClient
+        .send(method, bHandler);
     }
 }
     
