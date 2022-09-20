@@ -13,6 +13,7 @@ import java.nio.channels.ReadableByteChannel;
 import org.rauschig.jarchivelib.ArchiveFormat;
 import org.rauschig.jarchivelib.Archiver;
 import org.rauschig.jarchivelib.ArchiverFactory;
+import org.rauschig.jarchivelib.CompressionType;
 
 public class FileIO {
     public static String readFile(String filePath) {
@@ -50,6 +51,18 @@ public class FileIO {
         catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static File makeTar(String src, String dest, String name) throws Exception {
+        File source = new File(src);
+        File destination = new File(dest);
+
+        Archiver archiver = 
+            ArchiverFactory.createArchiver(
+                ArchiveFormat.TAR, CompressionType.GZIP);
+        
+        return 
+        archiver.create(name, destination, source);
     }
 
     public static void extractArchive(String archivePath, String destinationPath) throws Exception {

@@ -13,13 +13,7 @@ public class App
 
 {
     public static void main( String[] args) throws Exception
-    {
-        System.out.println(
-            DockerController.listContainers()
-            .body().toString()
-        );         
-
-        
+    {        
         /*String imagesJSON =
             DockerController
             .get(

@@ -9,7 +9,6 @@ import java.net.http.HttpResponse.BodyHandler;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.http.client.utils.URIBuilder;
@@ -56,11 +55,12 @@ public class Client {
             .build();
     }
 
-    public HttpRequest post(URI uri, BodyPublisher body) throws Exception {
+    public HttpRequest post(URI uri, BodyPublisher body, String headers) throws Exception {
         return
         HttpRequest.newBuilder(uri)
             .timeout(Duration.ofSeconds(10))
             .POST(body)
+            .headers("Content-Type", headers)
             .build();
     }
 
@@ -79,17 +79,16 @@ public class Client {
     }
 
     public HttpResponse getResource(String path, Map<String, String> parameters) throws Exception{
-        System.out.println(uriBuilder(path, parameters));
         return
         sendRequest(
             get(uriBuilder(path, parameters)), 
             BodyHandlers.ofString());
     }
 
-    public HttpResponse postResource(String path, Map<String, String> parameters, BodyPublisher body) throws Exception {
+    public HttpResponse postResource(String path, Map<String, String> parameters, BodyPublisher body, String headers) throws Exception {
         return
         sendRequest(
-            post(uriBuilder(path, parameters), body),
+            post(uriBuilder(path, parameters), body, headers),
             BodyHandlers.ofString());
     }
 

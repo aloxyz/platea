@@ -1,0 +1,46 @@
+{
+    "Hostname":"",
+    "Domainname": "",
+    "User":"",
+    "ExposedPorts": null,
+    "Env": ["PORT=8085"],
+    "Cmd":"",
+    "Healthcheck": {
+        "Interval": 0,
+        "Retries": 0,
+        "StartPeriod": 0,
+        "Test": [
+            ""
+        ],
+        "Timeout": 0
+    },
+    "Image": "fileserver:latest",
+    "Volumes": {
+        "additionalProperties": {}
+    },
+    "WorkingDir": "",
+    "Entrypoint": [""],
+    "NetworkDisabled": null,
+    "MacAddress": null,
+    "OnBuild": null,
+    "Labels": {
+        "service": "platea",
+        "instance": "test_instance"
+    },
+    "StopSignal": "SIGTERM",
+    "Shell": null,
+
+
+    "HostConfig": {
+        "Binds": [
+            "/mnt/fileshare:/mnt/fileshare",
+            "/var/log/lcarnevale:/opt/app/log"
+        ],
+        "PortBindings": {
+            "8085/tcp": [{ "HostPort": "8085" }]
+        },
+        "RestartPolicy": { "Name": "unless-stopped"}
+     }
+    
+    
+}

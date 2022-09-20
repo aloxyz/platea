@@ -30,13 +30,13 @@ public class DockerController {
         }   
     }
 
-    public static HttpResponse post(String endpoint, String id, Map<String, String> parameters, BodyPublisher body) throws Exception {
+    public static HttpResponse post(String endpoint, String id, Map<String, String> parameters, BodyPublisher body, String headers) throws Exception {
         if (!id.isEmpty()) {
             return
                 Client.getClient()
                 .postResource(
                     String.format("/%s/%s", endpoint, id),
-                    parameters, body);
+                    parameters, body, headers);
         }
 
         else {
@@ -44,21 +44,23 @@ public class DockerController {
                 Client.getClient()
                 .postResource(
                     String.format("/%s", endpoint),
-                    parameters, body);
+                    parameters, body, headers);
         }
     }
 
-    public static HttpResponse delete(String endpoint, String id) throws Exception {
+    public static HttpResponse delete(String endpoint, String id, Map<String, String> parameters) throws Exception {
         return 
             Client.getClient()
             .deleteResource(
                 String.format("/%s/%s", endpoint, id),
-                Client.getClient().noParameters());
+                parameters);
 
     }
 
-    public static HttpResponse listContainers() throws Exception {
-        return get("containers", "", Client.getClient().noParameters());
+    // Container
+
+    public static HttpResponse listContainers(Map<String, String> params) throws Exception {
+        return get("containers", "", params);
     }
 
     public static HttpResponse inspectContainer(String id) throws Exception {
@@ -75,23 +77,31 @@ public class DockerController {
             .writeValueAsString(body);
 
         return
-            DockerController.post("build", "",
+            DockerController.post("containers/create", "",
             params,
-            BodyPublishers.ofString(jsonBody)
+            BodyPublishers.ofString(jsonBody),
+            "application/json;charset=UTF-8"
             );
     }
 
-    public static HttpResponse deleteContainer(String id) throws Exception {
+    public static HttpResponse deleteContainer(String id, String force) throws Exception {
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("force", force);
         return
-            delete("containers", id);
+            delete("containers", id, params);
     }
 
     public static HttpResponse pruneContainers() throws Exception {
         return 
         post("/containers/prune", "",
         Client.getClient().noParameters(),
-        Client.getClient().noBody());
+        Client.getClient().noBody(),
+        "application/x-www-form-urlencoded");
     }
+
+
+    
+    // Image
 
     public static HttpResponse listImages(Map<String, String> params) throws Exception {
         return get("images", "", params);
@@ -115,19 +125,23 @@ public class DockerController {
         return
             DockerController.post("build", "",
             params,
-            Client.getClient().noBody());
+            Client.getClient().noBody(),
+            "application/x-www-form-urlencoded");
     }
 
-    public static HttpResponse deleteImage(String id) throws Exception {
+    public static HttpResponse deleteImage(String id, String force) throws Exception {
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("force", force);
         return
-            delete("images", id);
+            delete("images", id, params);
     }
 
     public static HttpResponse pruneImages() throws Exception {
         return 
         post("/images/prune", "",
         Client.getClient().noParameters(),
-        Client.getClient().noBody());
+        Client.getClient().noBody(),
+        "application/x-www-form-urlencoded");
     }
 
 }
