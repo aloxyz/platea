@@ -19,7 +19,7 @@ public class Containers {
             .writerWithDefaultPrettyPrinter()
             .writeValueAsString(config);
 
-        
+
 
         return
             Docker.post("containers/create", "",
@@ -62,7 +62,16 @@ public class Containers {
 
     public static HttpResponse start(String id) throws Exception {
         return
-            Docker.post("containers/start", id,
+            Docker.post("containers", id + "/start",
+            Client.getClient().noParameters(),
+            Client.getClient().noBody(),
+            "application/json;charset=UTF-8"
+            );
+    }
+
+    public static HttpResponse stop(String id) throws Exception {
+        return
+            Docker.post("containers", id  + "/stop",
             Client.getClient().noParameters(),
             Client.getClient().noBody(),
             "application/json;charset=UTF-8"

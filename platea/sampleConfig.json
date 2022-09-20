@@ -12,7 +12,7 @@
                 "Env": [
                     "PORT=8085"
                 ],
-                "Cmd": "",
+                "Cmd": ["sh", "-c", "python3 main.py -v -p $PORT"],
                 "Healthcheck": {
                     "Interval": 0,
                     "Retries": 0,
@@ -66,7 +66,7 @@
                 "User": "",
                 "ExposedPorts": "5000",
                 "Env": [],
-                "Cmd": "",
+                "Cmd": ["python3", "app.py"],
                 "Healthcheck": {
                     "Interval": 0,
                     "Retries": 0,
@@ -76,7 +76,7 @@
                     ],
                     "Timeout": 0
                 },
-                "Image": "fileserver:latest",
+                "Image": "smtpclient-microservice:latest",
                 "Volumes": {
                     "additionalProperties": {}
                 },

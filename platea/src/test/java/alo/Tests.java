@@ -1,27 +1,26 @@
 package alo;
 
-import static org.junit.Assert.assertEquals;
 
 import java.net.http.HttpResponse;
 import java.nio.file.Paths;
-
-import org.json.simple.JSONArray;
+import java.util.concurrent.TimeUnit;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
+import static org.junit.Assert.assertEquals;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class Tests {
 
     @Test
     public void dockerfileserver() throws Exception {
+        // SETUP
+        
         JSONObject config = JSONController.fileToJsonObject(Paths.get("/home/alo/Documenti/platea/platea/sampleConfig.json").toString());
         JSONObject containers = (JSONObject)config.get("containers");
         JSONObject container = (JSONObject)containers.get("docker-file-server");
         JSONObject buildConfig = (JSONObject)container.get("config");
-
 
         String instanceName = config.get("instanceName").toString();
         String uri = container.get("endpoint").toString();
@@ -31,16 +30,24 @@ public class Tests {
         String imageName = tmpImageName.substring(0, tmpImageName.lastIndexOf(":"));
         
 
+
+        // START
+
         HttpResponse buildImageRemoteResponse = Images.buildRemote(imageName, instanceName, uri);
         HttpResponse createContainerResponse = Containers.create(imageName, buildConfig);
-
         String containerId = Docker.getFromResponse(createContainerResponse, "Id");
-        
+        HttpResponse startContainerResponse = Containers.start(containerId);
+
+        TimeUnit.SECONDS.sleep(30);
+
+        HttpResponse stopContainerResponse = Containers.stop(containerId);
         HttpResponse deleteContainerResponse = Containers.delete(containerId, "true");
         HttpResponse deleteImageResponse = Images.delete(imageName, "true");
 
         assertEquals(200, buildImageRemoteResponse.statusCode());
         assertEquals(201, createContainerResponse.statusCode());
+        assertEquals(204, startContainerResponse.statusCode());
+        assertEquals(204, stopContainerResponse.statusCode());
         assertEquals(204, deleteContainerResponse.statusCode());
         assertEquals(200, deleteImageResponse.statusCode());
     }
