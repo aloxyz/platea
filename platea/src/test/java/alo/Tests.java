@@ -12,57 +12,49 @@ import org.junit.runners.MethodSorters;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class Tests {
-    
-    public String ImageName = "fileserver";
 
-    @Test
-    public void buildImageRemote() throws Exception {
+
+    public HttpResponse buildImageRemote(String imageName, String instance, String uri) throws Exception {
         HttpResponse response = 
             DockerController.buildImageRemote(
-                ImageName, 
+                "fileserver", 
                 "instance_name", 
                 "https://github.com/lcarnevale/docker-file-server.git#main");
         
+        
         System.out.println(response.body().toString());
         assertEquals(200, response.statusCode());
+        return response;
     }
 
-    @Test
-    public void listImages() throws Exception {
+
+    public HttpResponse listImages() throws Exception {
         HashMap<String,String> params = new HashMap<>();
         params.put("filters", "{\"label\":[\"service=platea\"]}");
 
         HttpResponse response =
             DockerController.listImages(params);
 
-        System.out.println(
-            response.body()
-        );
-
+        System.out.println(response.body());
         assertEquals(200, response.statusCode());
+        return response;
     }
 
-    @Test
-    public void createContainer() throws Exception {
+
+    public HttpResponse createContainer(String path) throws Exception {
         JSONObject body = new JSONObject();
-        body = JSONController.fileToJsonObject("/home/alo/Documenti/platea/platea/src/main/java/alo/docker-file-server.json");
+        body = JSONController.fileToJsonObject(path);
 
         HttpResponse response =
         DockerController.createContainer("", body);
-        
-        /*
-        containerId =
-        JSONController.stringToJSONObject(
-            response.body().toString())
-            .get("Id").toString();
-        */
 
         System.out.println(response.body().toString());
         assertEquals(201, response.statusCode());
+        return response;
     }
 
-    @Test
-    public void listContainers() throws Exception {
+
+    public HttpResponse listContainers() throws Exception {
         HashMap<String,String> params = new HashMap<>();
         params.put("filters", "{\"label\":[\"service=platea\"]}");
 
@@ -74,25 +66,52 @@ public class Tests {
         );
 
         assertEquals(200, response.statusCode());
+        return response;
     }
 
-    @Test
-    public void deleteContainer() throws Exception {
+
+    public HttpResponse deleteContainer(String id) throws Exception {
         HttpResponse response =
-            DockerController.deleteContainer(containerId, "true");
+            DockerController.deleteContainer(id, "true");
 
         System.out.println(response.body().toString());
         assertEquals(204, response.statusCode());
+        return response;
     }
     
-    @Test
-    public void deleteImage() throws Exception {
+
+    public HttpResponse deleteImage(String name) throws Exception {
 
         HttpResponse response =
-            DockerController.deleteImage(ImageName, "true");
+            DockerController.deleteImage(name, "true");
 
         System.out.println(response.body().toString());
         assertEquals(200, response.statusCode());
+        return response;
     }
 
+    @Test
+    public void dockerfileserver() throws Exception {
+        String imageName = "fileserver";
+        String instanceName = "instance_name";
+        String uri = "https://github.com/lcarnevale/docker-file-server.git#main";
+
+        String containerConfig = "/home/alo/Documenti/platea/platea/src/main/java/alo/docker-file-server.json";
+
+        HttpResponse buildImageRemoteResponse = buildImageRemote(imageName, instanceName, uri);
+        HttpResponse createContainerResponse = createContainer(containerConfig);
+        
+        String containerId =
+            JSONController.stringToJSONObject(
+                createContainerResponse.body().toString())
+                .get("Id").toString();
+        
+        HttpResponse deleteContainerResponse = deleteContainer(containerId);
+        HttpResponse deleteImageResponse = deleteImage(imageName);
+
+        assertEquals(200, buildImageRemoteResponse.statusCode());
+        assertEquals(201, createContainerResponse.statusCode());
+        assertEquals(204, deleteContainerResponse.statusCode());
+        assertEquals(200, deleteImageResponse.statusCode());
+    }
 }
