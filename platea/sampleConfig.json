@@ -1,0 +1,118 @@
+{
+    "instanceName": "lcarnevale",
+    "containers": [
+        {
+            "name":"docker-file-server",
+            "endpoint": "https://github.com/lcarnevale/docker-file-server.git#main",
+            
+            "config": {
+                "Hostname": "",
+                "Domainname": "",
+                "User": "",
+                "ExposedPorts": null,
+                "Env": [
+                    "PORT=8085"
+                ],
+                "Cmd": "",
+                "Healthcheck": {
+                    "Interval": 0,
+                    "Retries": 0,
+                    "StartPeriod": 0,
+                    "Test": [
+                        ""
+                    ],
+                    "Timeout": 0
+                },
+                "Image": "fileserver:latest",
+                "Volumes": {
+                    "additionalProperties": {}
+                },
+                "WorkingDir": "",
+                "Entrypoint": [
+                    ""
+                ],
+                "NetworkDisabled": null,
+                "MacAddress": null,
+                "OnBuild": null,
+                "Labels": {
+                    "service": "platea",
+                    "instance": "test_instance"
+                },
+                "StopSignal": "SIGTERM",
+                "Shell": null,
+                "HostConfig": {
+                    "Binds": [
+                        "/mnt/fileshare:/mnt/fileshare",
+                        "/var/log/lcarnevale:/opt/app/log"
+                    ],
+                    "PortBindings": {
+                        "8085/tcp": [
+                            {
+                                "HostPort": "8085"
+                            }
+                        ]
+                    },
+                    "RestartPolicy": {
+                        "Name": "unless-stopped"
+                    }
+                }
+            }
+        },
+        {
+            "name":"smtpclient-microservice",
+            "endpoint": "https://github.com/lcarnevale/smtpclient-microservice.git#main",
+            
+            "config": {
+                "Hostname": "",
+                "Domainname": "",
+                "User": "",
+                "ExposedPorts": "5000",
+                "Env": [],
+                "Cmd": "",
+                "Healthcheck": {
+                    "Interval": 0,
+                    "Retries": 0,
+                    "StartPeriod": 0,
+                    "Test": [
+                        ""
+                    ],
+                    "Timeout": 0
+                },
+                "Image": "fileserver:latest",
+                "Volumes": {
+                    "additionalProperties": {}
+                },
+                "WorkingDir": "",
+                "Entrypoint": [
+                    ""
+                ],
+                "NetworkDisabled": null,
+                "MacAddress": null,
+                "OnBuild": null,
+                "Labels": {
+                    "service": "platea",
+                    "instance": "test_instance"
+                },
+                "StopSignal": "SIGTERM",
+                "Shell": null,
+                "HostConfig": {
+                    "Binds": [
+                        "/mnt/fileshare:/mnt/fileshare",
+                        "/var/log/lcarnevale:/opt/app/log"
+                    ],
+                    "PortBindings": {
+                        "5000/tcp": [
+                            {
+                                "HostPort": "5000"
+                            }
+                        ]
+                    },
+                    "RestartPolicy": {
+                        "Name": "unless-stopped"
+                    }
+                }
+            }
+        }
+
+    ]
+}
