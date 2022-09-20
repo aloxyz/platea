@@ -17,15 +17,19 @@ public class Tests {
 
     @Test
     public void dockerfileserver() throws Exception {
-        
-        String instanceName = "instance_name";
-        String imageName = "fileserver";
-        String uri = "https://github.com/lcarnevale/docker-file-server.git#main";
-
         JSONObject config = JSONController.fileToJsonObject(Paths.get("/home/alo/Documenti/platea/platea/sampleConfig.json").toString());
         JSONObject containers = (JSONObject)config.get("containers");
         JSONObject container = (JSONObject)containers.get("docker-file-server");
         JSONObject buildConfig = (JSONObject)container.get("config");
+
+
+        String instanceName = config.get("instanceName").toString();
+        String uri = container.get("endpoint").toString();
+
+        //get name from image name
+        String tmpImageName = buildConfig.get("Image").toString();
+        String imageName = tmpImageName.substring(0, tmpImageName.lastIndexOf(":"));
+        
 
         HttpResponse buildImageRemoteResponse = Images.buildRemote(imageName, instanceName, uri);
         HttpResponse createContainerResponse = Containers.create(imageName, buildConfig);
