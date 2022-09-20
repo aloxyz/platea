@@ -1,19 +1,13 @@
 package alo;
 
 
-import java.net.http.HttpRequest.BodyPublishers;
-import java.nio.file.Paths;
-import java.util.HashMap;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-
 public class App
 
 {
     public static void main( String[] args) throws Exception
-    {        
+    {    
+
+        Instances.run("/home/alo/Documenti/platea/platea/sampleConfig.json");
         /*String imagesJSON =
             DockerController
             .get(

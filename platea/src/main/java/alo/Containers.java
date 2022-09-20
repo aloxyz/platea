@@ -9,17 +9,21 @@ import org.json.simple.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Containers {
-    public static HttpResponse create(String name, JSONObject config) throws Exception {
+    public static HttpResponse create(String name, String instance, JSONObject config) throws Exception {
+        HashMap<String, String> labels = new HashMap<String, String>();
+        labels.put("service", "platea");
+        labels.put("instance", instance);
+        String jsonLabels = new JSONObject(labels).toJSONString();
+        
 
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("name", name);
-
+        params.put("labels", jsonLabels);
+        
         String body =
             new ObjectMapper()
             .writerWithDefaultPrettyPrinter()
             .writeValueAsString(config);
-
-
 
         return
             Docker.post("containers/create", "",

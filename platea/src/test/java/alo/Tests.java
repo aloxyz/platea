@@ -14,6 +14,11 @@ import static org.junit.Assert.assertEquals;
 public class Tests {
 
     @Test
+    public void instances() throws Exception {
+        Instances.run("/home/alo/Documenti/platea/platea/sampleConfig.json");
+    }
+
+    @Test
     public void dockerfileserver() throws Exception {
         // SETUP
         
@@ -34,11 +39,10 @@ public class Tests {
         // START
 
         HttpResponse buildImageRemoteResponse = Images.buildRemote(imageName, instanceName, uri);
-        HttpResponse createContainerResponse = Containers.create(imageName, buildConfig);
+        HttpResponse createContainerResponse = Containers.create(imageName, instanceName, buildConfig);
         String containerId = Docker.getFromResponse(createContainerResponse, "Id");
         HttpResponse startContainerResponse = Containers.start(containerId);
 
-        TimeUnit.SECONDS.sleep(30);
 
         HttpResponse stopContainerResponse = Containers.stop(containerId);
         HttpResponse deleteContainerResponse = Containers.delete(containerId, "true");

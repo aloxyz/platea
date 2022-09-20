@@ -35,7 +35,7 @@
                 "OnBuild": null,
                 "Labels": {
                     "service": "platea",
-                    "instance": "test_instance"
+                    "instance": "lcarnevale"
                 },
                 "StopSignal": "SIGTERM",
                 "Shell": null,
@@ -64,7 +64,7 @@
                 "Hostname": "",
                 "Domainname": "",
                 "User": "",
-                "ExposedPorts": "5000",
+                "ExposedPorts": {"5000/tcp": {}},
                 "Env": [],
                 "Cmd": ["python3", "app.py"],
                 "Healthcheck": {
@@ -89,7 +89,7 @@
                 "OnBuild": null,
                 "Labels": {
                     "service": "platea",
-                    "instance": "test_instance"
+                    "instance": "lcarnevale"
                 },
                 "StopSignal": "SIGTERM",
                 "Shell": null,
