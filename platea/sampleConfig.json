@@ -58,7 +58,7 @@
             }
         },
         "smtpclient-microservice": {
-            "endpoint": "https://github.com/lcarnevale/smtpclient-microservice.git#main",
+            "endpoint": "https://github.com/lcarnevale/smtpclient-microservice.git",
             
             "config": {
                 "Hostname": "",

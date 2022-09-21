@@ -3,6 +3,8 @@ package alo;
 
 import java.net.http.HttpResponse;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.json.simple.JSONObject;
 import org.junit.FixMethodOrder;
@@ -14,8 +16,15 @@ import static org.junit.Assert.assertEquals;
 public class Tests {
 
     @Test
-    public void instances() throws Exception {
-        Instances.run("/home/alo/Documenti/platea/platea/sampleConfig.json");
+    public void buildInstances() throws Exception {
+        Map<String,HttpResponse> responses =
+        Instances.build("/home/alo/Documenti/platea/platea/sampleConfig.json");
+        
+        responses.keySet().forEach(key -> {
+            String body = responses.get(key).body().toString();
+            assertEquals(200, responses.get(key).statusCode());
+        });
+        
     }
 
     @Test

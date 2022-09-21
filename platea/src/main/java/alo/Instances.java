@@ -95,6 +95,45 @@ public class Instances {
     }
 
     @SuppressWarnings("unchecked")
+    public static Map<String,HttpResponse> build(String configPath) throws Exception {
+        /*
+         * Returns a map of Images.buildRemote() responses for each image.
+         * Image name is the key for an HttpResponse value. 
+         * 
+         * build().get("image-name") => HttpResponse
+         */
+        HashMap<String,HttpResponse> responses = new HashMap<>();
+        
+        JSONObject config = JSONController.fileToJsonObject(Paths.get(configPath).toString());
+        JSONObject containers = (JSONObject)config.get("containers");
+
+        containers.keySet().forEach(key -> {
+            try {
+                Object value = containers.get(key);
+                JSONObject container = (JSONObject) value;
+
+                // SETUP
+                String instanceName = config.get("instanceName").toString();
+                String uri = container.get("endpoint").toString();
+                
+                JSONObject buildConfig = (JSONObject)container.get("config");
+
+                //get name from image name
+                String tmpImageName = buildConfig.get("Image").toString();
+                String imageName = tmpImageName.substring(0, tmpImageName.lastIndexOf(":"));
+                
+                // START
+                HttpResponse buildImageRemoteResponse = Images.buildRemote(imageName, instanceName, uri);
+
+                responses.put(imageName, buildImageRemoteResponse);
+            } catch (Exception e) {e.printStackTrace();}
+
+        });
+        return responses;
+    }
+
+
+    @SuppressWarnings("unchecked")
     public static Map<String,Map> run(String configPath) throws Exception {
         HashMap<String, Map> instanceResponses = new HashMap<>();
 
