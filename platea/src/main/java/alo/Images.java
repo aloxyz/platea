@@ -24,10 +24,14 @@ public class Images {
             "application/x-www-form-urlencoded");
     }
 
-    public static HttpResponse list() throws Exception {
+    public static HttpResponse list(String instanceName) throws Exception {
         HashMap<String,String> params = new HashMap<>();
-        params.put("filters", "{\"label\":[\"service=platea\"]}");
-
+        if(instanceName.isEmpty()) {
+            params.put("filters", "{\"label\":[\"service=platea\"]}");
+        }
+        else {
+            params.put("filters", String.format("{\"label\":[\"service=platea\", \"instance=%s\"]}", instanceName));
+        }
         return
             Docker.get("images", "", params);
     }

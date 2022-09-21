@@ -78,20 +78,35 @@ public class Instances {
         return instances;
     }
 
-    public static void list() throws Exception {
-        System.out.println("Platea containers: ");
-
-        String containersString = Containers.list().body().toString();
-
-        JSONArray containers = (JSONArray)JSONValue.parse(containersString);
+    public static Map<String,HttpResponse> deleteContainers(String instanceName) throws Exception {
+        /*
+         * Returns a map of Containers.delete() responses for each deleted container.
+         * Container id is the key for an HttpResponse value. 
+         * 
+         * deleteContainers().get("container-id") => HttpResponse
+         */
+        HashMap<String,HttpResponse> responses = new HashMap<>();
         
+        String containersString = Containers.list(instanceName).body().toString();
+        JSONArray containers = (JSONArray)JSONValue.parse(containersString);
+        HttpResponse deleteContainerResponse;
+
         for(JSONObject container : JSONController.JSONArrayToList(containers)) {
-            JSONObject labels = (JSONObject)container.get("Labels");
-            
-                System.out.println(ConsoleColors.PURPLE_BOLD + "instance: " + labels.get("instance").toString() + ConsoleColors.RESET);
-                System.out.println("names: " + container.get("Names"));
-                System.out.println("id: " + container.get("Id").toString());
+            String id = container.get("Id").toString();
+            deleteContainerResponse = Containers.delete(id, "true");
+            responses.put(id, deleteContainerResponse);
         }
+
+        return responses;
+    }
+
+    public static void deleteImages(String instanceName) {
+        
+    }
+
+    public static void delete(String instanceName) throws Exception {
+        deleteContainers(instanceName);
+        deleteImages(instanceName);
     }
 
     @SuppressWarnings("unchecked")
@@ -130,6 +145,46 @@ public class Instances {
 
         });
         return responses;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Map<String,String> create(String configPath) throws Exception {
+        /*
+         * Returns a map of Containers.create() IDs for each created container.
+         * Container name is the key for an ID value. 
+         * 
+         * create().get("container-name") => String ID
+         */
+        HashMap<String,String> ids = new HashMap<>();
+        
+        JSONObject config = JSONController.fileToJsonObject(Paths.get(configPath).toString());
+        JSONObject containers = (JSONObject)config.get("containers");
+
+        containers.keySet().forEach(key -> {
+            try {
+                Object value = containers.get(key);
+                JSONObject container = (JSONObject) value;
+
+                // SETUP
+                String instanceName = config.get("instanceName").toString();
+                String uri = container.get("endpoint").toString();
+                
+                JSONObject buildConfig = (JSONObject)container.get("config");
+
+                //get name from image name
+                String tmp = buildConfig.get("Image").toString();
+                String containerName = tmp.substring(0, tmp.lastIndexOf(":"));
+                
+                // START
+                HttpResponse createContainerResponse = Containers.create(containerName, instanceName, buildConfig);
+                
+                String id = Docker.getFromResponse(createContainerResponse, "Id");
+                
+                ids.put(containerName, id);
+            } catch (Exception e) {e.printStackTrace();}
+
+        });
+        return ids;
     }
 
 
