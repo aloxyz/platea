@@ -230,4 +230,20 @@ public class Instances {
 
         return responses;
     }
+
+    public static Map<String, HttpResponse> stopContainers(String instanceName) throws Exception {
+        HashMap<String,HttpResponse> responses = new HashMap<>();
+        
+        String containersString = Containers.list(instanceName).body().toString();
+        JSONArray containers = (JSONArray)JSONValue.parse(containersString);
+        HttpResponse stopContainerResponse;
+
+        for(JSONObject container : JSONController.JSONArrayToList(containers)) {
+            String id = container.get("Id").toString();
+            stopContainerResponse = Containers.stop(id);
+            responses.put(id, stopContainerResponse);
+        }
+
+        return responses;
+    }
 }

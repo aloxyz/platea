@@ -20,6 +20,11 @@ public class Tests {
     }
 
     @Test
+    public void stopInstance() throws Exception {
+        Instances.stopContainers("lcarnevale");
+    }
+
+    @Test
     public void deleteInstance() throws Exception {
         Instances.delete("lcarnevale");
     }
@@ -55,7 +60,6 @@ public class Tests {
             System.out.println(ids.get(key));
         });
     }
-
 
     @Test
     public void dockerfileserver() throws Exception {
