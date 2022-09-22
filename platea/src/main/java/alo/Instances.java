@@ -131,6 +131,7 @@ public class Instances {
 
         for(JSONObject container : JSONController.JSONArrayToList(containers)) {
             String id = container.get("Id").toString();
+            System.out.println("Deleted container: (id)" + id + ".");
             deleteContainerResponse = Containers.delete(id, "true");
             responses.put(id, deleteContainerResponse);
         }
@@ -154,6 +155,7 @@ public class Instances {
         for(JSONObject image : JSONController.JSONArrayToList(images)) {
             String id = image.get("Id").toString();
             deleteImageResponse = Images.delete(id, "true");
+            System.out.println("Deleted image: (id)" + image.get("Id") + ".");
             responses.put(id, deleteImageResponse);
         }
 
@@ -168,6 +170,8 @@ public class Instances {
          * 
          * build().get("image-name") => HttpResponse
          */
+        
+
         HashMap<String,HttpResponse> responses = new HashMap<>();
         
         JSONObject config = JSONController.fileToJsonObject(Paths.get(configPath).toString());
@@ -189,7 +193,9 @@ public class Instances {
                 String imageName = tmpImageName.substring(0, tmpImageName.lastIndexOf(":"));
                 
                 // START
+                System.out.println("Building image: " + imageName + "...");
                 HttpResponse buildImageRemoteResponse = Images.buildRemote(imageName, instanceName, uri);
+                System.out.println("Done");
 
                 responses.put(imageName, buildImageRemoteResponse);
             } catch (Exception e) {e.printStackTrace();}
@@ -228,6 +234,7 @@ public class Instances {
                 // START
                 HttpResponse createContainerResponse = Containers.create(containerName, instanceName, buildConfig);
                 String id = Docker.getFromResponse(createContainerResponse, "Id");
+                System.out.println("Created container: " + containerName + ".");
 
                 ids.put(containerName, id);
             } catch (Exception e) {e.printStackTrace();}
