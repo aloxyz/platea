@@ -78,9 +78,12 @@ public class Instances {
         return instances;
     }
 
-    public static void delete(String instanceName) throws Exception {
-        deleteContainers(instanceName);
-        deleteImages(instanceName);
+    public static Map<String,Map> delete(String instanceName) throws Exception {
+        HashMap<String,Map> responses = new HashMap<>();
+        responses.put("containers", deleteContainers(instanceName));
+        responses.put("images", deleteImages(instanceName));
+
+        return responses;
     }
 
     public static Map<String,HttpResponse> deleteContainers(String instanceName) throws Exception {
@@ -105,14 +108,32 @@ public class Instances {
         return responses;
     }
 
-    public static void deleteImages(String instanceName) {
+    public static Map<String,HttpResponse> deleteImages(String instanceName) throws Exception {
+        /*
+         * Returns a map of Images.delete() responses for each deleted image.
+         * Image id is the key for an HttpResponse value. 
+         * 
+         * deleteImages().get("image-id") => HttpResponse
+         */
+        HashMap<String,HttpResponse> responses = new HashMap<>();
         
+        String imagesString = Images.list(instanceName).body().toString();
+        JSONArray images = (JSONArray)JSONValue.parse(imagesString);
+        HttpResponse deleteImageResponse;
+
+        for(JSONObject image : JSONController.JSONArrayToList(images)) {
+            String id = image.get("Id").toString();
+            deleteImageResponse = Images.delete(id, "true");
+            responses.put(id, deleteImageResponse);
+        }
+
+        return responses;
     }
 
     
 
     @SuppressWarnings("unchecked")
-    public static Map<String,HttpResponse> build(String configPath) throws Exception {
+    public static Map<String,HttpResponse> buildImages(String configPath) throws Exception {
         /*
          * Returns a map of Images.buildRemote() responses for each image.
          * Image name is the key for an HttpResponse value. 
@@ -150,7 +171,7 @@ public class Instances {
     }
 
     @SuppressWarnings("unchecked")
-    public static Map<String,String> create(String configPath) throws Exception {
+    public static Map<String,String> createContainers(String configPath) throws Exception {
         /*
          * Returns a map of Containers.create() IDs for each created container.
          * Container name is the key for an ID value. 
@@ -169,7 +190,6 @@ public class Instances {
 
                 // SETUP
                 String instanceName = config.get("instanceName").toString();
-                String uri = container.get("endpoint").toString();
                 
                 JSONObject buildConfig = (JSONObject)container.get("config");
 

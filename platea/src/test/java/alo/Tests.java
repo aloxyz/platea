@@ -15,13 +15,18 @@ import static org.junit.Assert.assertEquals;
 public class Tests {
 
     @Test
-    public void list() throws Exception {
-        System.out.println(
-            Containers.list("lcarnevale").body().toString()
-        );
-        System.out.println(
-            Images.list("lcarnevale").body().toString()
-        );
+    public void deleteContainers() throws Exception {
+        Instances.buildImages("/home/alo/Documenti/platea/platea/sampleConfig.json");
+        Instances.createContainers("/home/alo/Documenti/platea/platea/sampleConfig.json");
+
+
+        System.out.println(Containers.list("lcarnevale").body().toString());
+        System.out.println(Images.list("lcarnevale").body().toString());
+
+        Instances.delete("lcarnevale");
+
+        System.out.println(Containers.list("lcarnevale").body().toString());
+        System.out.println(Images.list("lcarnevale").body().toString());
 
 
     }
@@ -29,7 +34,7 @@ public class Tests {
     @Test
     public void buildInstances() throws Exception {
         Map<String,HttpResponse> responses =
-            Instances.build("/home/alo/Documenti/platea/platea/sampleConfig.json");
+            Instances.buildImages("/home/alo/Documenti/platea/platea/sampleConfig.json");
         
         responses.keySet().forEach(key -> {
             String body = responses.get(key).body().toString();
@@ -40,7 +45,7 @@ public class Tests {
     @Test
     public void createContainers() throws Exception {
         Map<String,String> ids =
-            Instances.create("/home/alo/Documenti/platea/platea/sampleConfig.json");
+            Instances.createContainers("/home/alo/Documenti/platea/platea/sampleConfig.json");
         
         ids.keySet().forEach(key -> {
             System.out.println(ids.get(key));
