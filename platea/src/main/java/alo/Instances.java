@@ -88,14 +88,13 @@ public class Instances {
 
     public static Map<String,Map> run(String configPath) throws Exception {
         HashMap<String, Map> responses = new HashMap<>();
-
         responses.put("buildImages", Instances.buildImages(configPath));
         
-        Map<String, String> createContainersResponse = Instances.createContainers(configPath);
-        ArrayList<String> ids = new ArrayList<>(createContainersResponse.values());
-        
-        responses.put("createContainers", createContainersResponse);
-        responses.put("startContainers", Instances.startContainers(ids));
+        JSONObject config = JSONController.fileToJsonObject(Paths.get(configPath).toString());
+        String instanceName = config.get("instanceName").toString();
+
+        responses.put("createContainers", Instances.createContainers(configPath));
+        responses.put("startContainers", Instances.startContainers(instanceName));
 
         return responses;
     }
@@ -202,7 +201,7 @@ public class Instances {
 
                 // SETUP
                 String instanceName = config.get("instanceName").toString();
-                
+
                 JSONObject buildConfig = (JSONObject)container.get("config");
 
                 //get name from image name
@@ -211,9 +210,8 @@ public class Instances {
                 
                 // START
                 HttpResponse createContainerResponse = Containers.create(containerName, instanceName, buildConfig);
-                
                 String id = Docker.getFromResponse(createContainerResponse, "Id");
-                
+
                 ids.put(containerName, id);
             } catch (Exception e) {e.printStackTrace();}
 
@@ -221,10 +219,14 @@ public class Instances {
         return ids;
     }
 
-    public static Map<String, HttpResponse> startContainers(ArrayList<String> ids) throws Exception {
+    public static Map<String, HttpResponse> startContainers(String instanceName) throws Exception {
         HashMap<String, HttpResponse> responses = new HashMap<>();
 
-        for (String id : ids) {
+        String containersString = Containers.list(instanceName).body().toString();
+        JSONArray containers = (JSONArray)JSONValue.parse(containersString);
+
+        for (JSONObject container : JSONController.JSONArrayToList(containers)) {
+            String id = container.get("Id").toString();
             responses.put(id, Containers.start(id));
         }
 

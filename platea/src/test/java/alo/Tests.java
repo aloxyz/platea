@@ -15,6 +15,17 @@ import static org.junit.Assert.assertEquals;
 public class Tests {
 
     @Test
+    public void commands() throws Exception {
+        PlateaCommand cmd = new PlateaCommand();
+        
+        cmd.listInstances = true;
+        cmd.instanceName = "lcarnevale";
+        cmd.runInstance = true;
+        cmd.stopInstance = true;
+        cmd.call();
+    }
+
+    @Test
     public void runInstance() throws Exception {
         Instances.run("/home/alo/Documenti/platea/platea/sampleConfig.json");
     }
@@ -33,6 +44,7 @@ public class Tests {
     public void buildInstance() throws Exception {
         Instances.buildImages("/home/alo/Documenti/platea/platea/sampleConfig.json");
         Instances.createContainers("/home/alo/Documenti/platea/platea/sampleConfig.json");
+
 
 
         System.out.println(Containers.list("lcarnevale").body().toString());

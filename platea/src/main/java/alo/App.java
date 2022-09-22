@@ -7,18 +7,14 @@ public class App
     public static void main( String[] args) throws Exception
     {    
 
-        Instances.run("/home/alo/Documenti/platea/platea/sampleConfig.json");
-        /*String imagesJSON =
-            DockerController
-            .get(
-                "images",
-                "")
-                .body().toString();
+        PlateaCommand cmd = new PlateaCommand();
+        
+        cmd.listInstances = true;
+        cmd.instanceName = "lcarnevale";
+        cmd.runInstance = true;
+        cmd.stopInstance = true;
+        
+        cmd.call();
 
-        JSONArray jsonDocument = (JSONArray)JSONValue.parse(imagesJSON);
-
-        for(JSONObject o : JSONController.JSONArrayToList(jsonDocument)) {
-            System.out.println(o.get("Id"));
-        } */
     }
 }
