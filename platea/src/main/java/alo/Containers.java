@@ -35,11 +35,12 @@ public class Containers {
 
     public static HttpResponse list(String instanceName) throws Exception {
         HashMap<String,String> params = new HashMap<>();
+        params.put("all", "true");
         if(instanceName.isEmpty()) {
-            params.put("filters", "{\"label\":[\"service=platea\"]}");
+            params.put("filters", "{\"label\":[\"instance\"]}");
         }
         else {
-            params.put("filters", String.format("{\"label\":[\"service=platea\", \"instance=%s\"]}", instanceName));
+            params.put("filters", String.format("{\"label\":[\"instance=%s\"]}", instanceName));
         }
         
         return 
@@ -48,7 +49,7 @@ public class Containers {
 
     public static HttpResponse inspect(String id) throws Exception {
         HashMap<String,String> params = new HashMap<>();
-        params.put("filters", "{\"label\":[\"service=platea\"]}");
+        params.put("filters", "{\"label\":[\"instance\"]}");
 
         return 
             Docker.get("containers", id, params);

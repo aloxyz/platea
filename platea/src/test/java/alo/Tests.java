@@ -3,6 +3,7 @@ package alo;
 
 import java.net.http.HttpResponse;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
 import org.json.simple.JSONObject;
 import org.junit.FixMethodOrder;
@@ -15,7 +16,14 @@ public class Tests {
 
     @Test
     public void list() throws Exception {
-        System.out.println(Containers.list("lcarnevale").body().toString());
+        System.out.println(
+            Containers.list("lcarnevale").body().toString()
+        );
+        System.out.println(
+            Images.list("lcarnevale").body().toString()
+        );
+
+
     }
 
     @Test

@@ -78,6 +78,11 @@ public class Instances {
         return instances;
     }
 
+    public static void delete(String instanceName) throws Exception {
+        deleteContainers(instanceName);
+        deleteImages(instanceName);
+    }
+
     public static Map<String,HttpResponse> deleteContainers(String instanceName) throws Exception {
         /*
          * Returns a map of Containers.delete() responses for each deleted container.
@@ -104,10 +109,7 @@ public class Instances {
         
     }
 
-    public static void delete(String instanceName) throws Exception {
-        deleteContainers(instanceName);
-        deleteImages(instanceName);
-    }
+    
 
     @SuppressWarnings("unchecked")
     public static Map<String,HttpResponse> build(String configPath) throws Exception {

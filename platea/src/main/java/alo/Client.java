@@ -73,6 +73,9 @@ public class Client {
     }
 
     public HttpResponse getResource(String path, Map<String, String> params) throws Exception{
+        System.out.println(
+            uriBuilder(path, params)
+        );
         return
         sendRequest(
             get(uriBuilder(path, params)), 
