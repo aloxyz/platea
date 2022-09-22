@@ -33,7 +33,7 @@ public class Containers {
             );
     }
 
-    public static HttpResponse list(String instanceName) throws Exception {
+    public static HttpResponse list(String instanceName, String status) throws Exception {
         HashMap<String,String> params = new HashMap<>();
         params.put("all", "true");
         if(instanceName.isEmpty()) {
@@ -42,7 +42,11 @@ public class Containers {
         else {
             params.put("filters", String.format("{\"label\":[\"instance=%s\"]}", instanceName));
         }
-        
+        if(!status.isEmpty()) {
+            params.put("filters", String.format("{\"status\": [\"%s\"]}", status));
+        }
+
+
         return 
             Docker.get("containers", "", params);
     }

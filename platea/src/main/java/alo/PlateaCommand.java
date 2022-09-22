@@ -10,44 +10,60 @@ import picocli.CommandLine.Parameters;
 
 @Command(name = "platea", description = "Docker container provisioning tool.", mixinStandardHelpOptions = true)
 public class PlateaCommand implements Callable<Integer> {
+    public String configPath;
 
     @Parameters(paramLabel = "INSTANCE", description = "The instance name.")
     String instanceName;
 
-    @Option(names = {"-f", "--fetch-instances"}, description = "fetch instance files from the remote repository.")
+    @Option(names = {"fetch"}, description = "fetch instance files from the remote repository.")
     boolean fetchInstances;
 
-    @Option(names = {"-l", "--list-instances"}, description = "List available instances from the remote repository.")
+    @Option(names = {"ls"}, description = "List available instances from the remote repository.")
     boolean listInstances;
 
-    @Option(names = {"-b", "--build"}, description = "Build the specified instance.")
+    @Option(names = {"ps"}, description = "List running instances.")
+    boolean listRunningInstances;
+
+    @Option(names = {"build"}, description = "Build the specified instance.")
     boolean buildInstance;
 
-    @Option(names = {"--start"}, description = "Start the specified instance.")
+    @Option(names = {"start"}, description = "Start the specified instance.")
     boolean startInstance;
 
-    @Option(names = {"-r", "--run"}, description = "Build and start the specified instance.")
+    @Option(names = {"run"}, description = "Build and start the specified instance.")
     boolean runInstance;
 
-    @Option(names = {"--stop"}, description = "Stop the specified instance.")
+    @Option(names = {"stop"}, description = "Stop the specified instance.")
     boolean stopInstance;
 
-    @Option(names = {"-d", "--delete"}, description = "Delete the specified instance.")
-    boolean deleteInstance;
+    @Option(names = {"rm"}, description = "Remove the specified instance, along with beloning containers and images.")
+    boolean removeInstance;
 
     @Override
     public Integer call() throws Exception {
+        if(!instanceName.isEmpty()) {
+            
+            configPath = new File(
+                Config.getConfig().instancesPath() + instanceName + ".json")
+                .getAbsolutePath();
+        }
+        System.out.println(
+            configPath
+        );
         if (fetchInstances) {
             Instances.fetchRemote();
         }
         if (listInstances) {
-            Instances.listRemote();
+            System.out.println(
+                Instances.listRemote().toString()
+            );
+        }
+        if (listRunningInstances) {
+            System.out.println(
+                Instances.listRunning().toString()
+            );
         }
         if (buildInstance) {
-            String configPath = new File(
-                Config.getConfig().instancesPath() + instanceName + ".json")
-                .getAbsolutePath();
-
             Instances.buildImages(configPath);
             Instances.createContainers(configPath);
         }
@@ -56,15 +72,14 @@ public class PlateaCommand implements Callable<Integer> {
             Instances.startContainers(instanceName);
         }
         if (runInstance) {
-            Instances.run(instanceName);
+            Instances.run(configPath);
         }
         if (stopInstance) {
             Instances.stopContainers(instanceName);
         }
-        if (deleteInstance) {
+        if (removeInstance) {
             Instances.deleteContainers(instanceName);
         }
-
 
         return 0;
     }

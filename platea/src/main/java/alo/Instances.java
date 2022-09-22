@@ -33,6 +33,7 @@ public class Instances {
         
         Process p = builder.start();
         p.waitFor(20, TimeUnit.SECONDS);
+        System.out.println("Done");
 
         // DOWNLOADING TAR FROM REPO DOESNT WORK, HTTP ERROR 406
         /*
@@ -78,6 +79,22 @@ public class Instances {
         return instances;
     }
 
+    public static ArrayList<String> listRunning() throws Exception {
+        /*
+         * Returns an ArrayList of running containers IDs
+         */
+        String containersString = Containers.list("", "running").body().toString();
+        JSONArray containers = (JSONArray)JSONValue.parse(containersString);
+        
+        ArrayList<String> tmp = new ArrayList<>();
+
+        for (JSONObject container : JSONController.JSONArrayToList(containers)) {
+            tmp.add(container.get("Id").toString());
+        }
+
+        return tmp;
+    }
+
     public static Map<String,Map> delete(String instanceName) throws Exception {
         HashMap<String,Map> responses = new HashMap<>();
         responses.put("containers", deleteContainers(instanceName));
@@ -108,7 +125,7 @@ public class Instances {
          */
         HashMap<String,HttpResponse> responses = new HashMap<>();
         
-        String containersString = Containers.list(instanceName).body().toString();
+        String containersString = Containers.list(instanceName, "").body().toString();
         JSONArray containers = (JSONArray)JSONValue.parse(containersString);
         HttpResponse deleteContainerResponse;
 
@@ -222,7 +239,7 @@ public class Instances {
     public static Map<String, HttpResponse> startContainers(String instanceName) throws Exception {
         HashMap<String, HttpResponse> responses = new HashMap<>();
 
-        String containersString = Containers.list(instanceName).body().toString();
+        String containersString = Containers.list(instanceName, "").body().toString();
         JSONArray containers = (JSONArray)JSONValue.parse(containersString);
 
         for (JSONObject container : JSONController.JSONArrayToList(containers)) {
@@ -236,7 +253,7 @@ public class Instances {
     public static Map<String, HttpResponse> stopContainers(String instanceName) throws Exception {
         HashMap<String,HttpResponse> responses = new HashMap<>();
         
-        String containersString = Containers.list(instanceName).body().toString();
+        String containersString = Containers.list(instanceName, "").body().toString();
         JSONArray containers = (JSONArray)JSONValue.parse(containersString);
         HttpResponse stopContainerResponse;
 
