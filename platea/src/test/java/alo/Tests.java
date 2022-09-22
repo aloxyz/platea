@@ -14,6 +14,7 @@ import static org.junit.Assert.assertEquals;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class Tests {
 
+    /*
     @Test
     public void commands() throws Exception {
         PlateaCommand cmd = new PlateaCommand();
@@ -92,4 +93,5 @@ public class Tests {
         assertEquals(204, deleteContainerResponse.statusCode());
         assertEquals(200, deleteImageResponse.statusCode());
     }
+    */
 }
