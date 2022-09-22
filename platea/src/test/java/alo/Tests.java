@@ -15,7 +15,17 @@ import static org.junit.Assert.assertEquals;
 public class Tests {
 
     @Test
-    public void deleteContainers() throws Exception {
+    public void runInstance() throws Exception {
+        Instances.run("/home/alo/Documenti/platea/platea/sampleConfig.json");
+    }
+
+    @Test
+    public void deleteInstance() throws Exception {
+        Instances.delete("lcarnevale");
+    }
+
+    @Test
+    public void buildInstance() throws Exception {
         Instances.buildImages("/home/alo/Documenti/platea/platea/sampleConfig.json");
         Instances.createContainers("/home/alo/Documenti/platea/platea/sampleConfig.json");
 
@@ -23,16 +33,10 @@ public class Tests {
         System.out.println(Containers.list("lcarnevale").body().toString());
         System.out.println(Images.list("lcarnevale").body().toString());
 
-        Instances.delete("lcarnevale");
-
-        System.out.println(Containers.list("lcarnevale").body().toString());
-        System.out.println(Images.list("lcarnevale").body().toString());
-
-
     }
 
     @Test
-    public void buildInstances() throws Exception {
+    public void buildIimages() throws Exception {
         Map<String,HttpResponse> responses =
             Instances.buildImages("/home/alo/Documenti/platea/platea/sampleConfig.json");
         

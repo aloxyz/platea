@@ -64,7 +64,7 @@
                 "Hostname": "",
                 "Domainname": "",
                 "User": "",
-                "ExposedPorts": {"5000/tcp": {}},
+                "ExposedPorts": {"5005/tcp": {}},
                 "Env": [],
                 "Cmd": ["python3", "app.py"],
                 "Healthcheck": {
@@ -101,7 +101,7 @@
                     "PortBindings": {
                         "5000/tcp": [
                             {
-                                "HostPort": "5000"
+                                "HostPort": "5005"
                             }
                         ]
                     },

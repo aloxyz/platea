@@ -86,6 +86,20 @@ public class Instances {
         return responses;
     }
 
+    public static Map<String,Map> run(String configPath) throws Exception {
+        HashMap<String, Map> responses = new HashMap<>();
+
+        responses.put("buildImages", Instances.buildImages(configPath));
+        
+        Map<String, String> createContainersResponse = Instances.createContainers(configPath);
+        ArrayList<String> ids = new ArrayList<>(createContainersResponse.values());
+        
+        responses.put("createContainers", createContainersResponse);
+        responses.put("startContainers", Instances.startContainers(ids));
+
+        return responses;
+    }
+
     public static Map<String,HttpResponse> deleteContainers(String instanceName) throws Exception {
         /*
          * Returns a map of Containers.delete() responses for each deleted container.
@@ -129,8 +143,6 @@ public class Instances {
 
         return responses;
     }
-
-    
 
     @SuppressWarnings("unchecked")
     public static Map<String,HttpResponse> buildImages(String configPath) throws Exception {
@@ -209,54 +221,13 @@ public class Instances {
         return ids;
     }
 
+    public static Map<String, HttpResponse> startContainers(ArrayList<String> ids) throws Exception {
+        HashMap<String, HttpResponse> responses = new HashMap<>();
 
-    @SuppressWarnings("unchecked")
-    public static Map<String,Map> run(String configPath) throws Exception {
-        HashMap<String, Map> instanceResponses = new HashMap<>();
+        for (String id : ids) {
+            responses.put(id, Containers.start(id));
+        }
 
-        JSONObject config = JSONController.fileToJsonObject(Paths.get(configPath).toString());
-        JSONObject containers = (JSONObject)config.get("containers");
-    
-        containers.keySet().forEach(key -> {
-            try {
-                Object value = containers.get(key);
-                JSONObject container = (JSONObject) value;
-
-                // SETUP
-                String instanceName = config.get("instanceName").toString();
-                String uri = container.get("endpoint").toString();
-                
-                JSONObject buildConfig = (JSONObject)container.get("config");
-
-                //get name from image name
-                String tmpImageName = buildConfig.get("Image").toString();
-                String imageName = tmpImageName.substring(0, tmpImageName.lastIndexOf(":"));
-                
-
-                // START
-                HttpResponse buildImageRemoteResponse = Images.buildRemote(imageName, instanceName, uri);
-                HttpResponse createContainerResponse = Containers.create(imageName, instanceName, buildConfig);
-                System.out.println(createContainerResponse.body().toString());
-                String containerId = Docker.getFromResponse(createContainerResponse, "Id");
-                HttpResponse startContainerResponse = Containers.start(containerId);
-
-                HashMap<String,HttpResponse> responses = new HashMap<>();
-                responses.put("buildImageRemote", buildImageRemoteResponse);
-                responses.put("createContainer", createContainerResponse);
-                responses.put("startContainer", startContainerResponse);
-
-                instanceResponses.put(instanceName, responses);
-            } catch (Exception e) {e.printStackTrace();}
-        });
-
-        return instanceResponses;
+        return responses;
     }
-
-    /*
-    public static Map<String,HttpResponse> remove(String containerId) {
-        HttpResponse stopContainerResponse = Containers.stop(containerId);
-        HttpResponse deleteContainerResponse = Containers.delete(containerId, "true");
-        HttpResponse deleteImageResponse = Images.delete(imageName, "true");
-    }
-    */
 }
