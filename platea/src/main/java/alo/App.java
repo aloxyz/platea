@@ -5,17 +5,42 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class App {
-    static public HashMap<String, String> helpMessages;
-    static public String command = new String();
-    static public String instanceName = new String();
-    static public String configPath = new String();
-    static public ArrayList<String> singleCommands = new ArrayList<>();
-    static public ArrayList<String> argCommands = new ArrayList<>();
+    static private HashMap<String, String> helpMessages;
+    static private String command = new String();
+    static private String instanceName = new String();
+    static private String configPath = new String();
+    static private ArrayList<String> singleCommands = new ArrayList<>();
+    static private ArrayList<String> argCommands = new ArrayList<>();
+
+    private static void helpMessage() {
+        System.out.println(
+                ConsoleColors.BLUE_BOLD + "Usage:"+ ConsoleColors.RESET +"\nplatea <command> <instance>\n\n"+
+                "Docker container provisioning tool\n\n"+
+                ConsoleColors.BLUE_BOLD+
+                "Name\t\tDescription"+
+                ConsoleColors.RESET
+            );
+        for (String cmd : helpMessages.keySet()) {
+            if(cmd == "instance") {
+                System.out.println(
+                ConsoleColors.BLUE+cmd+ConsoleColors.RESET+
+                "\t" + helpMessages.get(cmd)
+            );
+            } 
+            else {
+                System.out.println(
+                    ConsoleColors.BLUE + cmd + ConsoleColors.RESET + "\t\t" + helpMessages.get(cmd)
+                );
+            }
+        }
+    }
+
     public static void main( String[] args) throws Exception {
         
         helpMessages = new HashMap<>();
         helpMessages.put("instance", "The instance name");
         helpMessages.put("fetch", "fetch instance files from the remote repository");
+        helpMessages.put("help", "Display this help message");
         helpMessages.put("ls", "List available instances from the remote repository");
         helpMessages.put("ps", "List running instances");
         helpMessages.put("build", "Build the specified instance");
@@ -26,6 +51,7 @@ public class App {
         
 
 
+        singleCommands.add("help");
         singleCommands.add("fetch");
         singleCommands.add("ls");
         singleCommands.add("ps");
@@ -37,30 +63,16 @@ public class App {
         argCommands.add("rm");
 
         if (args.length == 0) {
-            System.out.println(
-                ConsoleColors.BLUE_BOLD + "Usage:"+ ConsoleColors.RESET +"\nplatea <command> <instance>\n\n"+
-                "Docker container provisioning tool\n\n"+
-                ConsoleColors.BLUE_BOLD+
-                "Name\t\tDescription"+
-                ConsoleColors.RESET
-            );
-            for (String cmd : helpMessages.keySet()) {
-                if(cmd == "instance") {
-                    System.out.println(
-                    ConsoleColors.BLUE+cmd+ConsoleColors.RESET+
-                    "\t" + helpMessages.get(cmd)
-                );
-                } 
-                else {
-                    System.out.println(
-                        ConsoleColors.BLUE + cmd + ConsoleColors.RESET + "\t\t" + helpMessages.get(cmd)
-                    );
-                }
-            }
+            helpMessage();
             return;
         }
 
         command = args[0];
+
+        if (! (singleCommands.contains(command) || argCommands.contains(command))) {
+            System.out.println("Invalid command: " + command);
+        }
+
         if (args.length == 1 && argCommands.contains(command)) {
             
             System.out.println(
@@ -72,9 +84,13 @@ public class App {
             return;
         }
 
-        if (args.length == 1 && singleCommands.contains(command)) {
+        if (singleCommands.contains(command)) {
             
             switch(command) { 
+                case "help":
+                    helpMessage();
+                    break;
+
                 case "fetch":
                     Instances.fetchRemote();
                     break;
@@ -89,10 +105,6 @@ public class App {
                     System.out.println(
                         Instances.listRunning().toString()
                     );
-                    break;
-
-                default:
-                    System.out.println("Invalid command: " + command);
                     break;
                 }
             return;
@@ -127,10 +139,6 @@ public class App {
                     break;
                 case "rm":
                     Instances.deleteContainers(instanceName);
-                    break;
-    
-                default:
-                    System.out.println("Invalid command: " + command);
                     break;
             }
         }
