@@ -1,18 +1,19 @@
 package alo;
 
 
-import java.net.http.HttpResponse;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-import org.json.simple.JSONObject;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
-import static org.junit.Assert.assertEquals;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class Tests {
+    @Ignore
+    @Test
+    public void main() throws Exception {
+        String[] args = {"ps"};
+        App.main(args);
+    }
 
     /*
     @Test

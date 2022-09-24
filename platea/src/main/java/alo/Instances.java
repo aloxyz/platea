@@ -2,10 +2,10 @@ package alo;
 
 import java.io.File;
 import java.net.http.HttpResponse;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import org.json.simple.JSONArray;
@@ -35,7 +35,7 @@ public class Instances {
         p.waitFor(20, TimeUnit.SECONDS);
         System.out.println("Done");
 
-        // DOWNLOADING TAR FROM REPO DOESNT WORK, HTTP ERROR 406
+        // DOWNLOADING TAR FROM REPO DOESN'T WORK, HTTP ERROR 406
         /*
         // Download configs archive
         FileIO.wget(this.configRepository, "tmp/configs.tar.gz");
@@ -59,8 +59,8 @@ public class Instances {
         ArrayList<String> instances = new ArrayList<String>();
 
         // populate instances String Arraylist
-        for (File f : new File(instancesPath).listFiles()) {    // go through all jsons
-            if (f.getName() != ".git" && f.getName().endsWith(".json")) {
+        for (File f : Objects.requireNonNull(new File(instancesPath).listFiles())) {    // go through all jsons
+            if (!f.getName().equals(".git") && f.getName().endsWith(".json")) {
                 instances.add(f.getName());
             }
             /*
@@ -79,11 +79,11 @@ public class Instances {
         return instances;
     }
 
-    public static ArrayList<String> listRunning() throws Exception {
+    public static ArrayList<String> listRunning(String instanceName) throws Exception {
         /*
          * Returns an ArrayList of running containers IDs
          */
-        String containersString = Containers.list("", "running").body().toString();
+        String containersString = Containers.list(instanceName, "running").body().toString();
         JSONArray containers = (JSONArray)JSONValue.parse(containersString);
         
         ArrayList<String> tmp = new ArrayList<>();
@@ -103,14 +103,13 @@ public class Instances {
         return responses;
     }
 
-    public static Map<String,Map> run(String configPath) throws Exception {
+    public static Map<String,Map> run(JSONObject config) throws Exception {
         HashMap<String, Map> responses = new HashMap<>();
-        responses.put("buildImages", Instances.buildImages(configPath));
-        
-        JSONObject config = JSONController.fileToJsonObject(Paths.get(configPath).toString());
+        responses.put("buildImages", Instances.buildImages(config));
+
         String instanceName = config.get("instanceName").toString();
 
-        responses.put("createContainers", Instances.createContainers(configPath));
+        responses.put("createContainers", Instances.createContainers(config));
         responses.put("startContainers", Instances.startContainers(instanceName));
 
         return responses;
@@ -163,7 +162,7 @@ public class Instances {
     }
 
     @SuppressWarnings("unchecked")
-    public static Map<String,HttpResponse> buildImages(String configPath) throws Exception {
+    public static Map<String,HttpResponse> buildImages(JSONObject config) {
         /*
          * Returns a map of Images.buildRemote() responses for each image.
          * Image name is the key for an HttpResponse value. 
@@ -173,8 +172,7 @@ public class Instances {
         
 
         HashMap<String,HttpResponse> responses = new HashMap<>();
-        
-        JSONObject config = JSONController.fileToJsonObject(Paths.get(configPath).toString());
+
         JSONObject containers = (JSONObject)config.get("containers");
 
         containers.keySet().forEach(key -> {
@@ -205,7 +203,7 @@ public class Instances {
     }
 
     @SuppressWarnings("unchecked")
-    public static Map<String,String> createContainers(String configPath) throws Exception {
+    public static Map<String,String> createContainers(JSONObject config) {
         /*
          * Returns a map of Containers.create() IDs for each created container.
          * Container name is the key for an ID value. 
@@ -213,8 +211,7 @@ public class Instances {
          * create().get("container-name") => String ID
          */
         HashMap<String,String> ids = new HashMap<>();
-        
-        JSONObject config = JSONController.fileToJsonObject(Paths.get(configPath).toString());
+
         JSONObject containers = (JSONObject)config.get("containers");
 
         containers.keySet().forEach(key -> {

@@ -12,7 +12,7 @@ public class Config {
     private final String databaseURL = "http://localhost:3000/instances";
     private final String dockerSocket = "unix:/var/run/docker.sock";
     private final String dockerURL = "localhost:2375";
-    private Config() throws Exception {
+    private Config() {
     } 
 
     public static void main(String[] args) throws Exception {

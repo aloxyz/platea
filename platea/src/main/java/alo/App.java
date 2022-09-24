@@ -1,14 +1,14 @@
 package alo;
 
+import org.json.simple.JSONObject;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class App {
     static private HashMap<String, String> helpMessages;
-    static private String command = "";
-    static private String instanceName = "";
-    static private String configPath = "";
+    static private JSONObject config;
     static private final ArrayList<String> singleCommands = new ArrayList<>();
     static private final ArrayList<String> argCommands = new ArrayList<>();
 
@@ -21,7 +21,7 @@ public class App {
                 ConsoleColors.RESET
             );
         for (String cmd : helpMessages.keySet()) {
-            if(cmd == "instance") {
+            if(cmd.equals("instance")) {
                 System.out.println(
                 ConsoleColors.BLUE+cmd+ConsoleColors.RESET+
                 "\t" + helpMessages.get(cmd)
@@ -67,7 +67,7 @@ public class App {
             return;
         }
 
-        command = args[0];
+        String command = args[0];
 
         if (! (singleCommands.contains(command) || argCommands.contains(command))) {
             System.out.println("Invalid command: " + command);
@@ -103,7 +103,7 @@ public class App {
     
                 case "ps":
                     System.out.println(
-                            Instances.listRunning()
+                            Instances.listRunning("")
                     );
                     break;
                 }
@@ -111,35 +111,41 @@ public class App {
         }
 
         if (args.length == 2 && argCommands.contains(command)) {
-            instanceName = args[1];
-
+            String instanceName = args[1];
+            
             if(!instanceName.isEmpty()) {
-                configPath = new File(
+                // Create instance
+                String configPath = new File(
                     Config.getConfig().instancesPath() + instanceName + ".json")
                     .getAbsolutePath();
-            }
+
+                
+                Instance instance = new Instance(configPath);
+                config = instance.getConfig();
             
             switch(command) {    
                 
                 case "build":
-                    Instances.buildImages(configPath);
-                    Instances.createContainers(configPath);
+                    instance.buildImages();
+                    instance.createContainers();
                     break;
     
                 case "start":
-                    Instances.startContainers(instanceName);
+                    instance.startContainers();
                     break;
 
                 case "run":
-                    Instances.run(configPath);
+                    instance.run();
                     break;
                 
                 case "stop":
-                    Instances.stopContainers(instanceName);
+                    instance.stopContainers();
                     break;
                 case "rm":
-                    Instances.deleteContainers(instanceName);
+                    instance.deleteContainers();
                     break;
+            
+                }
             }
         }
     }

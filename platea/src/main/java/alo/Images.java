@@ -6,10 +6,10 @@ import java.util.HashMap;
 import org.json.simple.JSONObject;
 
 public class Images {
-    public static HttpResponse buildRemote(String imageName, String instance, String uri) throws Exception {
+    public static HttpResponse buildRemote(String imageName, String instanceName, String uri) throws Exception {
         HashMap<String, String> labels = new HashMap<String, String>();
         labels.put("service", "platea");
-        labels.put("instance", instance);
+        labels.put("instance", instanceName);
         String jsonLabels = new JSONObject(labels).toJSONString();
 
         HashMap<String, String> params = new HashMap<String, String>();

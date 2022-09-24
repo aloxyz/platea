@@ -12,7 +12,7 @@ public class Database {
     String user;
     String password;    
 
-    public static synchronized Database getDatabase() throws Exception {
+    public static synchronized Database getDatabase() {
         if (database == null) {
             database = new Database();
         }
