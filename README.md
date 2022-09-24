@@ -17,3 +17,5 @@
 ## stop
 	platea stop INSTANCE
 
+# UML Scheme
+![](UML.png)
