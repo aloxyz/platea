@@ -6,11 +6,11 @@ import java.util.HashMap;
 
 public class App {
     static private HashMap<String, String> helpMessages;
-    static private String command = new String();
-    static private String instanceName = new String();
-    static private String configPath = new String();
-    static private ArrayList<String> singleCommands = new ArrayList<>();
-    static private ArrayList<String> argCommands = new ArrayList<>();
+    static private String command = "";
+    static private String instanceName = "";
+    static private String configPath = "";
+    static private final ArrayList<String> singleCommands = new ArrayList<>();
+    static private final ArrayList<String> argCommands = new ArrayList<>();
 
     private static void helpMessage() {
         System.out.println(
@@ -47,7 +47,7 @@ public class App {
         helpMessages.put("start", "Start the specified instance");
         helpMessages.put("run", "Build and start the specified instance");
         helpMessages.put("stop", "Stop the specified instance");
-        helpMessages.put("rm", "Remove the specified instance, along with beloning containers and images");
+        helpMessages.put("rm", "Remove the specified instance, along with belonging containers and images");
         
 
 
@@ -97,13 +97,13 @@ public class App {
     
                 case "ls":
                     System.out.println(
-                        Instances.listRemote().toString()
+                            Instances.listRemote()
                     );
                     break;
     
                 case "ps":
                     System.out.println(
-                        Instances.listRunning().toString()
+                            Instances.listRunning()
                     );
                     break;
                 }
@@ -142,6 +142,5 @@ public class App {
                     break;
             }
         }
-        return;
     }
 }

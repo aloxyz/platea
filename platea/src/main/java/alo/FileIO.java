@@ -77,7 +77,7 @@ public class FileIO {
     }
 
 
-    public static String StreamtoString(InputStream stream) throws Exception {
+    public static String StreamToString(InputStream stream) throws Exception {
         InputStreamReader isr = new InputStreamReader(stream);
         BufferedReader br = new BufferedReader(isr);
         StringBuffer sb = new StringBuffer();

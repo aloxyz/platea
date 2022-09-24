@@ -2,16 +2,16 @@ package alo;
 
 public class Config {
     private static Config config;
-    private String configPath = System.getenv("HOME") + ".platearc";
-    private String basePath = System.getenv("XDG_CONFIG_HOME") + "/platea";
-    private String instancesPath = basePath + "/instances/";
-    private String containersPath = basePath + "/containers/";
-    private String scriptsPath = basePath + "/scripts/";
+    private final String configPath = System.getenv("HOME") + ".platearc";
+    private final String basePath = System.getenv("XDG_CONFIG_HOME") + "/platea";
+    private final String instancesPath = basePath + "/instances/";
+    private final String containersPath = basePath + "/containers/";
+    private final String scriptsPath = basePath + "/scripts/";
 
-    private String remoteRepositoryURL = "git@gitlab.com:aloxyz/platea-configs.git";
-    private String databaseURL = "http://localhost:3000/instances";
-    private String dockerSocket = "unix:/var/run/docker.sock";
-    private String dockerURL = "localhost:2375";
+    private final String remoteRepositoryURL = "git@gitlab.com:aloxyz/platea-configs.git";
+    private final String databaseURL = "http://localhost:3000/instances";
+    private final String dockerSocket = "unix:/var/run/docker.sock";
+    private final String dockerURL = "localhost:2375";
     private Config() throws Exception {
     } 
 
