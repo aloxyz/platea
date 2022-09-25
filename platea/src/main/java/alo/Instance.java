@@ -5,6 +5,7 @@ import org.json.simple.JSONObject;
 import java.net.http.HttpResponse;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Instance {
@@ -22,36 +23,83 @@ public class Instance {
         return Instances.listRunning(name);
     }
 
-    public Map<String, Map> delete() throws Exception {
-        return Instances.delete(name);
+    public ArrayList<Map> delete() throws Exception {
+        ArrayList<Map> responses = new ArrayList<>();
+
+        responses.add(deleteContainers());
+        responses.add(deleteImages());
+
+        return responses;
     }
 
-    public Map<String,Map> run() throws Exception {
-        return Instances.run(config);
+    public ArrayList<Map> run() throws Exception {
+        ArrayList<Map> responses = new ArrayList<>();
+
+        responses.add(buildImages());
+        responses.add(createContainers());
+        responses.add(startContainers());
+
+        return responses;        
     }
 
     public Map<String, HttpResponse> deleteContainers() throws Exception {
-        return Instances.deleteContainers(name);
+        HashMap<String, HttpResponse> responses = new HashMap<>();
+
+        for (Container c : containers) {
+            responses.put(c.getId(), c.delete());
+        }
+
+        return responses;
     }
 
     public Map<String, HttpResponse> deleteImages() throws Exception {
-        return Instances.deleteImages(name);
+        HashMap<String, HttpResponse> responses = new HashMap<>();
+
+        for (Image i : images) {
+            responses.put(i.getId(), i.delete());
+        }
+
+        return responses;
     }
 
     public Map<String, HttpResponse> buildImages() throws Exception {
-        return Instances.buildImages(config);
+        HashMap<String, HttpResponse> responses = new HashMap<>();
+
+        for (Image i : images) {
+            responses.put(i.getId(), i.buildRemote());
+        }
+
+        return responses;
     }
 
-    public Map<String, String> createContainers() throws Exception {
-        return Instances.createContainers(config);
+    public Map<String, HttpResponse> createContainers() throws Exception {
+        HashMap<String, HttpResponse> responses = new HashMap<>();
+
+        for (Container c : containers) {
+            responses.put(c.getId(), c.create());
+        }
+
+        return responses;
     }
 
     public Map<String, HttpResponse> startContainers() throws Exception {
-        return Instances.startContainers(name);
+        HashMap<String, HttpResponse> responses = new HashMap<>();
+
+        for (Container c : containers) {
+            responses.put(c.getId(), c.start());
+        }
+
+        return responses;
     }
 
     public Map<String, HttpResponse> stopContainers() throws Exception {
-        return Instances.stopContainers(name);
+        HashMap<String, HttpResponse> responses = new HashMap<>();
+
+        for (Container c : containers) {
+            responses.put(c.getId(), c.stop());
+        }
+
+        return responses;
     }
 
     public String getName() {

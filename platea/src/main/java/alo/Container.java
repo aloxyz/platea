@@ -4,18 +4,18 @@ import org.json.simple.JSONObject;
 
 import java.net.http.HttpResponse;
 
-public class Container {
+public class Container implements IDockerController {
     private final String id;
     private final String name;
     private final Instance instance; //get instance by instancename (label)
     private final JSONObject config;
 
-    Container(Instance instance) {
-        this.id = "id";
-        this.name = "name";
+    Container(String id, String name, Instance instance) {
+        this.id = id;
+        this.name = name;
         this.instance = instance;
 
-        this.config = instance.getConfig(); //TODO
+        this.config = instance.getConfig();
     }
 
     public HttpResponse create() throws Exception {
@@ -36,5 +36,21 @@ public class Container {
 
     public HttpResponse stop() throws Exception {
         return Containers.stop(id);
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Instance getInstance() {
+        return instance;
+    }
+
+    public JSONObject getConfig() {
+        return config;
     }
 }
