@@ -43,7 +43,7 @@ public class App {
         helpMessages.put("help", "Display this help message");
         helpMessages.put("ls", "List available instances from the remote repository");
         helpMessages.put("ps", "List running instances");
-        helpMessages.put("build", "Build the specified instance");
+        helpMessages.put("create", "Create the specified instance");
         helpMessages.put("start", "Start the specified instance");
         helpMessages.put("run", "Build and start the specified instance");
         helpMessages.put("stop", "Stop the specified instance");
@@ -92,18 +92,18 @@ public class App {
                     break;
 
                 case "fetch":
-                    Instances.fetchRemote();
+                    Instance.fetchRemote();
                     break;
     
                 case "ls":
                     System.out.println(
-                            Instances.listRemote()
+                        Instance.listRemote()
                     );
                     break;
     
                 case "ps":
                     System.out.println(
-                            Instances.listRunning("")
+                        Instance.listRunning()
                     );
                     break;
                 }
@@ -113,7 +113,13 @@ public class App {
         if (args.length == 2 && argCommands.contains(command)) {
             String instanceName = args[1];
             
-            if(!instanceName.isEmpty()) {
+
+            if(command.equals("create") && !instanceName.isEmpty()) {
+                // TODO check if instance already exists
+
+
+                // Load instance
+
                 // Create instance
                 String configPath = new File(
                     Config.getConfig().instancesPath() + instanceName + ".json")
@@ -121,28 +127,20 @@ public class App {
 
                 
                 Instance instance = new Instance(configPath);
-                config = instance.getConfig();
             
-            switch(command) {    
-                
-                case "build":
-                    instance.buildImages();
-                    instance.createContainers();
-                    break;
-    
+            switch(command) {
+                    
                 case "start":
                     instance.startContainers();
                     break;
 
-                case "run":
-                    instance.run();
-                    break;
-                
                 case "stop":
                     instance.stopContainers();
                     break;
+
                 case "rm":
                     instance.deleteContainers();
+                    instance.deleteImages();
                     break;
             
                 }

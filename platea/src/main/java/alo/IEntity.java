@@ -2,12 +2,10 @@ package alo;
 
 import java.net.http.HttpResponse;
 
-interface IDockerController {
+interface IEntity {
     public HttpResponse inspect() throws Exception;
 
-    public HttpResponse delete() throws Exception;
-    
-    public String getId();
+    public HttpResponse delete(String force) throws Exception;
     
     public String getName();
     

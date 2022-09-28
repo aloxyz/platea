@@ -8,6 +8,15 @@ import org.junit.runners.MethodSorters;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class Tests {
+
+    @Test
+    public void db() throws Exception {
+        Instance i = new Instance("/home/alo/Documenti/platea/platea/sampleConfig.json");
+        //i.delete();
+
+    }
+
+
     @Ignore
     @Test
     public void main() throws Exception {

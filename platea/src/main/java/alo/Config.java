@@ -1,7 +1,10 @@
 package alo;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 public class Config {
     private static Config config;
+    private final Dotenv env = Dotenv.load();
     private final String configPath = System.getenv("HOME") + ".platearc";
     private final String basePath = System.getenv("XDG_CONFIG_HOME") + "/platea";
     private final String instancesPath = basePath + "/instances/";
@@ -15,14 +18,14 @@ public class Config {
     private Config() {
     } 
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         ProcessBuilder builder = new ProcessBuilder();
         
         String[] setEnv = {"/bin/sh", "-c", "export PLATEA_BASE_PATH=" + Config.getConfig().basePath()};
         builder.command(setEnv);
     }
  
-    public static synchronized Config getConfig() throws Exception {
+    public static synchronized Config getConfig() {
         if (config == null) {
             config = new Config();
         }
@@ -59,5 +62,9 @@ public class Config {
 
     public String dockerURL() {
         return this.dockerURL;
+    }
+
+    public Dotenv getEnv() {
+        return env;
     }
 }

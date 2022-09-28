@@ -1,33 +1,81 @@
 package alo;
 
 import java.net.http.HttpResponse;
+import java.util.HashMap;
 
-public class Image implements IDockerController{
-    private final String id;
-    private final Instance instance; //get instance by instancename (label)
-    private final String name;
-    private String uri;
+import org.json.simple.JSONObject;
 
-    Image(String id, String name, Instance instance) {
-        this.id = id;
-        this.name = name;
-        this.instance = instance;
+public class Image implements IEntity{
+    private static String name;
+    private static Instance instance;
+    private static String uri;
+
+    Image(String name, Instance instance, String uri) throws Exception {
+        Image.name = name;
+        Image.instance = instance;
+        Image.uri = uri;
+
+        String id = Database.getDatabase().getImage(this);
+
+        if (id.isEmpty()) {
+            create();            
+            Database.getDatabase().insertImage(this);
+        }
     }
 
-    public HttpResponse buildRemote() throws Exception {
-        return Images.buildRemote(name, instance.getName(), uri);
+    private HttpResponse create() throws Exception {
+        // Create image from remote repository
+        HashMap<String, String> labels = new HashMap<String, String>();
+        labels.put("service", "platea");
+        labels.put("instance", instance.getName());
+        String jsonLabels = new JSONObject(labels).toJSONString();
+
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("t", name);
+        params.put("remote", uri);
+        params.put("labels", jsonLabels);
+
+        return
+            Docker.post("build", "",
+            params,
+            Client.getClient().noBody(),
+            "application/x-www-form-urlencoded");
     }
 
     public HttpResponse inspect() throws Exception {
-        return Images.inspect(id);
+        return
+            Docker.get("images", name, Client.getClient().noParameters());
     }
 
-    public HttpResponse delete() throws Exception {
-        return Images.delete(name, "true");
+    public HttpResponse delete(String force) throws Exception {
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("force", force);
+
+        Database.getDatabase().deleteImage(this);
+
+        return
+            Docker.delete("images", name, params);
     }
 
-    public String getId() {
-        return id;
+    public static HttpResponse list() throws Exception {
+        HashMap<String,String> params = new HashMap<>();
+        params.put("all", "true");
+        if(instance.getName().isEmpty()) {
+            params.put("filters", "{\"label\":[\"instance\"]}");
+        }
+        else {
+            params.put("filters", String.format("{\"label\":[\"instance=%s\"]}", instance.getName()));
+        }
+        return
+            Docker.get("images", "", params);
+    }
+
+    public static HttpResponse prune() throws Exception {
+        return 
+            Docker.post("/images/prune", "",
+            Client.getClient().noParameters(),
+            Client.getClient().noBody(),
+            "application/x-www-form-urlencoded");
     }
 
     public Instance getInstance() {

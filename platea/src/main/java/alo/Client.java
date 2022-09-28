@@ -1,6 +1,8 @@
 package alo;
 
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -20,24 +22,42 @@ public class Client {
     
     private static Client client;
 
-    private Client() throws Exception {
+    private Client() {
         httpClient = HttpClient.newHttpClient();
         // Map Unix socket to tcp address
         String[] cmd = {"/bin/sh", "-c", "socat -v tcp-l:2375,reuseaddr unix:/var/run/docker.sock"};
-        new ProcessBuilder()
-        //.inheritIO()
-        .command(cmd)
-        .start();
+        try {
+            new ProcessBuilder()
+            //.inheritIO()
+            .command(cmd)
+            .start();
+        } 
+        
+        catch (SecurityException e) {
+            System.out.println("Could not create subprocess");
+        }
+
+        catch (IOException e) {
+            System.out.println("I/O error");
+        }
+
+        catch (Exception e) {
+            System.out.println("A shell error occurred");
+        }
     } 
- 
-    public static synchronized Client getClient() throws Exception {
+
+
+
+    public static synchronized Client getClient() {
         if (client == null) {
             client = new Client();
         }
         return client;
     }
 
-    public URI uriBuilder(String path, Map<String, String> params) throws Exception{
+    public URI uriBuilder(String path, Map<String, String> params) {
+        URI tmp = null;
+
         URIBuilder builder = new URIBuilder();
         builder.setScheme("http").setHost(Config.getConfig().dockerURL()).setPath(path);
 
@@ -45,7 +65,15 @@ public class Client {
             builder.setParameter(pair.getKey(), pair.getValue());
         }
 
-        return builder.build();
+        try {
+            tmp = builder.build();
+        }
+
+        catch (URISyntaxException e) {
+            System.out.println("Could not build URI");
+        }
+
+        return tmp;
     }
 
     public HttpRequest get(URI uri) {
