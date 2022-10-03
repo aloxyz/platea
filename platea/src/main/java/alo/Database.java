@@ -39,7 +39,7 @@ public class Database {
         return database;
     }
 
-    public boolean instanceHandler(Instance instance) {
+    public boolean getInstance(String instanceName) throws Exception {
         /*
          * Returns true if exists in database, else return false
          */
@@ -47,19 +47,32 @@ public class Database {
         PreparedStatement p;
         ResultSet rs;
 
-        boolean next = false;
+        query = "SELECT * FROM instances WHERE name = ?";
+        p = connection.prepareStatement(query);
+        p.setString(1, instanceName);
+        rs = p.executeQuery();
+        return rs.next();
+
+    }
+
+    public void instanceHandler(Instance instance) {
+        /*
+         * Returns true if exists in database, else return false
+         */
+        String query;
+        PreparedStatement p;
+        ResultSet rs;
 
         try {
             query = "SELECT 1 FROM instances WHERE name = ?";
+
             p = connection.prepareStatement(query);
+            
             p.setString(1, instance.getName());
     
             rs = p.executeQuery();
-    
-            next = rs.next();
 
-            if (next == false) {
-    
+            if (!rs.next()) {
                 query = "INSERT INTO instances (name) VALUES (?)";
                 p = connection.prepareStatement(query);
                 p.setString(1, instance.getName());
@@ -70,9 +83,6 @@ public class Database {
         catch (SQLException e) {
             System.out.println("Database error");
         }
-
-        return next;
-
     }
 
     public String getContainer(Container container) throws Exception {
@@ -137,10 +147,9 @@ public class Database {
         PreparedStatement p;
         ResultSet rs;
 
-        query = "INSERT INTO images (name, instance) VALUES (?, ?)";
+        query = "INSERT INTO images (name) VALUES (?)";
         p = connection.prepareStatement(query);
         p.setString(1, image.getName());
-        p.setString(2, image.getInstance().getName());
 
         p.executeUpdate();
 
@@ -206,6 +215,7 @@ public class Database {
 
         catch (SQLException e) {
             System.out.println("Database error");
+            e.printStackTrace();
         }
     }
 

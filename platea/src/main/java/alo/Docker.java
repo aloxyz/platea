@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class Docker {
 
-    public static HttpResponse get(String endpoint, String id, Map<String, String> params) throws Exception {
+    public static HttpResponse get(String endpoint, String id, Map<String, String> params) {
         //System.out.println("GET: "+String.format("/%s/%s", endpoint, id));
         if (!id.isEmpty()) {
             return
@@ -25,7 +25,7 @@ public class Docker {
         }   
     }
 
-    public static HttpResponse post(String endpoint, String id, Map<String, String> parameters, BodyPublisher body, String headers) throws Exception {
+    public static HttpResponse post(String endpoint, String id, Map<String, String> parameters, BodyPublisher body, String headers) {
         //System.out.println("POST: "+String.format("/%s/%s", endpoint, id));
         if (!id.isEmpty()) {
             return
@@ -44,7 +44,7 @@ public class Docker {
         }
     }
 
-    public static HttpResponse delete(String endpoint, String id, Map<String, String> parameters) throws Exception {
+    public static HttpResponse delete(String endpoint, String id, Map<String, String> parameters) {
         //System.out.println("DELETE: "+String.format("/%s/%s", endpoint, id));
         return 
             Client.getClient()

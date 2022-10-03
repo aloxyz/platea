@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -53,19 +54,26 @@ public class FileIO {
         }
     }
 
-    public static File makeTar(String src, String dest, String name) throws Exception {
+    public static File makeTar(String src, String dest, String name) {
         File source = new File(src);
         File destination = new File(dest);
+        File tmp = null;
 
         Archiver archiver = 
             ArchiverFactory.createArchiver(
                 ArchiveFormat.TAR, CompressionType.GZIP);
         
-        return 
-        archiver.create(name, destination, source);
+        try {
+            tmp = archiver.create(name, destination, source);
+        }
+        catch(IOException e) {
+            System.out.println("Could not create tarball");
+        }
+
+        return tmp;
     }
 
-    public static void extractArchive(String archivePath, String destinationPath) throws Exception {
+    public static void extractArchive(String archivePath, String destinationPath){
         File archive = new File(archivePath);
         File destination = new File(destinationPath);
     
@@ -73,7 +81,14 @@ public class FileIO {
         ArchiverFactory
         .createArchiver(ArchiveFormat.ZIP);
 
-        archiver.extract(archive, destination);
+        try {
+            archiver.extract(archive, destination);
+        }
+
+        catch(IOException e) {
+            System.out.println("Could not extract the zip archive");
+        }
+
     }
 
 

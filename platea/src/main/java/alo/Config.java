@@ -4,12 +4,16 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 public class Config {
     private static Config config;
-    private final Dotenv env = Dotenv.load();
     private final String configPath = System.getenv("HOME") + ".platearc";
     private final String basePath = System.getenv("XDG_CONFIG_HOME") + "/platea";
     private final String instancesPath = basePath + "/instances/";
     private final String containersPath = basePath + "/containers/";
     private final String scriptsPath = basePath + "/scripts/";
+    Dotenv env = Dotenv.configure()
+    .directory(basePath + "/.env")
+    .ignoreIfMalformed()
+    .ignoreIfMissing()
+    .load();
 
     private final String remoteRepositoryURL = "git@gitlab.com:aloxyz/platea-configs.git";
     private final String databaseURL = "http://localhost:3000/instances";

@@ -1,38 +1,34 @@
 package alo;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
-
-import java.io.File;
 import java.net.http.HttpResponse;
 import java.nio.file.Paths;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-
 
 public class Instance {
     private String name;
     private ArrayList<Container> containers;
     private ArrayList<Image> images;
-    private final JSONObject config;
+    private JSONObject config;
 
     @SuppressWarnings("unchecked")
     Instance(String configPath) throws Exception {
-        this.config = JSONController.fileToJsonObject(Paths.get(configPath).toString());
+        try {
+            this.config = JSONController.fileToJsonObject(Paths.get(configPath).toString());
+        }
+        catch (Exception e) {
+            System.out.println("Could not parse config file: either wrong instance name or wrong syntax");
+        }
         this.name = config.get("instanceName").toString();
-
-        Database.getDatabase().instanceHandler(this);
-
-        JSONObject containers = (JSONObject)config.get("containers");
 
         this.containers = new ArrayList<>();
         this.images = new ArrayList<>();
+
+        JSONObject containers = (JSONObject)config.get("containers");
 
         containers.keySet().forEach(key -> {
             try {
@@ -40,118 +36,79 @@ public class Instance {
                 JSONObject container = (JSONObject) value;                
                 JSONObject buildConfig = (JSONObject)container.get("config");
 
+
                 String tmp = buildConfig.get("Image").toString();
                 String name = tmp.substring(0, tmp.lastIndexOf(":"));
 
                 String uri = container.get("endpoint").toString();
 
-
-                System.out.println(key.toString());
-                System.out.println(container.toJSONString());
-                System.out.println(buildConfig.toJSONString());
-                System.out.println(tmp);
-                System.out.println(name);
-                System.out.println(uri);
-
                 this.images.add(new Image(name, this, uri));
                 this.containers.add(new Container(name, this, buildConfig));
 
-
-            } catch (Exception e) {e.printStackTrace();}
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
         });
     }
+
+    
+    public void buildInstance() {
+        Database.getDatabase().instanceHandler(this);
+
+        for (Image i : images) {
+            try {
+                System.out.println("Building image " + ConsoleColors.YELLOW_BOLD_BRIGHT + i.getName() + ConsoleColors.RESET + "...");
+                i.create();
+            }
+            catch (Exception e) {
+                System.out.println("Could not build image " + i.getName());
+            }
+        }
+
+        for (Container c : containers) {
+            try {
+                System.out.println("Creating container " + ConsoleColors.YELLOW_BOLD_BRIGHT + c.getName() + ConsoleColors.RESET + "...");
+                c.create();
+            }
+            catch (Exception e) {
+                System.out.println("Could not create container " + c.getName());
+            }
+        }
+    }
+
+    public ArrayList<Container> getContainers() {
+        return containers;
+    }
+
+
+    public ArrayList<Image> getImages() {
+        return images;
+    }
+
 
     public void setName(String name) {
         this.name = name;
     }
 
-    public static void fetchRemote() throws Exception {
-        String instancesPath = Config.getConfig().instancesPath();
-
-        ProcessBuilder builder = new ProcessBuilder();
-        System.out.println("Fetching...");
-        // builder.inheritIO(); // Inherit stdout
-        if (! new File(instancesPath).exists()) {
-            // clone platea-configs repository in configs/
-            String[] gitClone = {"/bin/sh", "-c", "git clone " + Config.getConfig().remoteRepositoryURL() + " " + instancesPath};
-            builder.command(gitClone);
-        
-        } else {
-            String[] gitPull = {"/bin/sh", "-c", "cd " + instancesPath + " && git pull"};
-            builder.command(gitPull);
-        }
-        
-        Process p = builder.start();
-        p.waitFor(20, TimeUnit.SECONDS);
-        System.out.println("Done");
-
-        // DOWNLOADING TAR FROM REPO DOESN'T WORK, HTTP ERROR 406
-        /*
-        // Download configs archive
-        FileIO.wget(this.configRepository, "tmp/configs.tar.gz");
-
-        // Extract archive
-        FileIO.extractTarball("tmp/configs.tar.gz", "tmp/");
-        new File("tmp/configs.tar.gz").delete();
-        new File("tmp/pax_global_header").delete();
-
-        ArrayList<String> instances = new ArrayList<String>();
-        */
-    }
-
-    public static ArrayList<String> listRemote() throws Exception {
-        String instancesPath = Config.getConfig().instancesPath();
-
-        if (! new File(instancesPath).exists()) {
-            fetchRemote();
-        }
-
-        ArrayList<String> instances = new ArrayList<String>();
-
-        // populate instances String Arraylist
-        for (File f : Objects.requireNonNull(new File(instancesPath).listFiles())) {    // go through all jsons
-            if (!f.getName().equals(".git") && f.getName().endsWith(".json")) {
-                instances.add(f.getName());
-            }
-            /*
-            if (f.getName() != ".git" && f.getName().endsWith(".json")) {
-                String instance = FileIO.readFile(f.getAbsolutePath());             // read json content
-                
-                JSONArray arr = new JSONArray(instance);                            // go through the json
-                for (int i = 0; i < arr.length(); i++) {
-                    JSONObject obj = new JSONArray(instance).getJSONObject(i);
-                    instances.add(
-                        obj.getString("platea_service_name"));                  // add the instance name to the ArrayList
-                }
-            }
-             */
-        }
-        return instances;
-    }
-
-    public static ArrayList<String> listRunning() throws Exception {
-        /*
-         * Returns an ArrayList of running containers IDs
-         */
-        String containersString = Container.list("running").body().toString();
-        JSONArray containers = (JSONArray)JSONValue.parse(containersString);
-        
-        ArrayList<String> tmp = new ArrayList<>();
-
-        for (JSONObject container : JSONController.JSONArrayToList(containers)) {
-            tmp.add(container.get("Id").toString());
-        }
-
-        return tmp;
-    }
-
     public ArrayList<Map> delete() throws Exception {
         ArrayList<Map> responses = new ArrayList<>();
-
-        responses.add(deleteContainers());
-        responses.add(deleteImages());
-
-        Database.getDatabase().deleteInstance(this);
+        
+        if (Database.getDatabase().getInstance(this.name)) {
+            try {
+                responses.add(deleteContainers());
+                responses.add(deleteImages());
+                Database.getDatabase().deleteInstance(this);
+                System.out.println("Removed instance " + ConsoleColors.RED_BOLD_BRIGHT + this.name + ConsoleColors.RESET);
+            }
+            catch (NullPointerException e) {
+                e.printStackTrace();
+            }
+        
+        } 
+        else {
+            System.out.println("Instance does not exist or has not been yet created");
+        }
 
         return responses;
     }
@@ -161,6 +118,29 @@ public class Instance {
 
         for (Container c : containers) {
             responses.put(c.getId(), c.delete("true"));
+            System.out.println("Deleted container " + ConsoleColors.RED_BOLD_BRIGHT + c.getName() + ConsoleColors.RESET);
+        }
+
+        return responses;
+    }
+
+    
+    public Map<String, HttpResponse> createImages() throws Exception {
+        HashMap<String, HttpResponse> responses = new HashMap<>();
+
+        for (Image i : images) {
+            System.out.println("Building image " + ConsoleColors.YELLOW_BOLD_BRIGHT + i.getName() + ConsoleColors.RESET + "...");
+            responses.put(i.getName(), i.create());
+        }
+
+        return responses;
+    }
+
+    public Map<String, HttpResponse> createContainers() throws Exception {
+        HashMap<String, HttpResponse> responses = new HashMap<>();
+
+        for (Container c : containers) {
+            responses.put(c.getName(), c.create());
         }
 
         return responses;
@@ -171,26 +151,30 @@ public class Instance {
 
         for (Image i : images) {
             responses.put(i.getName(), i.delete("true"));
+            System.out.println("Deleted image " + ConsoleColors.RED_BOLD_BRIGHT + i.getName() + ConsoleColors.RESET);
         }
 
         return responses;
     }
 
-    public Map<String, HttpResponse> startContainers() throws Exception {
+    public Map<String, HttpResponse> startContainers() {
         HashMap<String, HttpResponse> responses = new HashMap<>();
 
         for (Container c : containers) {
             responses.put(c.getId(), c.start());
+            System.out.println("Started container " + ConsoleColors.YELLOW_BRIGHT + c.getName() + ConsoleColors.RESET);
         }
 
         return responses;
     }
 
-    public Map<String, HttpResponse> stopContainers() throws Exception {
+    public Map<String, HttpResponse> stopContainers() {
         HashMap<String, HttpResponse> responses = new HashMap<>();
 
         for (Container c : containers) {
             responses.put(c.getId(), c.stop());
+            System.out.println("Stopped container " + ConsoleColors.RED_BRIGHT + c.getName() + ConsoleColors.RESET);
+
         }
 
         return responses;

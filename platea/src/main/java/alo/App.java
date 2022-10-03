@@ -7,10 +7,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class App {
-    static private HashMap<String, String> helpMessages;
-    static private JSONObject config;
-    static private final ArrayList<String> singleCommands = new ArrayList<>();
-    static private final ArrayList<String> argCommands = new ArrayList<>();
+    private static HashMap<String, String> helpMessages;
+    private static JSONObject config;
+    private static ArrayList<String> singleCommands = new ArrayList<>();
+    private static ArrayList<String> argCommands = new ArrayList<>();
+    private static Instance instance;
+
 
     private static void helpMessage() {
         System.out.println(
@@ -56,6 +58,7 @@ public class App {
         singleCommands.add("ls");
         singleCommands.add("ps");
         
+        argCommands.add("create");
         argCommands.add("build");
         argCommands.add("start");
         argCommands.add("run");
@@ -92,19 +95,30 @@ public class App {
                     break;
 
                 case "fetch":
-                    Instance.fetchRemote();
+                    Instances.fetchRemote();
                     break;
     
                 case "ls":
-                    System.out.println(
-                        Instance.listRemote()
-                    );
+                    System.out.println(ConsoleColors.BLUE_BOLD_BRIGHT + "Available instances\n" + ConsoleColors.RESET);
+                    for (String i : Instances.listRemote()) {
+                        System.out.println(i);
+                    }
                     break;
     
                 case "ps":
-                    System.out.println(
-                        Instance.listRunning()
-                    );
+                    System.out.println(ConsoleColors.WHITE_BOLD + "Running instances\n" + ConsoleColors.RESET);
+                    
+                    ArrayList<String> running = Instances.listRunning();
+                    if (running.size() <= 0) {
+                        System.out.println(ConsoleColors.RED_BRIGHT + "No running platea instances" + ConsoleColors.RESET);
+                    }
+                    else {
+                        System.out.println(ConsoleColors.BLUE_BOLD_BRIGHT +"Service\t\t\t\tInstance" + ConsoleColors.RESET);
+                        for (String c : running) {
+                            System.out.println(c);
+                        }
+                    }
+
                     break;
                 }
             return;
@@ -112,39 +126,47 @@ public class App {
 
         if (args.length == 2 && argCommands.contains(command)) {
             String instanceName = args[1];
-            
+            boolean inDB = Database.getDatabase().getInstance(instanceName);
 
-            if(command.equals("create") && !instanceName.isEmpty()) {
-                // TODO check if instance already exists
-
-
-                // Load instance
-
-                // Create instance
+            if(!instanceName.isEmpty()) {
                 String configPath = new File(
                     Config.getConfig().instancesPath() + instanceName + ".json")
                     .getAbsolutePath();
 
-                
-                Instance instance = new Instance(configPath);
-            
-            switch(command) {
-                    
-                case "start":
-                    instance.startContainers();
-                    break;
+                    instance = new Instance(configPath);
+            }
 
-                case "stop":
-                    instance.stopContainers();
-                    break;
+            try {
+                if (!inDB && command.equals("create")) {   
+                    instance.buildInstance();
+                }
 
-                case "rm":
-                    instance.deleteContainers();
-                    instance.deleteImages();
-                    break;
-            
+                else if (inDB) {
+                    switch(command) {                    
+                        case "start":
+                            instance.startContainers();
+                            break;
+
+                        case "stop":
+                            instance.stopContainers();
+                            break;
+
+                        case "rm":
+                            instance.delete();
+                            break;
+                    }
+                }
+                else {
+                    System.out.println("Instance is not initialized");
                 }
             }
+            catch (Exception e) {
+                System.out.println("Error while referencing instance");
+                e.printStackTrace();
+            }
+       
         }
     }
 }
+
+

@@ -9,8 +9,7 @@
         name varchar(255) UNIQUE NOT NULL,
         creation_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-        PRIMARY KEY (name),
-        FOREIGN KEY (instance) REFERENCES instances(name)
+        PRIMARY KEY (name)
     );
 
     CREATE TABLE containers (

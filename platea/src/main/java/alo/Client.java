@@ -46,8 +46,6 @@ public class Client {
         }
     } 
 
-
-
     public static synchronized Client getClient() {
         if (client == null) {
             client = new Client();
@@ -101,21 +99,23 @@ public class Client {
             .build();
     }
 
-    public HttpResponse getResource(String path, Map<String, String> params) throws Exception{
+    public HttpResponse getResource(String path, Map<String, String> params) {
         return
-        sendRequest(
-            get(uriBuilder(path, params)), 
-            BodyHandlers.ofString());
+            sendRequest(
+                get(uriBuilder(path, params)), 
+                BodyHandlers.ofString());
+
+
     }
 
-    public HttpResponse postResource(String path, Map<String, String> params, BodyPublisher body, String headers) throws Exception {
+    public HttpResponse postResource(String path, Map<String, String> params, BodyPublisher body, String headers) {
         return
         sendRequest(
             post(uriBuilder(path, params), body, headers),
             BodyHandlers.ofString());
     }
 
-    public HttpResponse deleteResource(String path, Map<String, String> params) throws Exception {
+    public HttpResponse deleteResource(String path, Map<String, String> params) {
         return
         sendRequest(delete(uriBuilder(path, params)),
         BodyHandlers.ofString());
@@ -129,9 +129,21 @@ public class Client {
         return HttpRequest.BodyPublishers.noBody();
     }
 
-    public HttpResponse sendRequest(HttpRequest method, BodyHandler bHandler) throws Exception {
-        return
-        this.httpClient
-        .send(method, bHandler);
+    public HttpResponse sendRequest(HttpRequest method, BodyHandler bHandler) {
+        HttpResponse tmp = null;
+        try {
+            tmp =
+                this.httpClient
+                .send(method, bHandler);
+        }
+
+        catch (InterruptedException e) {
+            System.out.println("Request process was interrupted");
+        }
+
+        catch (IOException e) {
+            System.out.println("I/O error");
+        }
+        return tmp;
     }
 }

@@ -2,6 +2,7 @@ package alo;
 
 import org.json.simple.JSONObject;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
@@ -9,50 +10,18 @@ import java.util.HashMap;
 
 
 public class Container implements IEntity {
-    private static String id;
-    private static String name;
-    private static Instance instance;
-    private static JSONObject config;
+    private String id;
+    private String name;
+    private Instance instance;
+    private JSONObject config;
 
     Container(String name, Instance instance, JSONObject config) throws Exception {
-        Container.name = name;
-        Container.instance = instance;
-        Container.config = config;
-
-        String id = Database.getDatabase().getContainer(this);
-        if (id.isEmpty()) {
-            JSONObject createContainerResponse = 
-                JSONController.stringToJSONObject(create().body().toString());
-    
-            Container.id = createContainerResponse.get("Id").toString();
-
-            Database.getDatabase().insertContainer(this);
-        } else {
-            Container.id = id;
-        }
-
-
+        this.name = name;
+        this.instance = instance;
+        this.config = config;
     }
 
-    public static HttpResponse list(String status) throws Exception {
-        HashMap<String,String> params = new HashMap<>();
-        params.put("all", "true");
-        if(instance.getName().isEmpty()) {
-            params.put("filters", "{\"label\":[\"instance\"]}");
-        }
-        else {
-            params.put("filters", String.format("{\"label\":[\"instance=%s\"]}", instance.getName()));
-        }
-        if(!status.isEmpty()) {
-            params.put("filters", String.format("{\"status\": [\"%s\"]}", status));
-        }
-
-
-        return 
-            Docker.get("containers", "", params);
-    }
-
-    private HttpResponse create() throws Exception {
+    public HttpResponse create() throws Exception {
         HashMap<String, String> labels = new HashMap<String, String>();
         labels.put("service", "platea");
         labels.put("instance", instance.getName());
@@ -63,18 +32,51 @@ public class Container implements IEntity {
         params.put("name", name);
         params.put("labels", jsonLabels);
         
-        String body =
-            new ObjectMapper().writeValueAsString(config);
+        String body = null;
 
-        return
-            Docker.post("containers/create", "",
-            params,
-            BodyPublishers.ofString(body),
-            "application/json;charset=UTF-8"
-            );
+        try {
+        body =
+            new ObjectMapper().writeValueAsString(config);
+        }
+
+        catch (JsonProcessingException e) {
+            System.out.println("Could not process JSON");
+        }
+
+        String id = Database.getDatabase().getContainer(this);
+
+        HttpResponse createContainerResponse = null;
+        try {
+            if (id.isEmpty()) {
+                createContainerResponse =
+                    Docker.post("containers/create", "",
+                    params,
+                    BodyPublishers.ofString(body),
+                    "application/json;charset=UTF-8"
+                    );
+
+                JSONObject createContainerJsonObject = 
+                    JSONController.stringToJSONObject(createContainerResponse.body().toString());
+
+                System.out.println(createContainerJsonObject.get("message"));
+
+                this.id = createContainerJsonObject.get("Id").toString();
+    
+                Database.getDatabase().insertContainer(this);
+
+            } else {
+                this.id = id;
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Container " + name + " is not initialized");
+        }
+
+        return createContainerResponse;
     }
 
-    public HttpResponse inspect() throws Exception {
+    public HttpResponse inspect() {
         HashMap<String,String> params = new HashMap<>();
         params.put("filters", "{\"label\":[\"instance\"]}");
 
@@ -85,37 +87,39 @@ public class Container implements IEntity {
     public HttpResponse delete(String force) throws Exception {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("force", force);
-
         Database.getDatabase().deleteContainer(this);
         
-        return
-            Docker.delete("containers", id, params);
+        HttpResponse deleteContainerResponse = Docker.delete("containers", this.id, params);
+        
+        System.out.println(deleteContainerResponse.body().toString());
+        return deleteContainerResponse;
+            
     }
 
-    public HttpResponse start() throws Exception {
-        return
-            Docker.post("containers", id + "/start",
-            Client.getClient().noParameters(),
-            Client.getClient().noBody(),
-            "application/json;charset=UTF-8"
-            );
+    public HttpResponse start() {
+        HttpResponse tmp = null;
+        try {
+            if (!Database.getDatabase().getContainer(this).isEmpty()) {
+                tmp =
+                    Docker.post("containers", id + "/start",
+                    Client.getClient().noParameters(),
+                    Client.getClient().noBody(),
+                    "application/json;charset=UTF-8"
+                    );
+            }
+        } catch (Exception e) {
+            System.out.println("Container does not exist or has not been initialized");
+        }
+        return tmp;
     }
 
-    public HttpResponse stop() throws Exception {
+    public HttpResponse stop() {
         return
             Docker.post("containers", id  + "/stop",
             Client.getClient().noParameters(),
             Client.getClient().noBody(),
             "application/json;charset=UTF-8"
             );
-    }
-
-    public static HttpResponse prune() throws Exception {
-        return 
-        Docker.post("/containers/prune", "",
-        Client.getClient().noParameters(),
-        Client.getClient().noBody(),
-        "application/x-www-form-urlencoded");
     }
 
     public String getId() {
@@ -127,19 +131,19 @@ public class Container implements IEntity {
     }
 
     public void setId(String id) {
-        Container.id = id;
+        this.id = id;
     }
 
     public void setName(String name) {
-        Container.name = name;
+        this.name = name;
     }
 
     public void setInstance(Instance instance) {
-        Container.instance = instance;
+        this.instance = instance;
     }
 
     public void setConfig(JSONObject config) {
-        Container.config = config;
+        this.config = config;
     }
 
     public Instance getInstance() {

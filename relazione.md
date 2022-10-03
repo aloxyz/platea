@@ -6,19 +6,19 @@ L'applicativo consiste nel provisioning automatico di container grazie a dei fil
 ```
 {
     instanceName: string
-    containers {
-        container1 {
+    containers: {
+        container1: {
             endpoint: string
-            config {
+            config: {
                 <Docker container configuration file>
             }
         },
 
-        container2 {
+        container2: {
             ...
         },
         
-        containerN {
+        containerN: {
             ...
         }
     }

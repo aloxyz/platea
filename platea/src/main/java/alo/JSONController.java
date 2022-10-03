@@ -1,7 +1,9 @@
 package alo;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.ParseException;
 import java.util.ArrayList;
 
 import org.json.simple.JSONArray;
@@ -17,7 +19,10 @@ public class JSONController {
 
     public static JSONObject fileToJsonObject(String path) throws Exception {
         return
-        (JSONObject) new JSONParser().parse(Files.readString(Paths.get(path)));
+            (JSONObject) new JSONParser().parse(Files.readString(Paths.get(path)));
+
+
+
     }
 
     public static ArrayList<JSONObject> JSONArrayToList(JSONArray jsonArray) {
