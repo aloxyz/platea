@@ -1,4 +1,4 @@
-package alo;
+package platea;
 
 
 import org.junit.FixMethodOrder;
@@ -20,7 +20,7 @@ public class Tests {
     @Test
     public void main() throws Exception {
         String[] args = {"ps"};
-        App.main(args);
+        Main.main(args);
     }
 
     /*

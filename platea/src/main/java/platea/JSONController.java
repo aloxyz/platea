@@ -1,9 +1,7 @@
-package alo;
+package platea;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.ParseException;
 import java.util.ArrayList;
 
 import org.json.simple.JSONArray;

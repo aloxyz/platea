@@ -1,7 +1,8 @@
-package alo;
+package platea;
 
 public class DBException extends Exception {
-    
+
+
     public DBException(String errorMessage) {
         super(errorMessage);
     }

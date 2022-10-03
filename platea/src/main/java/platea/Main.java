@@ -1,4 +1,4 @@
-package alo;
+package platea;
 
 import org.json.simple.JSONObject;
 
@@ -6,7 +6,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class App {
+public class Main {
     private static HashMap<String, String> helpMessages;
     private static JSONObject config;
     private static ArrayList<String> singleCommands = new ArrayList<>();

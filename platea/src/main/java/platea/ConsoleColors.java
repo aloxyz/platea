@@ -1,4 +1,4 @@
-package alo;
+package platea;
 
 public class ConsoleColors {
     // Reset

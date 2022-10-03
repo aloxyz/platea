@@ -81,7 +81,7 @@
                         </descriptorRefs>
                         <archive>
                             <manifest>
-                                <mainClass>alo.App</mainClass>
+                                <mainClass>platea.Main</mainClass>
                             </manifest>
                         </archive>
                     </configuration>

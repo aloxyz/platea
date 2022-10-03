@@ -1,4 +1,4 @@
-package alo;
+package platea;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
