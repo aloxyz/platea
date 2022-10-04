@@ -7,6 +7,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import platea.exceptions.DatabaseException;
+import platea.exceptions.DatabaseInsertContainerException;
 
 public class Database {
     private static Database database;
@@ -120,8 +122,8 @@ public class Database {
         return "";
     }
 
-    public String insertContainer(Container container) throws DatabaseException {
-        if (container == null) throw new DatabaseException("Container cannot be null");
+    public String insertContainer(Container container) throws DatabaseInsertContainerException {
+        if (container == null) throw new DatabaseInsertContainerException("Container cannot be null");
 
         String query;
         PreparedStatement p;
@@ -146,7 +148,7 @@ public class Database {
 
         } catch (SQLException e) {
             String state = e.getSQLState();
-            if (state.equals("unique_violation")) throw new DatabaseException("Container already exists in database");
+            if (state.equals("unique_violation")) throw new DatabaseInsertContainerException("Container already exists in database");
         }
 
         return "";

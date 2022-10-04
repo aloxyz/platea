@@ -1,4 +1,4 @@
-package platea;
+package platea.exceptions;
 
 public class DatabaseException extends Exception {
     public DatabaseException() {

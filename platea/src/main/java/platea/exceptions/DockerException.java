@@ -1,4 +1,4 @@
-package platea;
+package platea.exceptions;
 
 public class DockerException extends Exception {
     public DockerException() {

@@ -4,6 +4,7 @@ import org.json.simple.JSONObject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import platea.exceptions.DockerException;
 
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
