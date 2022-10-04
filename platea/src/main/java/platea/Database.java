@@ -8,20 +8,19 @@ import java.sql.*;
 public class Database {
     private static Database database;
     private Connection connection;
-    private String url;
-    private String user;
-    private String password;
 
     Database() {
         try {
             Dotenv dotenv = Config.getConfig().getEnv();
-            url = dotenv.get("POSTGRES_URL");
-            user = dotenv.get("POSTGRES_USER");
-            password = dotenv.get("POSTGRES_PASSWORD");
+            String url = dotenv.get("POSTGRES_URL");
+            String user = dotenv.get("POSTGRES_USER");
+            String password = dotenv.get("POSTGRES_PASSWORD");
 
             connection = DriverManager.getConnection(url, user, password);
+
         } catch (SQLException e) {
-            System.out.println(": Cannot connect to database");
+            System.out.println("Cannot connect to database: " + e.getMessage());
+            System.exit(1);
         }
 
     }
@@ -34,7 +33,7 @@ public class Database {
     }
 
     public String insertInstance(Instance instance) throws DatabaseInsertInstanceException {
-        if (container == null) throw new DatabaseInsertInstanceException("Instance cannot be null");
+        if (instance == null) throw new DatabaseInsertInstanceException("Instance cannot be null");
 
         String query;
         PreparedStatement p;
@@ -49,7 +48,7 @@ public class Database {
 
         } catch (DatabaseGetException e) {
             System.out.println(e.getMessage());
-            System.exit(0);
+            System.exit(1);
 
         } catch (SQLException e) {
             String state = e.getSQLState();
@@ -79,7 +78,7 @@ public class Database {
 
         } catch (DatabaseGetException e) {
             System.out.println(e.getMessage());
-            System.exit(0);
+            System.exit(1);
 
         } catch (SQLException e) {
             String state = e.getSQLState();
@@ -91,14 +90,13 @@ public class Database {
     }
 
     public String insertImage(Image image) throws DatabaseInsertImageException {
-        if (container == null) throw new DatabaseInsertImageException("Image cannot be null");
+        if (image == null) throw new DatabaseInsertImageException("Image cannot be null");
 
         String query;
         PreparedStatement p;
 
         try {
             query = "INSERT INTO images (name) VALUES (?)";
-            p = connection.prepareStatement(query);
             p = connection.prepareStatement(query);
             p.setString(1, image.getName());
 
@@ -108,7 +106,7 @@ public class Database {
 
         } catch (DatabaseGetException e) {
             System.out.println(e.getMessage());
-            System.exit(0);
+            System.exit(1);
 
         } catch (SQLException e) {
             String state = e.getSQLState();
@@ -139,6 +137,10 @@ public class Database {
     }
 
     public <S> ResultSet get(Class<S> clazz, String table) throws DatabaseGetException {
+        /*
+         * Returns a ResultSet of the record given a class
+         */
+        if (clazz == null) throw new DatabaseGetException("Object cannot be null");
         String query;
         PreparedStatement p;
         ResultSet rs;
@@ -167,6 +169,7 @@ public class Database {
         /*
          * Returns a String value of the specified column label
          */
+        if (clazz == null) throw new DatabaseGetException("Object cannot be null");
 
         String query;
         PreparedStatement p;

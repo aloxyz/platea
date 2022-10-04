@@ -77,6 +77,7 @@ public class Client {
     }
 
     public HttpRequest get(URI uri) {
+        /* Generic GET method */
         return
                 HttpRequest.newBuilder(uri)
                         .timeout(Duration.ofSeconds(10))
@@ -85,6 +86,7 @@ public class Client {
     }
 
     public HttpRequest post(URI uri, BodyPublisher body, String headers) {
+        /* Generic POST method */
         return
                 HttpRequest.newBuilder(uri)
                         .timeout(Duration.ofSeconds(10))
@@ -94,6 +96,7 @@ public class Client {
     }
 
     public HttpRequest delete(URI uri) {
+        /* Generic DELETE method */
         return
                 HttpRequest.newBuilder(uri)
                         .timeout(Duration.ofSeconds(10))
