@@ -1,18 +1,40 @@
 package platea;
 
 
+import org.json.simple.JSONObject;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
+import platea.exceptions.DatabaseDeleteException;
+import platea.exceptions.DatabaseGetException;
+
+import java.io.File;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class Tests {
 
     @Test
-    public void db() throws Exception {
-        //i.delete();
+    public void db() {
+        Database db = Database.getDatabase();
+        try {
+            String configPath = new File(
+                    Config.getConfig().instancesPath() + "lcarnevale" + ".json")
+                    .getAbsolutePath();
 
+            Instance i = new Instance(configPath);
+
+            db.get(Instance.class, "instances", "name");
+            db.get(Container.class, "containers", "id");
+            db.get(Image.class, "images", "name");
+
+            db.delete(Instance.class, "instances");
+            db.delete(Container.class, "containers");
+            db.delete(Image.class, "images");
+
+        } catch (DatabaseGetException | DatabaseDeleteException e) {
+            e.printStackTrace();
+        }
     }
 
 
