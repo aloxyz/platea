@@ -2,6 +2,7 @@ package platea;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
+import platea.exceptions.DatabaseConnectionException;
 import platea.exceptions.DatabaseGetException;
 import platea.exceptions.DatabaseInsertInstanceException;
 
@@ -47,27 +48,32 @@ public class Instance {
         }
     }
 
+    public void buildInstance() throws DatabaseConnectionException {
+        Database db = Database.getDatabase();
 
-    public void buildInstance() {
         try {
-            if (Database.getDatabase().get(Instance.class, "instances", "name").isEmpty()) {
-                Database.getDatabase().insertInstance(this);
-            }
-
+            // Images
             for (Image i : images) {
                 System.out.printf("Building image %s%s%s...%n", ConsoleColors.YELLOW_BOLD_BRIGHT, i.getName(), ConsoleColors.RESET);
                 i.create();
+                db.controlledInsert(i, "images", "name");
             }
 
+            // Containers
             for (Container c : containers) {
                 System.out.printf("Creating container %s%s%s...%n", ConsoleColors.YELLOW_BOLD_BRIGHT, c.getName(), ConsoleColors.RESET);
                 c.create();
+                db.controlledInsert(c, "containers", "id");
             }
+
+            // Insert instance in DB
+            db.controlledInsert(this, "instances", "name");
+
+        } catch (DatabaseConnectionException | DatabaseInsertInstanceException e) {
+            System.out.println(e.getMessage());
+
         } catch (DatabaseGetException e) {
             System.out.printf("Could not find instance %s: %s%n", this.name, e.getMessage());
-
-        } catch (DatabaseInsertInstanceException e) {
-            System.out.println(e.getMessage());
         }
     }
 
@@ -163,11 +169,31 @@ public class Instance {
 
         for (Container c : containers) {
             responses.put(c.getId(), c.stop());
-            System.out.println("Stopped container " + ConsoleColors.RED_BRIGHT + c.getName() + ConsoleColors.RESET);
+            System.out.printf("Stopped container %s%s%s%n", ConsoleColors.RED_BRIGHT, c.getName(), ConsoleColors.RESET);
 
         }
 
         return responses;
+    }
+
+    public ArrayList<String> getContainerNames() {
+        ArrayList<String> tmp = new ArrayList<>();
+
+        for (Container c : containers) {
+            tmp.add(c.getName());
+        }
+
+        return tmp;
+    }
+
+    public ArrayList<String> getImageNames() {
+        ArrayList<String> tmp = new ArrayList<>();
+
+        for (Image i : images) {
+            tmp.add(i.getName());
+        }
+
+        return tmp;
     }
 
     public String getName() {

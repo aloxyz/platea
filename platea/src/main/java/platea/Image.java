@@ -1,15 +1,12 @@
 package platea;
 
 import org.json.simple.JSONObject;
-import platea.exceptions.CreateImageException;
-import platea.exceptions.DatabaseDeleteException;
-import platea.exceptions.DatabaseGetException;
-import platea.exceptions.DatabaseInsertImageException;
+import platea.exceptions.*;
 
 import java.net.http.HttpResponse;
 import java.util.HashMap;
 
-public class Image implements IEntity {
+public class Image {
     private final String name;
     private final Instance instance;
     private final String uri;
@@ -21,10 +18,10 @@ public class Image implements IEntity {
     }
 
     public HttpResponse create() throws CreateImageException {
-        // Create image from remote repository
-        Database db = Database.getDatabase();
-
+        /*Create image from remote repository*/
         try {
+            Database db = Database.getDatabase();
+
             // Setting labels
             HashMap<String, String> labels = new HashMap<>();
             labels.put("service", "platea");
@@ -37,9 +34,10 @@ public class Image implements IEntity {
             params.put("remote", uri);
             params.put("labels", jsonLabels);
 
-            String name = db.get(this.getClass(), "images", "name");
-            if (name.isEmpty()) db.insertImage(this);
+            // If image record not in database, insert into database
+            insert();
 
+            // Build image
             HttpResponse createImageResponse = Docker.post("build", "",
                     params,
                     Client.getClient().noBody(),
@@ -50,7 +48,7 @@ public class Image implements IEntity {
                 throw new CreateImageException();
             }
 
-        } catch (DatabaseInsertImageException | DatabaseDeleteException | DatabaseGetException e) {
+        } catch (DatabaseConnectionException | DatabaseDeleteException e) {
             System.out.println(e.getMessage());
         }
 
@@ -66,7 +64,7 @@ public class Image implements IEntity {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("force", force);
 
-        Database.getDatabase().deleteImage(this);
+        Database.getDatabase().delete(this.getClass(), "images");
         return
                 Docker.delete("images", name, params);
     }

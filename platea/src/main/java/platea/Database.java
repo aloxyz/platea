@@ -7,9 +7,9 @@ import java.sql.*;
 
 public class Database {
     private static Database database;
-    private Connection connection;
+    private final Connection connection;
 
-    Database() {
+    Database() throws DatabaseConnectionException {
         try {
             Dotenv dotenv = Config.getConfig().getEnv();
             String url = dotenv.get("POSTGRES_URL");
@@ -19,13 +19,12 @@ public class Database {
             connection = DriverManager.getConnection(url, user, password);
 
         } catch (SQLException e) {
-            System.out.println("Cannot connect to database: " + e.getMessage());
-            System.exit(1);
+            throw new DatabaseConnectionException(e.getSQLState());
         }
 
     }
 
-    public static synchronized Database getDatabase() {
+    public static synchronized Database getDatabase() throws DatabaseConnectionException {
         if (database == null) {
             database = new Database();
         }
@@ -136,6 +135,39 @@ public class Database {
 
     }
 
+    public void delete(String table, String condition) {
+        /* Delete from table given a condition
+         * example:
+         * delete("images", "name = string") */
+        String query;
+        PreparedStatement p;
+
+        try {
+            query = "DELETE FROM ? WHERE ?";
+            p = connection.prepareStatement(query);
+            p.setString(1, table);
+            p.setString(2, condition);
+
+            p.executeUpdate();
+
+        } catch (SQLException e) {
+            String state = e.getSQLState();
+            if (state.equals("undefined_table")) throw new DatabaseDeleteException("Table does not exist in database");
+        }
+    }
+
+    public void deleteAllFromInstance(Instance instance) {
+        for (String c : instance.getContainerNames()) {
+            delete("containers", "id = " + c);
+        }
+
+        for (String i : instance.getImageNames()) {
+            delete("images", "name = " + i);
+        }
+
+        delete(instance.getName(), "instances");
+    }
+
     public <S> ResultSet get(Class<S> clazz, String table) throws DatabaseGetException {
         /*
          * Returns a ResultSet of the record given a class
@@ -165,11 +197,11 @@ public class Database {
         return null;
     }
 
-    public <S> String get(Class<S> clazz, String table, String column) throws DatabaseGetException {
+    public String get(Object object, String table, String column) throws DatabaseGetException {
         /*
          * Returns a String value of the specified column label
          */
-        if (clazz == null) throw new DatabaseGetException("Object cannot be null");
+        if (object == null) throw new DatabaseGetException("Object cannot be null");
 
         String query;
         PreparedStatement p;
@@ -179,7 +211,7 @@ public class Database {
             query = "SELECT * FROM ? WHERE name = ?";
             p = connection.prepareStatement(query);
             p.setString(1, table);
-            p.setString(2, clazz.getName());
+            p.setString(2, object.getName());
 
             rs = p.executeQuery();
 
@@ -194,5 +226,35 @@ public class Database {
         }
 
         return "";
+    }
+
+    public String controlledInsert(Object object, String table, String column) {
+        /*If image record not in database, insert into database*/
+        try {
+            String name = get(object, table, column);
+            if (name.isEmpty()) {
+
+                switch (object.getClass().getName()) {
+                    case "platea.Instance":
+                        insertInstance((Instance) object);
+                        break;
+
+                    case "platea.Container":
+                        insertContainer((Container) object);
+                        break;
+
+                    case "platea.Image":
+                        insertImage((Image) object);
+                        break;
+                }
+            }
+        } catch (DatabaseGetException |
+                 DatabaseInsertImageException |
+                 DatabaseInsertInstanceException |
+                 DatabaseInsertContainerException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return name;
     }
 }
