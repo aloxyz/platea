@@ -24,19 +24,19 @@ public class Client {
 
     private Client() {
         httpClient = HttpClient.newHttpClient();
+
         // Map Unix socket to tcp address
         String[] cmd = {"/bin/sh", "-c", "socat -v tcp-l:2375,reuseaddr unix:/var/run/docker.sock"};
+
         try {
             new ProcessBuilder()
                     //.inheritIO()
                     .command(cmd)
                     .start();
-        } catch (SecurityException e) {
-            System.out.println("Could not create subprocess");
-        } catch (IOException e) {
-            System.out.println("I/O error");
+
         } catch (Exception e) {
-            System.out.println("A shell error occurred");
+            System.out.println(e.getMessage());
+            System.exit(1);
         }
     }
 
@@ -48,27 +48,29 @@ public class Client {
     }
 
     public URI uriBuilder(String path, Map<String, String> params) {
+        URI tmp = null;
+
         try {
             if (path.isEmpty()) {
                 throw new IllegalArgumentException("Empty URI path");
             }
 
-            URI tmp = null;
             URIBuilder builder = new URIBuilder();
             builder.setScheme("http").setHost(Config.getConfig().dockerURL()).setPath(path);
 
             for (Map.Entry<String, String> pair : params.entrySet()) {
                 builder.setParameter(pair.getKey(), pair.getValue());
             }
+
             tmp = builder.build();
 
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
-            System.exit(0);
+            System.exit(1);
 
         } catch (URISyntaxException e) {
             System.out.println(e.getMessage());
-            System.exit(0);
+            System.exit(1);
         }
 
         return tmp;
@@ -104,8 +106,6 @@ public class Client {
                 sendRequest(
                         get(uriBuilder(path, params)),
                         BodyHandlers.ofString());
-
-
     }
 
     public HttpResponse postResource(String path, Map<String, String> params, BodyPublisher body, String headers) {
@@ -127,14 +127,16 @@ public class Client {
 
     public HttpResponse sendRequest(HttpRequest method, BodyHandler bHandler) {
         HttpResponse tmp = null;
+
         try {
             tmp =
                     this.httpClient
                             .send(method, bHandler);
-        } catch (InterruptedException e) {
-            System.out.println("Request process was interrupted");
-        } catch (IOException e) {
-            System.out.println("I/O error");
+
+        } catch (InterruptedException | IOException e) {
+            System.out.println("Error while sending request to Docker Engine: " + e.getMessage());
+            System.exit(1);
+
         }
         return tmp;
     }
