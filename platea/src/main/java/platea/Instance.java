@@ -1,10 +1,13 @@
 package platea;
 
 import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
+import platea.exceptions.DatabaseGetException;
+import platea.exceptions.DatabaseInsertInstanceException;
 
+import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.nio.file.Paths;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,26 +19,19 @@ public class Instance {
     private JSONObject config;
 
     @SuppressWarnings("unchecked")
-    Instance(String configPath) throws Exception {
+    Instance(String configPath) {
         try {
             this.config = JSONController.fileToJsonObject(Paths.get(configPath).toString());
-        }
-        catch (Exception e) {
-            System.out.println("Could not parse config file: either wrong instance name or wrong syntax");
-        }
-        this.name = config.get("instanceName").toString();
+            this.name = config.get("instanceName").toString();
+            this.containers = new ArrayList<>();
+            this.images = new ArrayList<>();
 
-        this.containers = new ArrayList<>();
-        this.images = new ArrayList<>();
+            JSONObject containers = (JSONObject) config.get("containers");
 
-        JSONObject containers = (JSONObject)config.get("containers");
-
-        containers.keySet().forEach(key -> {
-            try {
+            containers.keySet().forEach(key -> {
                 Object value = containers.get(key);
-                JSONObject container = (JSONObject) value;                
-                JSONObject buildConfig = (JSONObject)container.get("config");
-
+                JSONObject container = (JSONObject) value;
+                JSONObject buildConfig = (JSONObject) container.get("config");
 
                 String tmp = buildConfig.get("Image").toString();
                 String name = tmp.substring(0, tmp.lastIndexOf(":"));
@@ -45,37 +41,33 @@ public class Instance {
                 this.images.add(new Image(name, this, uri));
                 this.containers.add(new Container(name, this, buildConfig));
 
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+            });
+        } catch (IOException | ParseException e) {
+            System.out.println("Could not parse config file: either wrong instance name or wrong syntax");
+        }
     }
 
-    
-    public void buildInstance() {
-        if (Database.getDatabase().get(Instance.class, "instances", "name").isEmpty()) {
-            Database.getDatabase().insertInstance(this);
-        }
 
-        for (Image i : images) {
-            try {
-                System.out.println("Building image " + ConsoleColors.YELLOW_BOLD_BRIGHT + i.getName() + ConsoleColors.RESET + "...");
+    public void buildInstance() {
+        try {
+            if (Database.getDatabase().get(Instance.class, "instances", "name").isEmpty()) {
+                Database.getDatabase().insertInstance(this);
+            }
+
+            for (Image i : images) {
+                System.out.printf("Building image %s%s%s...%n", ConsoleColors.YELLOW_BOLD_BRIGHT, i.getName(), ConsoleColors.RESET);
                 i.create();
             }
-            catch (Exception e) {
-                System.out.println("Could not build image " + i.getName());
-            }
-        }
 
-        for (Container c : containers) {
-            try {
-                System.out.println("Creating container " + ConsoleColors.YELLOW_BOLD_BRIGHT + c.getName() + ConsoleColors.RESET + "...");
+            for (Container c : containers) {
+                System.out.printf("Creating container %s%s%s...%n", ConsoleColors.YELLOW_BOLD_BRIGHT, c.getName(), ConsoleColors.RESET);
                 c.create();
             }
-            catch (Exception e) {
-                System.out.println("Could not create container " + c.getName());
-            }
+        } catch (DatabaseGetException e) {
+            System.out.printf("Could not find instance %s: %s%n", this.name, e.getMessage());
+
+        } catch (DatabaseInsertInstanceException e) {
+            System.out.println(e.getMessage());
         }
     }
 
@@ -83,11 +75,9 @@ public class Instance {
         return containers;
     }
 
-
     public ArrayList<Image> getImages() {
         return images;
     }
-
 
     public void setName(String name) {
         this.name = name;
@@ -95,20 +85,18 @@ public class Instance {
 
     public ArrayList<Map> delete() throws Exception {
         ArrayList<Map> responses = new ArrayList<>();
-        
+
         if (Database.getDatabase().get(Instance.class, "instances", "name").isEmpty()) {
             try {
                 responses.add(deleteContainers());
                 responses.add(deleteImages());
                 Database.getDatabase().deleteInstance(this);
                 System.out.println("Removed instance " + ConsoleColors.RED_BOLD_BRIGHT + this.name + ConsoleColors.RESET);
-            }
-            catch (NullPointerException e) {
+            } catch (NullPointerException e) {
                 e.printStackTrace();
             }
-        
-        } 
-        else {
+
+        } else {
             System.out.println("Instance does not exist or has not been yet created");
         }
 
@@ -126,7 +114,7 @@ public class Instance {
         return responses;
     }
 
-    
+
     public Map<String, HttpResponse> createImages() throws Exception {
         HashMap<String, HttpResponse> responses = new HashMap<>();
 

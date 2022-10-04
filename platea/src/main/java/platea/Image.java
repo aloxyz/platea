@@ -1,14 +1,18 @@
 package platea;
 
+import org.json.simple.JSONObject;
+import platea.exceptions.CreateImageException;
+import platea.exceptions.DatabaseDeleteException;
+import platea.exceptions.DatabaseGetException;
+import platea.exceptions.DatabaseInsertImageException;
+
 import java.net.http.HttpResponse;
 import java.util.HashMap;
 
-import org.json.simple.JSONObject;
-
-public class Image implements IEntity{
-    private String name;
-    private Instance instance;
-    private String uri;
+public class Image implements IEntity {
+    private final String name;
+    private final Instance instance;
+    private final String uri;
 
     Image(String name, Instance instance, String uri) {
         this.name = name;
@@ -16,38 +20,46 @@ public class Image implements IEntity{
         this.uri = uri;
     }
 
-    public HttpResponse create() throws Exception {
+    public HttpResponse create() throws CreateImageException {
         // Create image from remote repository
-        HashMap<String, String> labels = new HashMap<String, String>();
-        labels.put("service", "platea");
-        labels.put("instance", instance.getName());
-        String jsonLabels = new JSONObject(labels).toJSONString();
+        Database db = Database.getDatabase();
 
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put("t", name);
-        params.put("remote", uri);
-        params.put("labels", jsonLabels);
+        try {
+            // Setting labels
+            HashMap<String, String> labels = new HashMap<>();
+            labels.put("service", "platea");
+            labels.put("instance", instance.getName());
+            String jsonLabels = new JSONObject(labels).toJSONString();
 
-        String name = Database.getDatabase().getImage(this);
+            // Setting parameters
+            HashMap<String, String> params = new HashMap<>();
+            params.put("t", name);
+            params.put("remote", uri);
+            params.put("labels", jsonLabels);
 
-        if (name.isEmpty()) {           
-            Database.getDatabase().insertImage(this);
+            String name = db.get(this.getClass(), "images", "name");
+            if (name.isEmpty()) db.insertImage(this);
+
+            HttpResponse createImageResponse = Docker.post("build", "",
+                    params,
+                    Client.getClient().noBody(),
+                    "application/x-www-form-urlencoded");
+
+            if (createImageResponse.statusCode() != 200) {
+                db.delete(this.getClass(), "images");
+                throw new CreateImageException();
+            }
+
+        } catch (DatabaseInsertImageException | DatabaseDeleteException | DatabaseGetException e) {
+            System.out.println(e.getMessage());
         }
 
-        HttpResponse createImageResponse = 
-            Docker.post("build", "",
-            params,
-            Client.getClient().noBody(),
-            "application/x-www-form-urlencoded");
-
-            System.out.println(createImageResponse.body().toString());
-
-        return createImageResponse;
+        return null;
     }
 
     public HttpResponse inspect() {
         return
-            Docker.get("images", name, Client.getClient().noParameters());
+                Docker.get("images", name, Client.getClient().noParameters());
     }
 
     public HttpResponse delete(String force) throws Exception {
@@ -56,7 +68,7 @@ public class Image implements IEntity{
 
         Database.getDatabase().deleteImage(this);
         return
-            Docker.delete("images", name, params);
+                Docker.delete("images", name, params);
     }
 
     public Instance getInstance() {
