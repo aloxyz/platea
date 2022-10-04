@@ -120,25 +120,36 @@ public class Database {
         return "";
     }
 
-    public String insertContainer(Container container) throws Exception {
+    public String insertContainer(Container container) throws DatabaseException {
+        if (container == null) throw new DatabaseException("Container cannot be null");
+
         String query;
         PreparedStatement p;
         ResultSet rs;
 
-        query = "INSERT INTO containers (id, name, instance) VALUES (?, ?, ?)";
-        p = connection.prepareStatement(query);
-        p.setString(1, container.getId());
-        p.setString(2, container.getName());
-        p.setString(3, container.getInstance().getName());
+        try {
+            query = "INSERT INTO containers (id, name, instance) VALUES (?, ?, ?)";
+            p = connection.prepareStatement(query);
+            p.setString(1, container.getId());
+            p.setString(2, container.getName());
+            p.setString(3, container.getInstance().getName());
 
-        p.executeUpdate();
-        query = "SELECT id FROM containers WHERE name = ?";
-        p = connection.prepareStatement(query);
-        p.setString(1, container.getName());
+            p.executeUpdate();
+            query = "SELECT id FROM containers WHERE name = ?";
+            p = connection.prepareStatement(query);
+            p.setString(1, container.getName());
 
-        rs = p.executeQuery();
-        rs.next();     
-        return rs.getString("id");
+            rs = p.executeQuery();
+            rs.next();
+
+            return rs.getString("id");
+
+        } catch (SQLException e) {
+            String state = e.getSQLState();
+            if (state.equals("unique_violation")) throw new DatabaseException("Container already exists in database");
+        }
+
+        return "";
     }
 
     public String insertImage(Image image) throws Exception {
@@ -167,7 +178,7 @@ public class Database {
 
         try {
             if (!table.equals("instances") || !table.equals("containers") || !table.equals("images")) {
-                throw new DBException("Table " + table + " does not exist in database");
+                throw new DatabaseException("Table " + table + " does not exist in database");
             }
 
             query = "DELETE FROM ? WHERE name = ?";
@@ -179,7 +190,7 @@ public class Database {
 
         }
 
-        catch (DBException e) {
+        catch (DatabaseException e) {
             System.out.println(e.getMessage());
         }
         catch (SQLException e) {
