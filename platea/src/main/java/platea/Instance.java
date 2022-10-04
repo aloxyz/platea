@@ -54,7 +54,9 @@ public class Instance {
 
     
     public void buildInstance() {
-        Database.getDatabase().instanceHandler(this);
+        if (Database.getDatabase().get(Instance.class, "instances", "name").isEmpty()) {
+            Database.getDatabase().insertInstance(this);
+        }
 
         for (Image i : images) {
             try {
@@ -94,7 +96,7 @@ public class Instance {
     public ArrayList<Map> delete() throws Exception {
         ArrayList<Map> responses = new ArrayList<>();
         
-        if (Database.getDatabase().getInstance(this.name)) {
+        if (Database.getDatabase().get(Instance.class, "instances", "name").isEmpty()) {
             try {
                 responses.add(deleteContainers());
                 responses.add(deleteImages());

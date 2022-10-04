@@ -126,7 +126,7 @@ public class Main {
 
         if (args.length == 2 && argCommands.contains(command)) {
             String instanceName = args[1];
-            boolean inDB = Database.getDatabase().getInstance(instanceName);
+            boolean inDB = !Database.getDatabase().get(Instance.class, "instances", "name").isEmpty();
 
             if(!instanceName.isEmpty()) {
                 String configPath = new File(

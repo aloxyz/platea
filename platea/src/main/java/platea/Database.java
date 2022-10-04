@@ -1,21 +1,16 @@
 package platea;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import io.github.cdimascio.dotenv.Dotenv;
-import platea.exceptions.DatabaseException;
-import platea.exceptions.DatabaseInsertContainerException;
+import platea.exceptions.*;
+
+import java.sql.*;
 
 public class Database {
     private static Database database;
     private Connection connection;
     private String url;
     private String user;
-    private String password;    
+    private String password;
 
     Database() {
         try {
@@ -23,16 +18,14 @@ public class Database {
             url = dotenv.get("POSTGRES_URL");
             user = dotenv.get("POSTGRES_USER");
             password = dotenv.get("POSTGRES_PASSWORD");
-    
+
             connection = DriverManager.getConnection(url, user, password);
-        } 
-        
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.out.println(": Cannot connect to database");
-        } 
+        }
 
     }
-    
+
     public static synchronized Database getDatabase() {
         if (database == null) {
             database = new Database();
@@ -40,83 +33,29 @@ public class Database {
         return database;
     }
 
-    public boolean getInstance(String instanceName) throws Exception {
-        /*
-         * Returns true if exists in database, else return false
-         */
+    public String insertInstance(Instance instance) throws DatabaseInsertInstanceException {
+        if (container == null) throw new DatabaseInsertInstanceException("Instance cannot be null");
+
         String query;
         PreparedStatement p;
-        ResultSet rs;
-
-        query = "SELECT * FROM instances WHERE name = ?";
-        p = connection.prepareStatement(query);
-        p.setString(1, instanceName);
-        rs = p.executeQuery();
-        return rs.next();
-
-    }
-
-    public void instanceHandler(Instance instance) {
-        /*
-         * Returns true if exists in database, else return false
-         */
-        String query;
-        PreparedStatement p;
-        ResultSet rs;
 
         try {
-            query = "SELECT 1 FROM instances WHERE name = ?";
-
+            query = "INSERT INTO instances (name) VALUES (?)";
             p = connection.prepareStatement(query);
-            
             p.setString(1, instance.getName());
-    
-            rs = p.executeQuery();
+            p.executeUpdate();
 
-            if (!rs.next()) {
-                query = "INSERT INTO instances (name) VALUES (?)";
-                p = connection.prepareStatement(query);
-                p.setString(1, instance.getName());
-    
-                p.executeUpdate();
-            }
-        }
-        catch (SQLException e) {
-            System.out.println("Database error");
-        }
-    }
+            return get(Instance.class, "instances", "id");
 
-    public String getContainer(Container container) throws Exception {
-        String query;
-        PreparedStatement p;
-        ResultSet rs;
+        } catch (DatabaseGetException e) {
+            System.out.println(e.getMessage());
+            System.exit(0);
 
-        query = "SELECT * FROM containers WHERE name = ?";
-        p = connection.prepareStatement(query);
-        p.setString(1, container.getName());
+        } catch (SQLException e) {
+            String state = e.getSQLState();
+            if (state.equals("unique_violation"))
+                throw new DatabaseInsertInstanceException("Instance already exists in database");
 
-        rs = p.executeQuery();
-
-        if (rs.next() == true) {
-            return rs.getString("id");
-        }
-
-        return "";
-    }
-
-    public String getImage(Image image) throws Exception {
-        String query;
-        PreparedStatement p;
-        ResultSet rs;
-
-        query = "SELECT * FROM images WHERE name = ?";
-        p = connection.prepareStatement(query);
-        p.setString(1, image.getName());
-
-        rs = p.executeQuery();
-
-        if (rs.next() == true) {
-            return rs.getString("name");
         }
 
         return "";
@@ -127,7 +66,6 @@ public class Database {
 
         String query;
         PreparedStatement p;
-        ResultSet rs;
 
         try {
             query = "INSERT INTO containers (id, name, instance) VALUES (?, ?, ?)";
@@ -135,112 +73,123 @@ public class Database {
             p.setString(1, container.getId());
             p.setString(2, container.getName());
             p.setString(3, container.getInstance().getName());
-
             p.executeUpdate();
-            query = "SELECT id FROM containers WHERE name = ?";
-            p = connection.prepareStatement(query);
-            p.setString(1, container.getName());
 
-            rs = p.executeQuery();
-            rs.next();
+            return get(Container.class, "containers", "id");
 
-            return rs.getString("id");
+        } catch (DatabaseGetException e) {
+            System.out.println(e.getMessage());
+            System.exit(0);
 
         } catch (SQLException e) {
             String state = e.getSQLState();
-            if (state.equals("unique_violation")) throw new DatabaseInsertContainerException("Container already exists in database");
+            if (state.equals("unique_violation"))
+                throw new DatabaseInsertContainerException("Container already exists in database");
         }
 
         return "";
     }
 
-    public String insertImage(Image image) throws Exception {
-        String query;
-        PreparedStatement p;
-        ResultSet rs;
+    public String insertImage(Image image) throws DatabaseInsertImageException {
+        if (container == null) throw new DatabaseInsertImageException("Image cannot be null");
 
-        query = "INSERT INTO images (name) VALUES (?)";
-        p = connection.prepareStatement(query);
-        p.setString(1, image.getName());
-
-        p.executeUpdate();
-
-        query = "SELECT name FROM images WHERE name = ?";
-        p = connection.prepareStatement(query);
-        p.setString(1, image.getName());
-
-        rs = p.executeQuery();    
-        rs.next();            
-        return rs.getString("name");
-    }
-    
-    public <S> void delete(Class<S> clazz, String table) {
         String query;
         PreparedStatement p;
 
         try {
-            if (!table.equals("instances") || !table.equals("containers") || !table.equals("images")) {
-                throw new DatabaseException("Table " + table + " does not exist in database");
-            }
+            query = "INSERT INTO images (name) VALUES (?)";
+            p = connection.prepareStatement(query);
+            p = connection.prepareStatement(query);
+            p.setString(1, image.getName());
 
+            p.executeUpdate();
+
+            return get(Image.class, "images", "name");
+
+        } catch (DatabaseGetException e) {
+            System.out.println(e.getMessage());
+            System.exit(0);
+
+        } catch (SQLException e) {
+            String state = e.getSQLState();
+            if (state.equals("unique_violation"))
+                throw new DatabaseInsertImageException("Image already exists in database");
+        }
+
+        return "";
+    }
+
+    public <S> void delete(Class<S> clazz, String table) throws DatabaseDeleteException {
+        String query;
+        PreparedStatement p;
+
+        try {
             query = "DELETE FROM ? WHERE name = ?";
             p = connection.prepareStatement(query);
             p.setString(1, table);
             p.setString(2, clazz.getName());
 
-            p.executeUpdate();  
+            p.executeUpdate();
 
+        } catch (SQLException e) {
+            String state = e.getSQLState();
+            if (state.equals("undefined_table")) throw new DatabaseDeleteException("Table does not exist in database");
         }
 
-        catch (DatabaseException e) {
-            System.out.println(e.getMessage());
-        }
-        catch (SQLException e) {
-            System.out.println("Database error");
-        }
     }
 
-    @Deprecated
-    public void deleteContainer(Container container) throws Exception {
+    public <S> ResultSet get(Class<S> clazz, String table) throws DatabaseGetException {
         String query;
         PreparedStatement p;
-
-        query = "DELETE FROM containers WHERE name = ?";
-        p = connection.prepareStatement(query);
-        p.setString(1, container.getName());
-
-        p.executeUpdate();
-    }
-
-    @Deprecated
-    public void deleteInstance(Instance instance) {
-        String query;
-        PreparedStatement p;
+        ResultSet rs;
 
         try {
-            query = "DELETE FROM instances WHERE name = ?";
+            query = "SELECT * FROM ? WHERE name = ?";
             p = connection.prepareStatement(query);
-            p.setString(1, instance.getName());
-    
-            p.executeUpdate();    
+            p.setString(1, table);
+            p.setString(2, clazz.getName());
+
+            rs = p.executeQuery();
+
+            if (rs.next()) {
+                return rs;
+            }
+
+        } catch (SQLException e) {
+            String state = e.getSQLState();
+            if (state.equals("undefined_table")) throw new DatabaseGetException("Table does not exist in database");
         }
 
-        catch (SQLException e) {
-            System.out.println("Database error");
-            e.printStackTrace();
-        }
+        return null;
     }
 
-    @Deprecated
-    public void deleteImage(Image image) throws Exception {
+    public <S> String get(Class<S> clazz, String table, String column) throws DatabaseGetException {
+        /*
+         * Returns a String value of the specified column label
+         */
+
         String query;
         PreparedStatement p;
+        ResultSet rs;
 
+        try {
+            query = "SELECT * FROM ? WHERE name = ?";
+            p = connection.prepareStatement(query);
+            p.setString(1, table);
+            p.setString(2, clazz.getName());
 
-        query = "DELETE FROM images WHERE name = ?";
-        p = connection.prepareStatement(query);
-        p.setString(1, image.getName());
-        
-        p.executeUpdate();
+            rs = p.executeQuery();
+
+            if (rs.next()) {
+                return rs.getString(column);
+            }
+
+        } catch (SQLException e) {
+            String state = e.getSQLState();
+            if (state.equals("undefined_table")) throw new DatabaseGetException("Table does not exist in database");
+
+        }
+
+        return "";
     }
 }
