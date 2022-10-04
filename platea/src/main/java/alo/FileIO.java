@@ -4,12 +4,16 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
+import org.rauschig.jarchivelib.ArchiveFormat;
 import org.rauschig.jarchivelib.Archiver;
 import org.rauschig.jarchivelib.ArchiverFactory;
+import org.rauschig.jarchivelib.CompressionType;
 
 public class FileIO {
     public static String readFile(String filePath) {
@@ -49,14 +53,39 @@ public class FileIO {
         }
     }
 
+    public static File makeTar(String src, String dest, String name) throws Exception {
+        File source = new File(src);
+        File destination = new File(dest);
+
+        Archiver archiver = 
+            ArchiverFactory.createArchiver(
+                ArchiveFormat.TAR, CompressionType.GZIP);
+        
+        return 
+        archiver.create(name, destination, source);
+    }
+
     public static void extractArchive(String archivePath, String destinationPath) throws Exception {
         File archive = new File(archivePath);
         File destination = new File(destinationPath);
     
         Archiver archiver = 
         ArchiverFactory
-        .createArchiver("zip");
+        .createArchiver(ArchiveFormat.ZIP);
 
         archiver.extract(archive, destination);
+    }
+
+
+    public static String StreamtoString(InputStream stream) throws Exception {
+        InputStreamReader isr = new InputStreamReader(stream);
+        BufferedReader br = new BufferedReader(isr);
+        StringBuffer sb = new StringBuffer();
+
+        String str;
+        while((str = br.readLine())!= null){
+            sb.append(str);
+        }
+        return sb.toString();
     }
 }

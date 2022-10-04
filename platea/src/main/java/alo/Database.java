@@ -6,25 +6,23 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 
 public class Database {
+    private static Database database;
+    Connection conn;
     String url;
     String user;
-    String password;
-    public Connection conn;
-    
-    public Database(String url, String user, String password) {
-        this.url = url;
-        this.user = user;
-        this.password = password;
+    String password;    
+
+    public static synchronized Database getDatabase() throws Exception {
+        if (database == null) {
+            database = new Database();
+        }
+        return database;
     }
 
-    Connection connect() {
-        try {
-            this.conn = DriverManager.getConnection(
-                this.url, this.user, this.password);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return this.conn;
+    Connection connect() throws Exception {
+        return
+        conn = 
+        DriverManager.getConnection(url, user, password);
     }
 
     String query(String query) {
@@ -45,4 +43,7 @@ public class Database {
         return response;
         
     }
+
+        
+    
 }

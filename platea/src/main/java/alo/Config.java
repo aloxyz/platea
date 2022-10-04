@@ -6,9 +6,12 @@ public class Config {
     private String basePath = System.getenv("XDG_CONFIG_HOME") + "/platea";
     private String instancesPath = basePath + "/instances/";
     private String containersPath = basePath + "/containers/";
+    private String scriptsPath = basePath + "/scripts/";
 
     private String remoteRepositoryURL = "git@gitlab.com:aloxyz/platea-configs.git";
-    
+    private String databaseURL = "http://localhost:3000/instances";
+    private String dockerSocket = "unix:/var/run/docker.sock";
+    private String dockerURL = "localhost:2375";
     private Config() throws Exception {
     } 
 
@@ -40,5 +43,21 @@ public class Config {
 
     public String containersPath() {
         return this.containersPath;
+    }
+    
+    public String scriptsPath() {
+        return this.scriptsPath;
+    }
+
+    public String databaseURL() {
+        return this.databaseURL;
+    }
+
+    public String dockerSocket() {
+        return this.dockerSocket;
+    }
+
+    public String dockerURL() {
+        return this.dockerURL;
     }
 }
