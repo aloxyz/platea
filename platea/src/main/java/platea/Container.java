@@ -1,9 +1,7 @@
 package platea;
 
-import org.json.simple.JSONObject;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONObject;
+import platea.exceptions.CreateContainerException;
 import platea.exceptions.DockerException;
 
 import java.net.http.HttpRequest.BodyPublishers;
@@ -12,61 +10,55 @@ import java.util.HashMap;
 
 
 public class Container {
-    private String id;
-    private String name;
-    private Job job;
     private JSONObject config;
+    private final JSONObject labels;
+    private final String name;
+    private final String id = "";
 
-    Container(String name, Job job, JSONObject config) {
-        this.name = name;
-        this.job = job;
+    Container(JSONObject config, String jobName) {
         this.config = config;
+
+        this.name = config.getString("Image");
+
+        // Labels object setup
+        this.labels = new JSONObject();
+        this.labels.put("service", "platea");
+        this.labels.put("job", jobName);
     }
 
-    public HttpResponse create() throws DockerException  {
-        HashMap<String, String> labels = new HashMap<>();
-        labels.put("service", "platea");
-        labels.put("instance", job.getName());
-        String jsonLabels = new JSONObject(labels).toJSONString();
-
+    public HttpResponse create() throws CreateContainerException {
+        // Setting up parameters
         HashMap<String, String> params = new HashMap<>();
-        params.put("name", name);
-        params.put("labels", jsonLabels);
-        HttpResponse createContainerResponse = null;
-        String responseMessage = null;
+        params.put("name", this.name);
+        params.put("labels", this.labels.toString());
 
-        try {
-            String body = new ObjectMapper().writeValueAsString(config);
-            String id = Database.getDatabase().getContainer(this);
+        HttpResponse createContainerResponse;
+        String responseMessage;
 
-            if (id.isEmpty()) {
-                createContainerResponse =
-                        Docker.post("containers/create", "",
-                                params,
-                                BodyPublishers.ofString(body),
-                                "application/json;charset=UTF-8"
-                        );
+        // id = Database.getDatabase().getContainer(this);
 
-                JSONObject createContainerJsonObject =
-                        JSONController.stringToJSONObject(createContainerResponse.body().toString());
+        //if (id.isEmpty()) {
+            createContainerResponse =
+                Docker.post("containers/create", "",
+                        params,
+                        BodyPublishers.ofString(this.config.toString()),
+                        "application/json;charset=UTF-8"
+                );
 
-                if (createContainerResponse.statusCode() != 201) {
-                    responseMessage = createContainerJsonObject.get("message").toString();
-                    throw new DockerException("Could not create container: " + responseMessage);
-                }
+        JSONObject createContainerJsonObject = new JSONObject((createContainerResponse.body().toString()));
 
-                this.id = createContainerJsonObject.get("Id").toString();
-                Database.getDatabase().insertContainer(this);
-
-            } else this.id = id;
-
-        } catch (JsonProcessingException e) {
-            System.out.println("Could not process JSON");
-            System.exit(0);
+        if (createContainerResponse.statusCode() != 201) {
+            responseMessage = createContainerJsonObject.get("message").toString();
+            throw new CreateContainerException("Could not create container: " + responseMessage);
         }
 
+        //this.id = createContainerJsonObject.get("Id").toString();
+        //Database.getDatabase().insertContainer(this);
+
+        //} else this.id = id;
+
         return createContainerResponse;
-    }
+}
 
     public HttpResponse inspect() {
         HashMap<String, String> params = new HashMap<>();
