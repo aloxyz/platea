@@ -45,8 +45,8 @@ public class Tests {
 
         JSONArray images = job.getJSONArray("images");
 
-        JSONObject fileserver = (JSONObject) images.get(1);
-        Image image = new Image(fileserver, name);
+        JSONObject boh = (JSONObject) images.get(2);
+        Image image = new Image(boh, name);
         System.out.println(image.create().body().toString());
     }
 

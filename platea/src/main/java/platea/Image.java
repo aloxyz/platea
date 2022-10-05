@@ -42,7 +42,7 @@ public class Image {
 
         if (createImageResponse.statusCode() != 200) {
             JSONObject response = new JSONObject(createImageResponse.body().toString());
-            System.out.println("Error while sending request to Docker Engine: " + response.getString("message"));
+            System.out.println("Error while creating image: " + response.getString("message"));
             System.exit(1);
             throw new CreateImageException();
         }
@@ -113,9 +113,10 @@ public class Image {
         // Setting parameters
         HashMap<String, String> params = new HashMap<>();
         params.put("fromImage", this.name);
+        params.put("tag", "latest");
         params.put("labels", this.labels.toString());
 
-        HttpResponse createImageResponse = Docker.post("build", "",
+        HttpResponse createImageResponse = Docker.post("images/create", "",
                 params,
                 Client.getClient().noBody(),
                 "application/x-www-form-urlencoded");
