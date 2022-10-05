@@ -14,7 +14,7 @@ import org.json.simple.JSONValue;
 
 public class Instances {
     public static void fetchRemote() {
-        String instancesPath = Config.getConfig().instancesPath();
+        String instancesPath = Config.getConfig().jobsPath();
 
         ProcessBuilder builder = new ProcessBuilder();
         System.out.println(ConsoleColors.BLUE_BRIGHT +  "Fetching..." +  ConsoleColors.RESET);
@@ -60,7 +60,7 @@ public class Instances {
     }
 
     public static ArrayList<String> listRemote() {
-        String instancesPath = Config.getConfig().instancesPath();
+        String instancesPath = Config.getConfig().jobsPath();
 
         if (! new File(instancesPath).exists()) {
             fetchRemote();

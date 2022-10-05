@@ -1,128 +1,54 @@
 package platea;
 
 
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
-import platea.exceptions.DatabaseDeleteException;
-import platea.exceptions.DatabaseGetException;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class Tests {
-
     @Test
-    public void db() {
-        Database db = Database.getDatabase();
-        try {
-            String configPath = new File(
-                    Config.getConfig().instancesPath() + "lcarnevale" + ".json")
-                    .getAbsolutePath();
+    public void json() throws IOException {
+        JSONObject job = new JSONObject(Files.readString(Paths.get("/home/alo/Documenti/platea/sample.json")));
+        String name = job.getString("name");
 
-            Instance i = new Instance(configPath);
+        JSONArray images = job.getJSONArray("images");
+        for (int i = 0; i < images.length(); i++) {
+            JSONObject image = (JSONObject) images.get(i);
+            String imageName = image.getString("name");
+            String endpoint = image.getString("endpoint");
+            boolean source = image.getBoolean("source");
+            boolean script = image.getBoolean("script");
 
-            db.get(Instance.class, "instances", "name");
-            db.get(Container.class, "containers", "id");
-            db.get(Image.class, "images", "name");
+            System.out.printf("name: %s\nendpoint: %s\nbuild from source: %s\nhas setup script: %s\n", imageName, endpoint, source, script);
+        }
 
-            db.delete(Instance.class, "instances");
-            db.delete(Container.class, "containers");
-            db.delete(Image.class, "images");
+        JSONArray containers = job.getJSONArray("containers");
+        for (int i = 0; i < containers.length(); i++) {
+            JSONObject container = (JSONObject) containers.get(i);
 
-        } catch (DatabaseGetException | DatabaseDeleteException e) {
-            e.printStackTrace();
+            System.out.printf("container config: %s", container.toString(4));
         }
     }
 
-
-    @Ignore
     @Test
-    public void main() throws Exception {
-        String[] args = {"ps"};
-        Main.main(args);
+    public void image() throws Exception {
+        JSONObject job = new JSONObject(Files.readString(Paths.get("/home/alo/Documenti/platea/sample.json")));
+        String name = job.getString("name");
+
+        JSONArray images = job.getJSONArray("images");
+
+        JSONObject fileserver = (JSONObject) images.get(1);
+        Image image = new Image(fileserver, name);
+        System.out.println(image.create().body().toString());
     }
 
-    /*
-    @Test
-    public void commands() throws Exception {
-        PlateaCommand cmd = new PlateaCommand();
-        
-        cmd.fetchInstances = true;
-        cmd.listInstances = true;
-        cmd.instanceName = "lcarnevale";
-        cmd.runInstance = true;
-        cmd.listRunningInstances = true;
-        //cmd.stopInstance = true;
-        //cmd.removeInstance = true;
-        cmd.call();
-    }
-    
-    @Test
-    public void runInstance() throws Exception {
-        Instances.run("/home/alo/Documenti/platea/platea/sampleConfig.json");
-    }
-
-    @Test
-    public void stopInstance() throws Exception {
-        Instances.stopContainers("lcarnevale");
-    }
-
-    @Test
-    public void deleteInstance() throws Exception {
-        Instances.delete("lcarnevale");
-    }
-
-    @Test
-    public void buildInstance() throws Exception {
-        Instances.buildImages("/home/alo/Documenti/platea/platea/sampleConfig.json");
-        Instances.createContainers("/home/alo/Documenti/platea/platea/sampleConfig.json");
-
-
-
-        System.out.println(Containers.list("lcarnevale", "").body().toString());
-        System.out.println(Images.list("lcarnevale").body().toString());
-
-    }
-
-    @Test
-    public void dockerfileserver() throws Exception {
-        // SETUP
-        
-        JSONObject config = JSONController.fileToJsonObject(Paths.get("/home/alo/Documenti/platea/platea/sampleConfig.json").toString());
-        JSONObject containers = (JSONObject)config.get("containers");
-        JSONObject container = (JSONObject)containers.get("docker-file-server");
-        JSONObject buildConfig = (JSONObject)container.get("config");
-
-        String instanceName = config.get("instanceName").toString();
-        String uri = container.get("endpoint").toString();
-
-        //get name from image name
-        String tmpImageName = buildConfig.get("Image").toString();
-        String imageName = tmpImageName.substring(0, tmpImageName.lastIndexOf(":"));
-        
-
-
-        // START
-
-        HttpResponse buildImageRemoteResponse = Images.buildRemote(imageName, instanceName, uri);
-        HttpResponse createContainerResponse = Containers.create(imageName, instanceName, buildConfig);
-        String containerId = Docker.getFromResponse(createContainerResponse, "Id");
-        HttpResponse startContainerResponse = Containers.start(containerId);
-
-
-        HttpResponse stopContainerResponse = Containers.stop(containerId);
-        HttpResponse deleteContainerResponse = Containers.delete(containerId, "true");
-        HttpResponse deleteImageResponse = Images.delete(imageName, "true");
-
-        assertEquals(200, buildImageRemoteResponse.statusCode());
-        assertEquals(201, createContainerResponse.statusCode());
-        assertEquals(204, startContainerResponse.statusCode());
-        assertEquals(204, stopContainerResponse.statusCode());
-        assertEquals(204, deleteContainerResponse.statusCode());
-        assertEquals(200, deleteImageResponse.statusCode());
-    }
-    */
 }
+

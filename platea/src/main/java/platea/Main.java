@@ -11,7 +11,7 @@ public class Main {
     private static JSONObject config;
     private static ArrayList<String> singleCommands = new ArrayList<>();
     private static ArrayList<String> argCommands = new ArrayList<>();
-    private static Instance instance;
+    private static Job job;
 
 
     private static void helpMessage() {
@@ -126,33 +126,33 @@ public class Main {
 
         if (args.length == 2 && argCommands.contains(command)) {
             String instanceName = args[1];
-            boolean inDB = !Database.getDatabase().get(Instance.class, "instances", "name").isEmpty();
+            boolean inDB = !Database.getDatabase().get(Job.class, "instances", "name").isEmpty();
 
             if(!instanceName.isEmpty()) {
                 String configPath = new File(
-                    Config.getConfig().instancesPath() + instanceName + ".json")
+                    Config.getConfig().jobsPath() + instanceName + ".json")
                     .getAbsolutePath();
 
-                    instance = new Instance(configPath);
+                    job = new Job(configPath);
             }
 
             try {
                 if (!inDB && command.equals("create")) {   
-                    instance.buildInstance();
+                    job.buildInstance();
                 }
 
                 else if (inDB) {
                     switch(command) {                    
                         case "start":
-                            instance.startContainers();
+                            job.startContainers();
                             break;
 
                         case "stop":
-                            instance.stopContainers();
+                            job.stopContainers();
                             break;
 
                         case "rm":
-                            instance.delete();
+                            job.delete();
                             break;
                     }
                 }

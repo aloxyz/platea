@@ -1,6 +1,7 @@
 package platea;
 
 import org.apache.http.client.utils.URIBuilder;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URI;
@@ -132,15 +133,13 @@ public class Client {
         HttpResponse tmp = null;
 
         try {
-            tmp =
-                    this.httpClient
-                            .send(method, bHandler);
+            tmp = this.httpClient.send(method, bHandler);
 
         } catch (InterruptedException | IOException e) {
-            System.out.println("Error while sending request to Docker Engine: " + e.getMessage());
+            System.out.println("Error while sending request to Docker Engine");
             System.exit(1);
-
         }
+
         return tmp;
     }
 

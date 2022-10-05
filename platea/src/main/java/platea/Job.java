@@ -13,14 +13,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Instance {
+public class Job {
     private String name;
     private ArrayList<Container> containers;
     private ArrayList<Image> images;
     private JSONObject config;
 
     @SuppressWarnings("unchecked")
-    Instance(String configPath) {
+    Job(String configPath) {
         try {
             this.config = JSONController.fileToJsonObject(Paths.get(configPath).toString());
             this.name = config.get("instanceName").toString();
@@ -55,7 +55,7 @@ public class Instance {
             // Images
             for (Image i : images) {
                 System.out.printf("Building image %s%s%s...%n", ConsoleColors.YELLOW_BOLD_BRIGHT, i.getName(), ConsoleColors.RESET);
-                i.create();
+                i.build();
                 db.controlledInsert(i, "images", "name");
             }
 
@@ -92,7 +92,7 @@ public class Instance {
     public ArrayList<Map> delete() throws Exception {
         ArrayList<Map> responses = new ArrayList<>();
 
-        if (Database.getDatabase().get(Instance.class, "instances", "name").isEmpty()) {
+        if (Database.getDatabase().get(Job.class, "instances", "name").isEmpty()) {
             try {
                 responses.add(deleteContainers());
                 responses.add(deleteImages());
@@ -126,7 +126,7 @@ public class Instance {
 
         for (Image i : images) {
             System.out.println("Building image " + ConsoleColors.YELLOW_BOLD_BRIGHT + i.getName() + ConsoleColors.RESET + "...");
-            responses.put(i.getName(), i.create());
+            responses.put(i.getName(), i.build());
         }
 
         return responses;

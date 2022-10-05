@@ -31,8 +31,8 @@ public class Database {
         return database;
     }
 
-    public String insertInstance(Instance instance) throws DatabaseInsertInstanceException {
-        if (instance == null) throw new DatabaseInsertInstanceException("Instance cannot be null");
+    public String insertInstance(Job job) throws DatabaseInsertInstanceException {
+        if (job == null) throw new DatabaseInsertInstanceException("Instance cannot be null");
 
         String query;
         PreparedStatement p;
@@ -40,10 +40,10 @@ public class Database {
         try {
             query = "INSERT INTO instances (name) VALUES (?)";
             p = connection.prepareStatement(query);
-            p.setString(1, instance.getName());
+            p.setString(1, job.getName());
             p.executeUpdate();
 
-            return get(Instance.class, "instances", "id");
+            return get(Job.class, "instances", "id");
 
         } catch (DatabaseGetException e) {
             System.out.println(e.getMessage());
@@ -156,16 +156,16 @@ public class Database {
         }
     }
 
-    public void deleteAllFromInstance(Instance instance) {
-        for (String c : instance.getContainerNames()) {
+    public void deleteAllFromInstance(Job job) {
+        for (String c : job.getContainerNames()) {
             delete("containers", "id = " + c);
         }
 
-        for (String i : instance.getImageNames()) {
+        for (String i : job.getImageNames()) {
             delete("images", "name = " + i);
         }
 
-        delete(instance.getName(), "instances");
+        delete(job.getName(), "instances");
     }
 
     public <S> ResultSet get(Class<S> clazz, String table) throws DatabaseGetException {
@@ -236,7 +236,7 @@ public class Database {
 
                 switch (object.getClass().getName()) {
                     case "platea.Instance":
-                        insertInstance((Instance) object);
+                        insertInstance((Job) object);
                         break;
 
                     case "platea.Container":

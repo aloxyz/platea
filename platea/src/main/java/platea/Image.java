@@ -1,58 +1,126 @@
 package platea;
 
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 import platea.exceptions.*;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 
 public class Image {
     private final String name;
-    private final Instance instance;
-    private final String uri;
+    private final String endpoint;
+    private final boolean source;
+    private final boolean script;
+    private final JSONObject labels;
 
-    Image(String name, Instance instance, String uri) {
-        this.name = name;
-        this.instance = instance;
-        this.uri = uri;
+    Image(JSONObject config, String jobName) {
+        this.name = config.getString("name");
+        this.endpoint = config.getString("endpoint");
+        this.source = config.getBoolean("source");
+        this.script = config.getBoolean("script");
+
+        // Labels object setup
+        this.labels = new JSONObject();
+        this.labels.put("service", "platea");
+        this.labels.put("job", jobName);
     }
 
     public HttpResponse create() throws CreateImageException {
-        /*Create image from remote repository*/
-        try {
-            Database db = Database.getDatabase();
+        HttpResponse createImageResponse;
 
-            // Setting labels
-            HashMap<String, String> labels = new HashMap<>();
-            labels.put("service", "platea");
-            labels.put("instance", instance.getName());
-            String jsonLabels = new JSONObject(labels).toJSONString();
+        if (this.source) {
+            createImageResponse = build();
+        }
+        else {
+            createImageResponse = pull();
+        }
+
+        if (createImageResponse.statusCode() != 200) {
+            JSONObject response = new JSONObject(createImageResponse.body().toString());
+            System.out.println("Error while sending request to Docker Engine: " + response.getString("message"));
+            System.exit(1);
+            throw new CreateImageException();
+        }
+
+        return createImageResponse;
+    }
+
+    public HttpResponse build() {
+        /*Build image from source*/
+
+        HttpResponse createImageResponse = null;
+        Config config = Config.getConfig();
+        String tmpPath = config.getTmpPath();
+        String scriptsPath = config.scriptsPath();
+
+        try {
+            String trimmedName = this.name.substring(
+                    this.name.lastIndexOf("/") + 1);
+
+            // Pull image source from repo
+            FileIO.bash(String.format("git clone %s %s", this.endpoint, tmpPath + trimmedName));
+
+            // Make tarball from source
+            File tar = FileIO.tar(tmpPath + trimmedName, tmpPath, trimmedName);
+            Path tarPath = Paths.get(tar.getAbsolutePath());
+
+            if (this.script) {
+                FileIO.bash(scriptsPath + this.name);
+            }
 
             // Setting parameters
             HashMap<String, String> params = new HashMap<>();
-            params.put("t", name);
-            params.put("remote", uri);
-            params.put("labels", jsonLabels);
+            params.put("t", trimmedName);
+            params.put("labels", this.labels.toString());
 
-            // If image record not in database, insert into database
-            insert();
-
-            // Build image
-            HttpResponse createImageResponse = Docker.post("build", "",
+            createImageResponse = Docker.post("build", "",
                     params,
-                    Client.getClient().noBody(),
-                    "application/x-www-form-urlencoded");
+                    HttpRequest.BodyPublishers.ofFile(tarPath),
+                    "application/x-tar");
 
-            if (createImageResponse.statusCode() != 200) {
-                db.delete(this.getClass(), "images");
-                throw new CreateImageException();
-            }
+            FileIO.cleanup();
 
-        } catch (DatabaseConnectionException | DatabaseDeleteException e) {
-            System.out.println(e.getMessage());
+        } catch (FileNotFoundException e) {
+            System.out.println("Tarball was not found");
         }
 
-        return null;
+        return createImageResponse;
+    }
+
+    public HttpResponse build(String endpoint) {
+        /*Build image from remote repository*/
+        HttpResponse createImageResponse;
+        // Setting parameters
+        HashMap<String, String> params = new HashMap<>();
+        params.put("remote", endpoint);
+        params.put("labels", this.labels.toString());
+
+        // Build image
+        createImageResponse = Docker.post("build", "",
+                params,
+                Client.getClient().noBody(),
+                "application/x-www-form-urlencoded");
+
+        return createImageResponse;
+    }
+
+    public HttpResponse pull() {
+        // Setting parameters
+        HashMap<String, String> params = new HashMap<>();
+        params.put("fromImage", this.name);
+        params.put("labels", this.labels.toString());
+
+        HttpResponse createImageResponse = Docker.post("build", "",
+                params,
+                Client.getClient().noBody(),
+                "application/x-www-form-urlencoded");
+
+        return createImageResponse;
     }
 
     public HttpResponse inspect() {
@@ -68,18 +136,4 @@ public class Image {
         return
                 Docker.delete("images", name, params);
     }
-
-    public Instance getInstance() {
-        return instance;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getUri() {
-        return uri;
-    }
-
-
 }

@@ -14,19 +14,19 @@ import java.util.HashMap;
 public class Container {
     private String id;
     private String name;
-    private Instance instance;
+    private Job job;
     private JSONObject config;
 
-    Container(String name, Instance instance, JSONObject config) {
+    Container(String name, Job job, JSONObject config) {
         this.name = name;
-        this.instance = instance;
+        this.job = job;
         this.config = config;
     }
 
-    public HttpResponse create() throws DockerException,  {
+    public HttpResponse create() throws DockerException  {
         HashMap<String, String> labels = new HashMap<>();
         labels.put("service", "platea");
-        labels.put("instance", instance.getName());
+        labels.put("instance", job.getName());
         String jsonLabels = new JSONObject(labels).toJSONString();
 
         HashMap<String, String> params = new HashMap<>();
@@ -130,16 +130,16 @@ public class Container {
         this.name = name;
     }
 
-    public void setInstance(Instance instance) {
-        this.instance = instance;
+    public void setInstance(Job job) {
+        this.job = job;
     }
 
     public void setConfig(JSONObject config) {
         this.config = config;
     }
 
-    public Instance getInstance() {
-        return instance;
+    public Job getInstance() {
+        return job;
     }
 
     public JSONObject getConfig() {
