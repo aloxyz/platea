@@ -9,4 +9,13 @@ public class Job {
         this.config = config;
         this.name = name;
     }
+
+    public JSONObject getConfig() {
+        return config;
+    }
+
+    public String getName() {
+        return name;
+    }
+
 }

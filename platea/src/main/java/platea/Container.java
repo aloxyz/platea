@@ -15,6 +15,8 @@ public class Container {
     private JSONObject config;
     private JSONObject labels;
     private String name;
+
+
     private String id;
 
     Container(JSONObject config, String jobName) {
@@ -123,4 +125,13 @@ public class Container {
         return
                 Docker.get("containers", id, params);
     }
+
+    public String getId() {
+        return this.id;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
 }
