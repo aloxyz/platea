@@ -11,6 +11,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 
+import static platea.Client.*;
+
 public class Image {
     private final String name;
     private final String endpoint;
@@ -18,7 +20,7 @@ public class Image {
     private final boolean script;
     private final JSONObject labels;
 
-    Image(JSONObject config, String jobName) {
+    Image(JSONObject config, String jobName) throws CreateImageException {
         this.name = config.getString("name");
         this.endpoint = config.getString("endpoint");
         this.source = config.getBoolean("source");
@@ -28,6 +30,8 @@ public class Image {
         this.labels = new JSONObject();
         this.labels.put("service", "platea");
         this.labels.put("job", jobName);
+
+        create();
     }
 
     public HttpResponse create() throws CreateImageException {
@@ -78,7 +82,7 @@ public class Image {
             params.put("t", trimmedName);
             params.put("labels", this.labels.toString());
 
-            createImageResponse = Docker.post("build", "",
+            createImageResponse = dockerPost("build", "",
                     params,
                     HttpRequest.BodyPublishers.ofFile(tarPath),
                     "application/x-tar");
@@ -101,7 +105,7 @@ public class Image {
         params.put("labels", this.labels.toString());
 
         // Build image
-        createImageResponse = Docker.post("build", "",
+        createImageResponse = dockerPost("build", "",
                 params,
                 Client.getClient().noBody(),
                 "application/x-www-form-urlencoded");
@@ -116,7 +120,7 @@ public class Image {
         params.put("tag", "latest");
         params.put("labels", this.labels.toString());
 
-        HttpResponse createImageResponse = Docker.post("images/create", "",
+        HttpResponse createImageResponse = dockerPost("images/create", "",
                 params,
                 Client.getClient().noBody(),
                 "application/x-www-form-urlencoded");
@@ -130,11 +134,11 @@ public class Image {
 
         //Database.getDatabase().delete(this.getClass(), "images");
         return
-                Docker.delete("images", name, params);
+                dockerDelete("images", name, params);
     }
 
     public HttpResponse inspect() {
         return
-                Docker.get("images", name, Client.getClient().noParameters());
+                dockerGet("images", name, Client.getClient().noParameters());
     }
 }

@@ -50,10 +50,14 @@ public class Database {
         String configName = job.getConfig().getString("name");
 
         try {
-            query = "INSERT INTO jobs (name, config) VALUES (?, ?)";
+            Array containers = connection.createArrayOf("VARCHAR", job.getContainers().toArray());
+
+            query = "INSERT INTO jobs (name, config, containers) VALUES (?, ?, ?)";
             p = connection.prepareStatement(query);
             p.setString(1, job.getName());
             p.setString(2, configName);
+            p.setArray(3, containers);
+
             p.executeUpdate();
 
             return getJob(job.getName());

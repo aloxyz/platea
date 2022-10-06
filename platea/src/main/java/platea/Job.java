@@ -2,12 +2,11 @@ package platea;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import platea.exceptions.CreateJobException;
 import platea.exceptions.database.GetException;
+import platea.exceptions.database.InsertException;
 import platea.exceptions.docker.CreateContainerException;
 import platea.exceptions.docker.CreateImageException;
-import platea.exceptions.database.InsertException;
 
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
@@ -21,30 +20,21 @@ public class Job {
         /* Create Job that does not yet exist in database */
         this.config = config;
         this.name = name;
-
-        try {
-            Database.getDatabase().insertJob(this);
-        }
-
-        catch (InsertException e) {
-            throw new CreateJobException(String.format("Could not create job \"name\": %s%n", e.getMessage()));
-        }
+        build();
     }
 
-    Job(String name) {
+    Job(String name) throws CreateJobException {
         /* Initialize Job with name (Job exists in database) */
         this.name = name;
 
         try {
             Database.getDatabase().getJob(name);
-        }
-        catch (GetException e) {
-            System.out.printf("Could not initialize job \"name\": %s%n", e.getMessage());
-            System.exit(1);
+        } catch (GetException e) {
+            throw new CreateJobException(String.format("Could not initialize job \"name\": %s%n", e.getMessage()));
         }
     }
 
-    public HttpResponse build() {
+    private HttpResponse build() throws CreateJobException {
         try {
             JSONArray images = this.config.getJSONArray("images");
             JSONArray containers = this.config.getJSONArray("containers");
@@ -53,33 +43,36 @@ public class Job {
             for (int i = 0; i < images.length(); i++) {
                 JSONObject imageConfig = (JSONObject) images.get(i);
 
-                Image image = new Image(imageConfig, this.name);
-                image.create();
+                new Image(imageConfig, this.name);
             }
 
             // Create containers
             for (int i = 0; i < containers.length(); i++) {
                 JSONObject containerConfig = (JSONObject) containers.get(i);
-                Container container = new Container(containerConfig, this.name);
 
-                // Create container and push its id to this.containers
-                JSONObject createContainerResponseJson = new JSONObject(container.create().body().toString());
-                this.containers.add(createContainerResponseJson.getString("Id"));
+                Container container = new Container(containerConfig, this.name);
+                this.containers.add(container.getId());
             }
 
-        } catch (CreateImageException | CreateContainerException e) {
-            System.out.println("Could not build instance: " + e.getMessage());
+            Database.getDatabase().insertJob(this);
+
+        } catch (CreateImageException | CreateContainerException | InsertException e) {
+            throw new CreateJobException(String.format("Could not build job \"name\": %s%n", e.getMessage()));
         }
 
         return null;
     }
 
     public JSONObject getConfig() {
-        return config;
+        return this.config;
     }
 
     public String getName() {
-        return name;
+        return this.name;
+    }
+
+    public ArrayList<String> getContainers() {
+        return this.containers;
     }
 
 }

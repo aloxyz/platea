@@ -14,9 +14,8 @@ public class Tests {
 
     @Test
     public void job() throws Exception {
-        JSONObject config = new JSONObject(Files.readString(Paths.get("/home/alo/dev/platea/sample.json")));
+        JSONObject config = new JSONObject(Files.readString(Paths.get("/home/alo/Documenti/platea/sample.json")));
         Job j = new Job("test_job", config);
-
     }
 
 }
