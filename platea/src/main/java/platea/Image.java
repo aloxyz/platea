@@ -30,7 +30,7 @@ public class Image {
         this.labels.put("job", jobName);
     }
 
-    public HttpResponse create() throws CreateImageException {
+    public HttpResponse create() throws DockerCreateImageException {
         HttpResponse createImageResponse;
 
         if (this.source) {
@@ -44,7 +44,7 @@ public class Image {
             JSONObject response = new JSONObject(createImageResponse.body().toString());
             System.out.println("Error while creating image: " + response.getString("message"));
             System.exit(1);
-            throw new CreateImageException();
+            throw new DockerCreateImageException();
         }
 
         return createImageResponse;

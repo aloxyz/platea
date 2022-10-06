@@ -25,11 +25,18 @@ public class Database {
 
     }
 
-    public static synchronized Database getDatabase() throws DatabaseConnectionException {
-        if (database == null) {
-            database = new Database();
+    public static synchronized Database getDatabase() {
+        try {
+            if (database == null) {
+                database = new Database();
+            }
+            return database;
+
+        } catch (DatabaseConnectionException e) {
+            System.out.println("Could not connect to database: " + e.getMessage());
         }
-        return database;
+
+        return null;
     }
 
     public ResultSet insertJob(Job job) throws DatabaseInsertException {
