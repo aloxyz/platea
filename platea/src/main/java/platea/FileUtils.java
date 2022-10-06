@@ -11,7 +11,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.concurrent.TimeUnit;
 
-public class FileIO {
+public class FileUtils {
     public static File wget(String url, String path) {
         // Download a file from given URL to specified path
         try {

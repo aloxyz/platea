@@ -63,14 +63,14 @@ public class Image {
                     this.name.lastIndexOf("/") + 1);
 
             // Pull image source from repo
-            FileIO.bash(String.format("git clone %s %s", this.endpoint, tmpPath + trimmedName));
+            FileUtils.bash(String.format("git clone %s %s", this.endpoint, tmpPath + trimmedName));
 
             // Make tarball from source
-            File tar = FileIO.tar(tmpPath + trimmedName, tmpPath, trimmedName);
+            File tar = FileUtils.tar(tmpPath + trimmedName, tmpPath, trimmedName);
             Path tarPath = Paths.get(tar.getAbsolutePath());
 
             if (this.script) {
-                FileIO.bash(scriptsPath + this.name);
+                FileUtils.bash(scriptsPath + this.name);
             }
 
             // Setting parameters
@@ -83,7 +83,7 @@ public class Image {
                     HttpRequest.BodyPublishers.ofFile(tarPath),
                     "application/x-tar");
 
-            FileIO.cleanup();
+            FileUtils.cleanup();
 
         } catch (FileNotFoundException e) {
             System.out.println("Tarball was not found");
@@ -124,17 +124,17 @@ public class Image {
         return createImageResponse;
     }
 
-    public HttpResponse inspect() {
-        return
-                Docker.get("images", name, Client.getClient().noParameters());
-    }
-
     public HttpResponse delete(String force) throws Exception {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("force", force);
 
-        Database.getDatabase().delete(this.getClass(), "images");
+        //Database.getDatabase().delete(this.getClass(), "images");
         return
                 Docker.delete("images", name, params);
+    }
+
+    public HttpResponse inspect() {
+        return
+                Docker.get("images", name, Client.getClient().noParameters());
     }
 }

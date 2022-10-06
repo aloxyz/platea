@@ -51,16 +51,5 @@ public class Docker {
             .deleteResource(
                 String.format("/%s/%s", endpoint, id),
                 parameters);
-
     }
-
-    public static String getFromResponse(HttpResponse response, String key) {
-        return
-        JSONController.stringToJSONObject(
-                response
-                .body()
-                .toString())
-                .get(key).toString();
-    }
-
 }
