@@ -1,7 +1,7 @@
 package platea;
 
 import org.json.JSONObject;
-import platea.exceptions.*;
+import platea.exceptions.docker.CreateImageException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -30,7 +30,7 @@ public class Image {
         this.labels.put("job", jobName);
     }
 
-    public HttpResponse create() throws DockerCreateImageException {
+    public HttpResponse create() throws CreateImageException {
         HttpResponse createImageResponse;
 
         if (this.source) {
@@ -44,7 +44,7 @@ public class Image {
             JSONObject response = new JSONObject(createImageResponse.body().toString());
             System.out.println("Error while creating image: " + response.getString("message"));
             System.exit(1);
-            throw new DockerCreateImageException();
+            throw new CreateImageException();
         }
 
         return createImageResponse;

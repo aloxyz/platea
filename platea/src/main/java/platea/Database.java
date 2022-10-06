@@ -1,16 +1,18 @@
 package platea;
 
 import io.github.cdimascio.dotenv.Dotenv;
-import platea.exceptions.*;
+import platea.exceptions.database.ConnectionException;
+import platea.exceptions.database.DeleteException;
+import platea.exceptions.database.GetException;
+import platea.exceptions.database.InsertException;
 
-import javax.xml.transform.Result;
 import java.sql.*;
 
 public class Database {
     private static Database database;
     private final Connection connection;
 
-    Database() throws DatabaseConnectionException {
+    Database() throws ConnectionException {
         try {
             Dotenv dotenv = Config.getConfig().getEnv();
             String url = dotenv.get("POSTGRES_URL");
@@ -20,7 +22,7 @@ public class Database {
             connection = DriverManager.getConnection(url, user, password);
 
         } catch (SQLException e) {
-            throw new DatabaseConnectionException(e.getSQLState());
+            throw new ConnectionException(e.getSQLState());
         }
 
     }
@@ -32,16 +34,16 @@ public class Database {
             }
             return database;
 
-        } catch (DatabaseConnectionException e) {
+        } catch (ConnectionException e) {
             System.out.println("Could not connect to database: " + e.getMessage());
         }
 
         return null;
     }
 
-    public ResultSet insertJob(Job job) throws DatabaseInsertException {
+    public ResultSet insertJob(Job job) throws InsertException {
         /* Returns the job's ResultSet that was just inserted, else returns null if any exception happens */
-        if (job == null) throw new DatabaseInsertException("Job cannot be null");
+        if (job == null) throw new InsertException("Job cannot be null");
 
         String query;
         PreparedStatement p;
@@ -56,23 +58,23 @@ public class Database {
 
             return getJob(job.getName());
 
-        } catch (DatabaseGetException e) {
+        } catch (GetException e) {
             System.out.println(e.getMessage());
             System.exit(1);
 
         } catch (SQLException e) {
             String state = e.getSQLState();
             if (state.equals("unique_violation"))
-                throw new DatabaseInsertException("Job already exists in database");
+                throw new InsertException("Job already exists in database");
 
         }
 
         return null;
     }
 
-    public ResultSet insertContainer(Container container, String jobName) throws DatabaseInsertException {
+    public ResultSet insertContainer(Container container, String jobName) throws InsertException {
         /* Returns the container's ResultSet that was just inserted, else returns null if any exception happens */
-        if (container == null) throw new DatabaseInsertException("Container cannot be null");
+        if (container == null) throw new InsertException("Container cannot be null");
 
         String query;
         PreparedStatement p;
@@ -87,20 +89,20 @@ public class Database {
 
             return getContainer(container.getId());
 
-        } catch (DatabaseGetException e) {
+        } catch (GetException e) {
             System.out.println(e.getMessage());
             System.exit(1);
 
         } catch (SQLException e) {
             String state = e.getSQLState();
             if (state.equals("unique_violation"))
-                throw new DatabaseInsertException("Job already exists in database");
+                throw new InsertException("Job already exists in database");
 
         }
 
         return null;
     }
-    public ResultSet getJob(String name) throws DatabaseGetException {
+    public ResultSet getJob(String name) throws GetException {
 
         String query;
         PreparedStatement p;
@@ -117,12 +119,12 @@ public class Database {
 
         } catch (SQLException e) {
             String state = e.getSQLState();
-            if (state.equals("undefined_table")) throw new DatabaseGetException("Table does not exist in database");
+            if (state.equals("undefined_table")) throw new GetException("Table does not exist in database");
         }
 
         return null;
     }
-    public ResultSet getContainer(String id) throws DatabaseGetException {
+    public ResultSet getContainer(String id) throws GetException {
         String query;
         PreparedStatement p;
         ResultSet rs;
@@ -138,13 +140,13 @@ public class Database {
 
         } catch (SQLException e) {
             String state = e.getSQLState();
-            if (state.equals("undefined_table")) throw new DatabaseGetException("Table does not exist in database");
+            if (state.equals("undefined_table")) throw new GetException("Table does not exist in database");
         }
 
         return null;
     }
 
-    public void deleteJob(String name) throws DatabaseDeleteException {
+    public void deleteJob(String name) throws DeleteException {
         String query;
         PreparedStatement p;
 
@@ -157,11 +159,11 @@ public class Database {
 
         } catch (SQLException e) {
             String state = e.getSQLState();
-            if (state.equals("undefined_table")) throw new DatabaseDeleteException("Table does not exist in database");
+            if (state.equals("undefined_table")) throw new DeleteException("Table does not exist in database");
         }
     }
 
-    public void deleteContainer(String id) throws DatabaseDeleteException {
+    public void deleteContainer(String id) throws DeleteException {
         String query;
         PreparedStatement p;
 
@@ -174,7 +176,7 @@ public class Database {
 
         } catch (SQLException e) {
             String state = e.getSQLState();
-            if (state.equals("undefined_table")) throw new DatabaseDeleteException("Table does not exist in database");
+            if (state.equals("undefined_table")) throw new DeleteException("Table does not exist in database");
         }
     }
 

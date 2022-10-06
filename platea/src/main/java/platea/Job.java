@@ -3,10 +3,11 @@ package platea;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import platea.exceptions.DatabaseGetException;
-import platea.exceptions.DockerCreateContainerException;
-import platea.exceptions.DockerCreateImageException;
-import platea.exceptions.DatabaseInsertException;
+import platea.exceptions.CreateJobException;
+import platea.exceptions.database.GetException;
+import platea.exceptions.docker.CreateContainerException;
+import platea.exceptions.docker.CreateImageException;
+import platea.exceptions.database.InsertException;
 
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
@@ -25,9 +26,8 @@ public class Job {
             Database.getDatabase().insertJob(this);
         }
 
-        catch (DatabaseInsertException e) {
-            System.out.printf("Could not create job \"name\": %s%n", e.getMessage());
-            System.exit(1);
+        catch (InsertException e) {
+            throw new CreateJobException(String.format("Could not create job \"name\": %s%n", e.getMessage()));
         }
     }
 
@@ -38,7 +38,7 @@ public class Job {
         try {
             Database.getDatabase().getJob(name);
         }
-        catch (DatabaseGetException e) {
+        catch (GetException e) {
             System.out.printf("Could not initialize job \"name\": %s%n", e.getMessage());
             System.exit(1);
         }
@@ -67,7 +67,7 @@ public class Job {
                 this.containers.add(createContainerResponseJson.getString("Id"));
             }
 
-        } catch (DockerCreateImageException | DockerCreateContainerException e) {
+        } catch (CreateImageException | CreateContainerException e) {
             System.out.println("Could not build instance: " + e.getMessage());
         }
 
