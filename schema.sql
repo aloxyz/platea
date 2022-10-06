@@ -7,16 +7,6 @@ CREATE TABLE jobs
     PRIMARY KEY (name)
 );
 
-CREATE TABLE images
-(
-    name          varchar(255) UNIQUE NOT NULL,
-    job           varchar(255)        NOT NULL,
-    creation_time TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    PRIMARY KEY (name),
-    FOREIGN KEY (job) REFERENCES jobs.name
-);
-
 CREATE TABLE containers
 (
     id            varchar(255) UNIQUE NOT NULL,
@@ -25,7 +15,7 @@ CREATE TABLE containers
     creation_time TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
-    FOREIGN KEY (job) REFERENCES jobs.name
+    FOREIGN KEY (job) REFERENCES jobs(name)
 );
 
 

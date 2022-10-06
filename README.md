@@ -11,8 +11,8 @@ docker run \
     --name pgdb \
     --env-file .env \
     -P -p 5432:5432 \
-    -v $PWD/.dbdata:/var/lib/postgresql/data \
-    -v $PWD/schema.sql:/docker-entrypoint-initdb.d/schema.sql \
+    -v $PWD/.dbdata:/var/lib/postgresql/data:Z \
+    -v $PWD/schema.sql:/docker-entrypoint-initdb.d/schema.sql:Z \
     -d postgres
 ```
 ### Example dotenv
