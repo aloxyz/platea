@@ -10,44 +10,45 @@ import platea.exceptions.docker.StopContainerException;
 
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.Random;
+import java.util.UUID;
 
 
 public class Container {
     private JSONObject config;
-    private JSONObject labels;
+    private JSONObject labels = new JSONObject();
     private String name;
-
-
     private String id;
 
-    Container(JSONObject config, String jobName) {
+    Container(JSONObject config, String jobName) throws CreateContainerException {
+        /* Create Container that does not yet exist in database. This constructor calls create() */
+
         this.config = config;
 
+        // Labels object setup
+        this.labels.put("service", "platea");
+        this.labels.put("job", jobName);
+
         // Name generation
-        byte[] array = new byte[8];
-        new Random().nextBytes(array);
-        String random = new String(array, StandardCharsets.UTF_8);
+        String uuid = UUID.randomUUID().toString();
+        this.name = config.getString("Image") + "_" + uuid.toLowerCase().substring(0, 7);
 
-        this.name = config.getString("Image") + "_" + random;
-
+        // Create container and insert into database
         try {
+            JSONObject createContainerResponseJson = new JSONObject(create().body().toString());
+            this.id = createContainerResponseJson.getString("Id");
+
             Database.getDatabase().insertContainer(this, jobName);
         }
 
         catch (InsertException e) {
             System.out.printf("Could not create container \"name\": %s%n", e.getMessage());
         }
-
-        // Labels object setup
-        this.labels = new JSONObject();
-        this.labels.put("service", "platea");
-        this.labels.put("job", jobName);
     }
 
     Container(String id) {
+        /* Initialize Container with id (Container exists in database). Does not call create() */
+
         this.id = id;
 
         try {
