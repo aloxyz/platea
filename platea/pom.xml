@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-job" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-job">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>alo</groupId>
@@ -9,8 +9,7 @@
     <packaging>jar</packaging>
 
     <name>platea</name>
-    <!-- FIXME change it to the project's website -->
-    <url>http://www.example.com</url>
+    <url>https://www.platea.io</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -38,6 +37,12 @@
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20220924</version>
+        </dependency>
+
+        <dependency>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
+            <version>4.6.3</version>
         </dependency>
 
         <dependency>
@@ -78,7 +83,7 @@
                     </configuration>
                     <executions>
                         <execution>
-    
+
                             <phase>package</phase> <!-- bind to the packaging phase -->
                             <goals>
                                 <goal>single</goal>
@@ -86,8 +91,8 @@
                         </execution>
                     </executions>
                 </plugin>
-                
-                
+
+
                 <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
                 <plugin>
                     <artifactId>maven-clean-plugin</artifactId>

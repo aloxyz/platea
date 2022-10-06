@@ -1,7 +1,6 @@
 package platea;
 
 import org.apache.http.client.utils.URIBuilder;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URI;
@@ -125,10 +124,6 @@ public class Client {
                         BodyHandlers.ofString());
     }
 
-    public Map noParameters() {
-        return Collections.<String, String>emptyMap();
-    }
-
     public HttpResponse sendRequest(HttpRequest method, BodyHandler bHandler) {
         HttpResponse tmp = null;
 
@@ -188,5 +183,9 @@ public class Client {
 
     public BodyPublisher noBody() {
         return HttpRequest.BodyPublishers.noBody();
+    }
+
+    public Map noParameters() {
+        return Collections.<String, String>emptyMap();
     }
 }
