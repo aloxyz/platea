@@ -7,7 +7,7 @@ public class Config {
     private final String configPath = System.getenv("HOME") + ".platearc";
     //private final String basePath = System.getenv("XDG_CONFIG_HOME") + "/platea";
     private final String basePath = "/home/alo/.config/platea";
-    private final String jobsPath = basePath + "/jobs/";
+    private final String jobConfigsPath = basePath + "/configs/";
     private final String containersPath = basePath + "/containers/";
 
     private final String tmpPath = basePath + "/tmp/";
@@ -25,12 +25,6 @@ public class Config {
     private final String dockerURL = "localhost:2375";
     private Config() {
     }
-    public static void main(String[] args) {
-        ProcessBuilder builder = new ProcessBuilder();
-
-        String[] setEnv = {"/bin/sh", "-c", "export PLATEA_BASE_PATH=" + Config.getConfig().basePath()};
-        builder.command(setEnv);
-    }
 
     public static synchronized Config getConfig() {
         if (config == null) {
@@ -43,8 +37,8 @@ public class Config {
         return this.basePath;
     }
 
-    public String jobsPath() {
-        return this.jobsPath;
+    public String jobConfigsPath() {
+        return this.jobConfigsPath;
     }
 
     public String remoteRepositoryURL() {

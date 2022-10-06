@@ -2,6 +2,7 @@ package platea.commands;
 
 import org.json.JSONObject;
 import picocli.CommandLine;
+import platea.Config;
 import platea.Job;
 
 import java.io.File;
@@ -34,7 +35,7 @@ public class CreateJobsCommand implements Callable<Integer> {
 
             paramLabel = "<config file name>",
             required = false)
-    File file;
+    File configFile;
 
     @CommandLine.Option(
             names = {"-l", "--local"},
@@ -47,12 +48,11 @@ public class CreateJobsCommand implements Callable<Integer> {
     public Integer call() throws Exception {
         JSONObject config;
         if (local) {
-            config = new JSONObject(Files.readString(file.toPath()));
+            config = new JSONObject(Files.readString(configFile.toPath()));
         }
         else {
-
-            config = new JSONObject(Files.readString(file.toPath()));
-
+            String path = Config.getConfig().jobConfigsPath() + configFile.getName();
+            config = new JSONObject(Files.readString(Paths.get(path)));
         }
 
         new Job(jobName, config);
