@@ -2,9 +2,10 @@ CREATE TABLE jobs
 (
     name          varchar(255) UNIQUE NOT NULL,
     config        varchar(255)        NOT NULL,
+    containers    varchar(255)[],
     creation_time TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    PRIMARY KEY (name)
+        PRIMARY KEY (name)
 );
 
 CREATE TABLE containers
@@ -15,7 +16,7 @@ CREATE TABLE containers
     creation_time TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
-    FOREIGN KEY (job) REFERENCES jobs(name)
+    FOREIGN KEY (job) REFERENCES jobs (name)
 );
 
 
