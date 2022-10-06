@@ -16,14 +16,14 @@ public class Job {
     private final String name;
     private ArrayList<String> containers = new ArrayList<>();
 
-    Job(String name, JSONObject config) throws CreateJobException {
+    public Job(String name, JSONObject config) throws CreateJobException {
         /* Create Job that does not yet exist in database */
         this.config = config;
         this.name = name;
         build();
     }
 
-    Job(String name) throws CreateJobException {
+    public Job(String name) throws CreateJobException {
         /* Initialize Job with name (Job exists in database) */
         this.name = name;
 

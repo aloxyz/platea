@@ -1,8 +1,12 @@
 package platea.commands;
 
+import org.json.JSONObject;
 import picocli.CommandLine;
+import platea.Job;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.concurrent.Callable;
 
 @CommandLine.Command(
@@ -41,6 +45,18 @@ public class CreateJobsCommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
+        JSONObject config;
+        if (local) {
+            config = new JSONObject(Files.readString(file.toPath()));
+        }
+        else {
+
+            config = new JSONObject(Files.readString(file.toPath()));
+
+        }
+
+        new Job(jobName, config);
+
         return 0;
     }
 }

@@ -26,7 +26,7 @@ public class PlateaCommand implements Callable<Integer> {
     boolean verbose;
 
     public static void main(final String[] args) {
-        int status = new CommandLine(new PlateaCommand()).execute("jobs", "create", "-h");
+        int status = new CommandLine(new PlateaCommand()).execute("jobs", "create", "-l", "-f", "/home/alo/Documenti/platea/sample.json", "--name", "picocli_job");
         System.exit(status);
     }
 
