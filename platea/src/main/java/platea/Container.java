@@ -1,29 +1,40 @@
 package platea;
 
 import org.json.JSONObject;
-import platea.exceptions.CreateContainerException;
-import platea.exceptions.DockerException;
+import platea.exceptions.*;
 
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Random;
 
 
 public class Container {
     private JSONObject config;
-    private final JSONObject labels;
-    private final String name;
-    private final String id = "";
+    private JSONObject labels;
+    private String name;
+    private String id;
 
     Container(JSONObject config, String jobName) {
         this.config = config;
 
-        this.name = config.getString("Image");
+        // Name generation
+        byte[] array = new byte[8];
+        new Random().nextBytes(array);
+        String random = new String(array, StandardCharsets.UTF_8);
+
+        this.name = config.getString("Image") + "_" + random;
 
         // Labels object setup
         this.labels = new JSONObject();
         this.labels.put("service", "platea");
         this.labels.put("job", jobName);
+    }
+
+    Container(String id) {
+        this.id = id;
     }
 
     public HttpResponse create() throws CreateContainerException {
@@ -35,10 +46,7 @@ public class Container {
         HttpResponse createContainerResponse;
         String responseMessage;
 
-        // id = Database.getDatabase().getContainer(this);
-
-        //if (id.isEmpty()) {
-            createContainerResponse =
+        createContainerResponse =
                 Docker.post("containers/create", "",
                         params,
                         BodyPublishers.ofString(this.config.toString()),
@@ -47,18 +55,66 @@ public class Container {
 
         JSONObject createContainerJsonObject = new JSONObject((createContainerResponse.body().toString()));
 
-        if (createContainerResponse.statusCode() != 201) {
+        if (createContainerResponse.statusCode() == 201) {
+            this.id = createContainerJsonObject.get("Id").toString();
+        } else {
             responseMessage = createContainerJsonObject.get("message").toString();
             throw new CreateContainerException("Could not create container: " + responseMessage);
         }
 
-        //this.id = createContainerJsonObject.get("Id").toString();
-        //Database.getDatabase().insertContainer(this);
-
-        //} else this.id = id;
-
         return createContainerResponse;
-}
+    }
+
+    public HttpResponse start() throws StartContainerException {
+        HttpResponse startContainerResponse =
+                Docker.post("containers", this.id + "/start",
+                        Client.getClient().noParameters(),
+                        Client.getClient().noBody(),
+                        "application/json;charset=UTF-8"
+                );
+
+        if (startContainerResponse.statusCode() == 304) {
+            throw new StartContainerException("Container already started");
+
+        } else if (startContainerResponse.statusCode() != 204 && startContainerResponse.statusCode() != 304) {
+            String message = new JSONObject(startContainerResponse.body().toString()).getString("message");
+            throw new StartContainerException("Could not start container: " + message);
+        }
+
+        return startContainerResponse;
+    }
+
+    public HttpResponse stop() throws StopContainerException {
+        HttpResponse stopContainerResponse =
+                Docker.post("containers", id + "/stop",
+                        Client.getClient().noParameters(),
+                        Client.getClient().noBody(),
+                        "application/json;charset=UTF-8"
+                );
+        if (stopContainerResponse.statusCode() == 304) {
+            throw new StopContainerException("Container already stopped");
+
+        } else if (stopContainerResponse.statusCode() != 204 && stopContainerResponse.statusCode() != 304) {
+            String message = new JSONObject(stopContainerResponse.body().toString()).getString("message");
+            throw new StopContainerException("Could not stop container: " + message);
+        }
+
+        return stopContainerResponse;
+    }
+
+    public HttpResponse delete(String force) throws DeleteContainerException {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("force", force);
+
+        HttpResponse deleteContainerResponse = Docker.delete("containers", this.id, params);
+
+        if (deleteContainerResponse.statusCode() != 204) {
+            String message = new JSONObject(deleteContainerResponse.body().toString()).getString("message");
+            throw new DeleteContainerException("Could not delete container: " + message);
+        }
+
+        return deleteContainerResponse;
+    }
 
     public HttpResponse inspect() {
         HashMap<String, String> params = new HashMap<>();
@@ -66,75 +122,5 @@ public class Container {
 
         return
                 Docker.get("containers", id, params);
-    }
-
-    public HttpResponse delete(String force) throws Exception {
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put("force", force);
-        Database.getDatabase().deleteContainer(this);
-
-        HttpResponse deleteContainerResponse = Docker.delete("containers", this.id, params);
-
-        System.out.println(deleteContainerResponse.body().toString());
-        return deleteContainerResponse;
-
-    }
-
-    public HttpResponse start() {
-        HttpResponse tmp = null;
-        try {
-            if (!Database.getDatabase().getContainer(this).isEmpty()) {
-                tmp =
-                        Docker.post("containers", id + "/start",
-                                Client.getClient().noParameters(),
-                                Client.getClient().noBody(),
-                                "application/json;charset=UTF-8"
-                        );
-            }
-        } catch (Exception e) {
-            System.out.println("Container does not exist or has not been initialized");
-        }
-        return tmp;
-    }
-
-    public HttpResponse stop() {
-        return
-                Docker.post("containers", id + "/stop",
-                        Client.getClient().noParameters(),
-                        Client.getClient().noBody(),
-                        "application/json;charset=UTF-8"
-                );
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setInstance(Job job) {
-        this.job = job;
-    }
-
-    public void setConfig(JSONObject config) {
-        this.config = config;
-    }
-
-    public Job getInstance() {
-        return job;
-    }
-
-    public JSONObject getConfig() {
-        return config;
     }
 }

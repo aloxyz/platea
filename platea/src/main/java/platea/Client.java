@@ -81,7 +81,7 @@ public class Client {
         /* Generic GET method */
         return
                 HttpRequest.newBuilder(uri)
-                        .timeout(Duration.ofSeconds(10))
+                        .timeout(Duration.ofSeconds(20))
                         .GET()
                         .build();
     }
@@ -90,7 +90,7 @@ public class Client {
         /* Generic POST method */
         return
                 HttpRequest.newBuilder(uri)
-                        .timeout(Duration.ofSeconds(10))
+                        .timeout(Duration.ofSeconds(20))
                         .POST(body)
                         .headers("Content-Type", headers)
                         .build();
@@ -100,7 +100,7 @@ public class Client {
         /* Generic DELETE method */
         return
                 HttpRequest.newBuilder(uri)
-                        .timeout(Duration.ofSeconds(10))
+                        .timeout(Duration.ofSeconds(20))
                         .DELETE()
                         .build();
     }
@@ -136,7 +136,7 @@ public class Client {
             tmp = this.httpClient.send(method, bHandler);
 
         } catch (InterruptedException | IOException e) {
-            System.out.println("Error while sending request to Docker Engine");
+            System.out.println("Error while sending request to Docker Engine: " + e.getMessage());
             System.exit(1);
         }
 
