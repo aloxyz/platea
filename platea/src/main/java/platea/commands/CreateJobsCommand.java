@@ -3,8 +3,10 @@ package platea.commands;
 import org.json.JSONObject;
 import picocli.CommandLine;
 import platea.Config;
+import platea.Database;
 import platea.Job;
 
+import javax.xml.crypto.Data;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -30,8 +32,8 @@ public class CreateJobsCommand implements Callable<Integer> {
             names = {"-f", "--file"},
             description =
                     "Config file to build the job instance. " +
-                    "If the --local flag is on, " +
-                    "a fully qualified path for the json file must be specified instead.",
+                            "If the --local flag is on, " +
+                            "a fully qualified path for the json file must be specified instead.",
 
             paramLabel = "<config file name>",
             required = false)
@@ -46,16 +48,23 @@ public class CreateJobsCommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        JSONObject config;
-        if (local) {
-            config = new JSONObject(Files.readString(configFile.toPath()));
-        }
-        else {
-            String path = Config.getConfig().jobConfigsPath() + configFile.getName();
-            config = new JSONObject(Files.readString(Paths.get(path)));
-        }
+        Database db = Database.getDatabase();
 
-        new Job(jobName, config);
+        if (db.getJob(jobName).next()) { // if job exists in database
+            new Job(jobName);
+
+        } else {
+            JSONObject config;
+
+            if (local) {
+                config = new JSONObject(Files.readString(configFile.toPath()));
+            } else {
+                String path = Config.getConfig().jobConfigsPath() + configFile.getName();
+                config = new JSONObject(Files.readString(Paths.get(path)));
+            }
+
+            new Job(jobName, config);
+        }
 
         return 0;
     }
