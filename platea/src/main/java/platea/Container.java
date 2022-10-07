@@ -10,6 +10,7 @@ import platea.exceptions.docker.StopContainerException;
 
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.UUID;
 

@@ -58,7 +58,7 @@ public class Image {
         /*Build image from source*/
 
         HttpResponse createImageResponse = null;
-        String tmpPath = Config.getConfig().getEnv().get("TMP_PATH");
+        String tmpPath = Config.getConfig().getEnv().get("TMP_PATH") + "/";
         String scriptsPath = Config.getConfig().getEnv().get("CONFIGS_PATH") + "/scripts";
 
         try {

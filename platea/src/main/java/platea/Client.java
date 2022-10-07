@@ -2,6 +2,7 @@ package platea;
 
 import org.apache.http.client.utils.URIBuilder;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -27,14 +28,19 @@ public class Client {
 
         // Map Unix socket to tcp address
         String[] cmd = {"/bin/sh", "-c", "socat -v tcp-l:2375,reuseaddr unix:/var/run/docker.sock"};
+        File log = new File(Config.getConfig().getEnv().get("BASE_PATH") + "/docker.log");
 
         try {
+            log.createNewFile();
+
             new ProcessBuilder()
                     //.inheritIO()
+                    .redirectOutput(log)
+                    .redirectError(log)
                     .command(cmd)
                     .start();
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.out.println(e.getMessage());
             System.exit(1);
         }
@@ -80,7 +86,7 @@ public class Client {
         /* Generic GET method */
         return
                 HttpRequest.newBuilder(uri)
-                        .timeout(Duration.ofSeconds(20))
+                        .timeout(Duration.ofSeconds(10))
                         .GET()
                         .build();
     }
@@ -89,7 +95,7 @@ public class Client {
         /* Generic POST method */
         return
                 HttpRequest.newBuilder(uri)
-                        .timeout(Duration.ofSeconds(20))
+                        .timeout(Duration.ofSeconds(10))
                         .POST(body)
                         .headers("Content-Type", headers)
                         .build();
@@ -99,7 +105,7 @@ public class Client {
         /* Generic DELETE method */
         return
                 HttpRequest.newBuilder(uri)
-                        .timeout(Duration.ofSeconds(20))
+                        .timeout(Duration.ofSeconds(10))
                         .DELETE()
                         .build();
     }

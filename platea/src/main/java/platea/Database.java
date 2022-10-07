@@ -1,10 +1,7 @@
 package platea;
 
 import io.github.cdimascio.dotenv.Dotenv;
-import platea.exceptions.database.ConnectionException;
-import platea.exceptions.database.DeleteException;
-import platea.exceptions.database.GetException;
-import platea.exceptions.database.InsertException;
+import platea.exceptions.database.*;
 
 import java.sql.*;
 
@@ -46,6 +43,37 @@ public class Database {
         return null;
     }
 
+    public ResultSet updateJobContainerIDs(Job job) throws UpdateException {
+        if (job == null) throw new UpdateException("Job cannot be null");
+
+        String query;
+        PreparedStatement p;
+        String configName = job.getConfig().getString("name");
+
+        try {
+            Array containers = connection.createArrayOf("VARCHAR", job.getContainers().toArray());
+
+            query = "UPDATE jobs SET containers = ? WHERE name = ?";
+            p = connection.prepareStatement(query);
+            p.setArray(1, containers);
+            p.setString(2, job.getName());
+
+            p.executeUpdate();
+
+            return getJob(job.getName());
+
+        } catch (GetException e) {
+            System.out.println(e.getMessage());
+            System.exit(1);
+
+        } catch (SQLException e) {
+            String state = e.getSQLState();
+            throw new UpdateException(String.format("%s (%s)", e.getMessage(), state));
+        }
+
+        return null;
+    }
+
     public ResultSet insertJob(Job job) throws InsertException {
         /* Returns the job's ResultSet that was just inserted, else returns null if any exception happens */
         if (job == null) throw new InsertException("Job cannot be null");
@@ -75,7 +103,6 @@ public class Database {
             String state = e.getSQLState();
             if (state.equals(UNIQUE_VIOLATION.toString()))
                 throw new InsertException("Job already exists in database");
-
         }
 
         return null;
@@ -94,6 +121,7 @@ public class Database {
             p.setString(1, container.getId());
             p.setString(2, container.getName());
             p.setString(3, jobName);
+
             p.executeUpdate();
 
             return getContainer(container.getId());
@@ -106,7 +134,7 @@ public class Database {
             String state = e.getSQLState();
             if (state.equals(UNIQUE_VIOLATION.toString()))
                 throw new InsertException("Job already exists in database");
-
+            System.out.println("Could not insert container: " + e.getMessage());
         }
 
         return null;

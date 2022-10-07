@@ -5,6 +5,7 @@ import org.json.JSONObject;
 import platea.exceptions.CreateJobException;
 import platea.exceptions.database.GetException;
 import platea.exceptions.database.InsertException;
+import platea.exceptions.database.UpdateException;
 import platea.exceptions.docker.CreateContainerException;
 import platea.exceptions.docker.CreateImageException;
 
@@ -39,6 +40,8 @@ public class Job {
             JSONArray images = this.config.getJSONArray("images");
             JSONArray containers = this.config.getJSONArray("containers");
 
+            Database.getDatabase().insertJob(this);
+
             // Create images
             for (int i = 0; i < images.length(); i++) {
                 JSONObject imageConfig = (JSONObject) images.get(i);
@@ -54,9 +57,9 @@ public class Job {
                 this.containers.add(container.getId());
             }
 
-            Database.getDatabase().insertJob(this);
+            Database.getDatabase().updateJobContainerIDs(this);
 
-        } catch (CreateImageException | CreateContainerException | InsertException e) {
+        } catch (CreateImageException | CreateContainerException | UpdateException | InsertException e) {
             throw new CreateJobException(String.format("Could not build job \"name\": %s%n", e.getMessage()));
         }
 
