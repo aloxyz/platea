@@ -58,9 +58,8 @@ public class Image {
         /*Build image from source*/
 
         HttpResponse createImageResponse = null;
-        Config config = Config.getConfig();
-        String tmpPath = config.getTmpPath();
-        String scriptsPath = config.scriptsPath();
+        String tmpPath = Config.getConfig().getEnv().get("TMP_PATH");
+        String scriptsPath = Config.getConfig().getEnv().get("CONFIGS_PATH") + "/scripts";
 
         try {
             String trimmedName = this.name.substring(

@@ -1,6 +1,8 @@
 package platea.commands;
 
 import picocli.CommandLine;
+import platea.Config;
+import platea.FileUtils;
 
 import java.util.concurrent.Callable;
 
@@ -41,6 +43,7 @@ public class PlateaCommand implements Callable<Integer> {
     boolean ps;
 
     public static void main(final String[] args) {
+        FileUtils.bash("");
         int status = new CommandLine(new PlateaCommand()).execute(args);
         System.exit(status);
     }

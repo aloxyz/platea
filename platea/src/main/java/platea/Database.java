@@ -8,6 +8,9 @@ import platea.exceptions.database.InsertException;
 
 import java.sql.*;
 
+import static org.postgresql.util.PSQLState.UNDEFINED_TABLE;
+import static org.postgresql.util.PSQLState.UNIQUE_VIOLATION;
+
 public class Database {
     private static Database database;
     private final Connection connection;
@@ -22,7 +25,7 @@ public class Database {
             connection = DriverManager.getConnection(url, user, password);
 
         } catch (SQLException e) {
-            throw new ConnectionException(e.getSQLState());
+            throw new ConnectionException(String.format("%s (%s)", e.getMessage(), e.getSQLState()));
         }
 
     }
@@ -32,10 +35,12 @@ public class Database {
             if (database == null) {
                 database = new Database();
             }
+
             return database;
 
         } catch (ConnectionException e) {
             System.out.println("Could not connect to database: " + e.getMessage());
+            System.exit(2);
         }
 
         return null;
@@ -68,7 +73,7 @@ public class Database {
 
         } catch (SQLException e) {
             String state = e.getSQLState();
-            if (state.equals("unique_violation"))
+            if (state.equals(UNIQUE_VIOLATION.toString()))
                 throw new InsertException("Job already exists in database");
 
         }
@@ -99,7 +104,7 @@ public class Database {
 
         } catch (SQLException e) {
             String state = e.getSQLState();
-            if (state.equals("unique_violation"))
+            if (state.equals(UNIQUE_VIOLATION.toString()))
                 throw new InsertException("Job already exists in database");
 
         }
@@ -123,7 +128,7 @@ public class Database {
 
         } catch (SQLException e) {
             String state = e.getSQLState();
-            if (state.equals("undefined_table")) throw new GetException("Table does not exist in database");
+            if (state.equals(UNDEFINED_TABLE.toString())) throw new GetException("Table does not exist in database");
         }
 
         return null;
@@ -144,7 +149,7 @@ public class Database {
 
         } catch (SQLException e) {
             String state = e.getSQLState();
-            if (state.equals("undefined_table")) throw new GetException("Table does not exist in database");
+            if (state.equals(UNDEFINED_TABLE.toString())) throw new GetException("Table does not exist in database");
         }
 
         return null;
@@ -163,7 +168,7 @@ public class Database {
 
         } catch (SQLException e) {
             String state = e.getSQLState();
-            if (state.equals("undefined_table")) throw new DeleteException("Table does not exist in database");
+            if (state.equals(UNDEFINED_TABLE.toString())) throw new DeleteException("Table does not exist in database");
         }
     }
 
@@ -180,7 +185,7 @@ public class Database {
 
         } catch (SQLException e) {
             String state = e.getSQLState();
-            if (state.equals("undefined_table")) throw new DeleteException("Table does not exist in database");
+            if (state.equals(UNDEFINED_TABLE.toString())) throw new DeleteException("Table does not exist in database");
         }
     }
 

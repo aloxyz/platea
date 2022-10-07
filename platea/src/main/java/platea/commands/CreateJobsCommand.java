@@ -6,7 +6,6 @@ import platea.Config;
 import platea.Database;
 import platea.Job;
 
-import javax.xml.crypto.Data;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -25,7 +24,7 @@ public class CreateJobsCommand implements Callable<Integer> {
             names = {"-n", "--name"},
             description = "Name for the new job.",
             paramLabel = "<name>",
-            required = false)
+            required = true)
     String jobName;
 
     @CommandLine.Option(
@@ -34,23 +33,28 @@ public class CreateJobsCommand implements Callable<Integer> {
                     "Config file to build the job instance. " +
                             "If the --local flag is on, " +
                             "a fully qualified path for the json file must be specified instead.",
-
             paramLabel = "<config file name>",
-            required = false)
+            required = true)
     File configFile;
+
+    @CommandLine.Option(
+            names = {"-s", "--script"},
+            description =
+                    "Configuration script used to build the image. Required if specified in job config file.",
+            paramLabel = "<script file name>")
+    File scriptFile;
 
     @CommandLine.Option(
             names = {"-l", "--local"},
             description = "Use a local file.",
-            paramLabel = "<name>",
-            required = false)
+            paramLabel = "<name>")
     boolean local;
 
     @Override
     public Integer call() throws Exception {
         Database db = Database.getDatabase();
 
-        if (db.getJob(jobName).next()) { // if job exists in database
+        if (db.getJob(jobName) != null) { // if job exists in database
             new Job(jobName);
 
         } else {
@@ -58,8 +62,9 @@ public class CreateJobsCommand implements Callable<Integer> {
 
             if (local) {
                 config = new JSONObject(Files.readString(configFile.toPath()));
+
             } else {
-                String path = Config.getConfig().jobConfigsPath() + configFile.getName();
+                String path = Config.getConfig().getEnv().get("CONFIGS_PATH") + configFile.getName();
                 config = new JSONObject(Files.readString(Paths.get(path)));
             }
 

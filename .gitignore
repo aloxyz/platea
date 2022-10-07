@@ -2,3 +2,4 @@ platea/test.json
 .idea
 .vscode
 *.iml
+.env

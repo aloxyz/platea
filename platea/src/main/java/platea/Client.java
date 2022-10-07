@@ -56,7 +56,7 @@ public class Client {
             }
 
             URIBuilder builder = new URIBuilder();
-            builder.setScheme("http").setHost(Config.getConfig().dockerURL()).setPath(path);
+            builder.setScheme("http").setHost(Config.getConfig().getEnv().get("DOCKER_URL")).setPath(path);
 
             for (Map.Entry<String, String> pair : params.entrySet()) {
                 builder.setParameter(pair.getKey(), pair.getValue());
