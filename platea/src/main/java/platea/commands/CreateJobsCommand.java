@@ -33,7 +33,7 @@ public class CreateJobsCommand implements Callable<Integer> {
                     "Config file to build the job instance. " +
                             "If the --local flag is on, " +
                             "a fully qualified path for the json file must be specified instead.",
-            paramLabel = "<config file name>",
+            paramLabel = "<config>",
             required = true)
     File configFile;
 
@@ -41,7 +41,7 @@ public class CreateJobsCommand implements Callable<Integer> {
             names = {"-s", "--script"},
             description =
                     "Configuration script used to build the image. Required if specified in job config file.",
-            paramLabel = "<script file name>")
+            paramLabel = "<script>")
     File scriptFile;
 
     @CommandLine.Option(

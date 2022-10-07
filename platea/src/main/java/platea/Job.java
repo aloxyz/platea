@@ -42,6 +42,10 @@ public class Job {
             String[] dbArray = (String[]) rs.getArray("containers").getArray();
             this.containers = new ArrayList<>(Arrays.asList(dbArray));
 
+        }
+        catch (NullPointerException e) {
+            throw new CreateJobException("Job does not exist");
+
         } catch (GetException | SQLException e) {
             throw new CreateJobException(String.format("Could not initialize job \"name\": %s%n", e.getMessage()));
         }

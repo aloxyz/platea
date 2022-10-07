@@ -4,6 +4,8 @@ import picocli.CommandLine;
 import platea.Container;
 import platea.Database;
 import platea.Job;
+import platea.exceptions.CreateJobException;
+import platea.exceptions.docker.DeleteJobException;
 
 import java.util.concurrent.Callable;
 
@@ -41,23 +43,33 @@ public class JobsCommand implements Callable<Integer> {
             paramLabel = "<name>")
     boolean stop;
 
-    @CommandLine.Parameters(
-            description = "Specified job name",
-            paramLabel = "<job>")
+    @CommandLine.Option(
+            names = {"-n", "--name"},
+            description = "Name for the new job.",
+            paramLabel = "<name>")
     String jobName;
 
+/*    @CommandLine.Parameters(
+            description = "Specified job name",
+            paramLabel = "<job>")
+    String jobName;*/
+
     @Override
-    public Integer call() throws Exception {
+    public Integer call() {
         Database db = Database.getDatabase();
 
-        if (delete) {
-            new Job(jobName).delete();
-        } else if (purge) {
-            new Job(jobName).purge();
-        } else if (start) {
-            //new Job(jobName).start();
-        } else if (stop) {
-            //new Job(jobName).stop();
+        try {
+            if (delete) {
+                new Job(jobName).delete();
+            } else if (purge) {
+                new Job(jobName).purge();
+            } else if (start) {
+                //new Job(jobName).start();
+            } else if (stop) {
+                //new Job(jobName).stop();
+            }
+        } catch (DeleteJobException | CreateJobException e) {
+            System.out.println(e.getMessage());
         }
 
         return 0;
