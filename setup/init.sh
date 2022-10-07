@@ -1,16 +1,13 @@
 #!/bin/bash
 
 # This script is ran each time Platea is called.
-# It sets up project directory structure and build a dotenv file.
+# It sets up a dotenv file.
 
 # Directories
 BASE_PATH=$HOME/.config/platea
 CONFIGS_PATH=$BASE_PATH/configs
 TMP_PATH=$BASE_PATH/tmp
 RC_PATH=$HOME/.platearc
-
-# Project structure
-mkdir -p "$BASE_PATH" "$CONFIGS_PATH"
 
 # Build dotenv if does not exist
 if [ -f "$BASE_PATH"/.env ]; then
@@ -30,12 +27,3 @@ if [ -f "$BASE_PATH"/.env ]; then
   POSTGRES_URL=jdbc:postgresql:platea
   EOF
 fi
-
-# Database
-docker run \
-    --name pgdb \
-    --env-file .env \
-    -P -p 5432:5432 \
-    -v "$PWD"/.dbdata:/var/lib/postgresql/data:Z \
-    -v "$PWD"/schema.sql:/docker-entrypoint-initdb.d/schema.sql:Z \
-    -d postgres
