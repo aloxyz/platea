@@ -9,9 +9,7 @@ import platea.exceptions.database.InsertException;
 import platea.exceptions.database.UpdateException;
 import platea.exceptions.docker.*;
 
-import javax.xml.crypto.Data;
 import java.net.http.HttpResponse;
-import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -23,6 +21,7 @@ public class Job {
     private JSONObject config;
     private final String name;
     private ArrayList<String> containers = new ArrayList<>();
+    private ArrayList<String> images = new ArrayList<>();
 
     public Job(String name, JSONObject config) throws CreateJobException {
         /* Create Job that does not yet exist in database */
@@ -39,8 +38,11 @@ public class Job {
             // Get containers from database and store into this.containers
             ResultSet rs = Database.getDatabase().getJob(name);
 
-            String[] dbArray = (String[]) rs.getArray("containers").getArray();
-            this.containers = new ArrayList<>(Arrays.asList(dbArray));
+            String[] dbContainers = (String[]) rs.getArray("containers").getArray();
+            String[] dbImages = (String[]) rs.getArray("images").getArray();
+
+            this.containers = new ArrayList<>(Arrays.asList(dbContainers));
+            this.images = new ArrayList<>(Arrays.asList(dbImages));
 
         }
         catch (NullPointerException e) {
@@ -62,7 +64,8 @@ public class Job {
             for (int i = 0; i < images.length(); i++) {
                 JSONObject imageConfig = (JSONObject) images.get(i);
 
-                new Image(imageConfig, this.name);
+                Image image = new Image(imageConfig, this.name);
+                this.images.add(image.getName());
             }
 
             // Create containers
@@ -73,7 +76,7 @@ public class Job {
                 this.containers.add(container.getId());
             }
 
-            Database.getDatabase().updateJobContainerIDs(this);
+            Database.getDatabase().updateJob(this);
 
         } catch (CreateImageException | CreateContainerException | UpdateException | InsertException e) {
             throw new CreateJobException(String.format("Could not build job \"name\": %s%n", e.getMessage()));
@@ -115,12 +118,9 @@ public class Job {
 
             JSONArray images = this.config.getJSONArray("images");
 
-            for (int i = 0; i < images.length(); i++) {
-                JSONObject imageConfig = (JSONObject) images.get(i);
-                String imageName = imageConfig.getString("name");
-
+            for (String image : this.images) {
                 // delete images and put response into imagesResponses
-                imagesResponses.put(imageName, new Image(imageName).delete("true"));
+                imagesResponses.put(image, new Image(image).delete("true"));
             }
 
             responses.put("images", imagesResponses); //put imagesResponses into full responses Map
@@ -143,6 +143,10 @@ public class Job {
 
     public ArrayList<String> getContainers() {
         return this.containers;
+    }
+
+    public ArrayList<String> getImages() {
+        return this.images;
     }
 
 }

@@ -1,8 +1,6 @@
 package platea.commands;
 
 import picocli.CommandLine;
-import platea.Container;
-import platea.Database;
 import platea.Job;
 import platea.exceptions.CreateJobException;
 import platea.exceptions.docker.DeleteJobException;
@@ -56,8 +54,6 @@ public class JobsCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        Database db = Database.getDatabase();
-
         try {
             if (delete) {
                 new Job(jobName).delete();

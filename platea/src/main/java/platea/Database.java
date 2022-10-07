@@ -43,20 +43,21 @@ public class Database {
         return null;
     }
 
-    public ResultSet updateJobContainerIDs(Job job) throws UpdateException {
+    public ResultSet updateJob(Job job) throws UpdateException {
         if (job == null) throw new UpdateException("Job cannot be null");
 
         String query;
         PreparedStatement p;
-        String configName = job.getConfig().getString("name");
 
         try {
             Array containers = connection.createArrayOf("VARCHAR", job.getContainers().toArray());
+            Array images = connection.createArrayOf("VARCHAR", job.getImages().toArray());
 
-            query = "UPDATE jobs SET containers = ? WHERE name = ?";
+            query = "UPDATE jobs SET containers = ?, images = ? WHERE name = ?";
             p = connection.prepareStatement(query);
             p.setArray(1, containers);
-            p.setString(2, job.getName());
+            p.setArray(2, images);
+            p.setString(3, job.getName());
 
             p.executeUpdate();
 
@@ -84,12 +85,14 @@ public class Database {
 
         try {
             Array containers = connection.createArrayOf("VARCHAR", job.getContainers().toArray());
+            Array images = connection.createArrayOf("VARCHAR", job.getImages().toArray());
 
-            query = "INSERT INTO jobs (name, config, containers) VALUES (?, ?, ?)";
+            query = "INSERT INTO jobs (name, config, containers, images) VALUES (?, ?, ?, ?)";
             p = connection.prepareStatement(query);
             p.setString(1, job.getName());
             p.setString(2, configName);
             p.setArray(3, containers);
+            p.setArray(4, images);
 
             p.executeUpdate();
 
@@ -139,6 +142,7 @@ public class Database {
 
         return null;
     }
+
     public ResultSet getJob(String name) throws GetException {
 
         String query;
@@ -161,6 +165,7 @@ public class Database {
 
         return null;
     }
+
     public ResultSet getContainer(String id) throws GetException {
         String query;
         PreparedStatement p;

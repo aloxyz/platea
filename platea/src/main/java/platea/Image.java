@@ -21,7 +21,6 @@ public class Image {
     private boolean source;
     private boolean script;
     private JSONObject labels;
-
     Image(JSONObject config, String jobName) throws CreateImageException {
         this.name = config.getString("name");
         this.endpoint = config.getString("endpoint");
@@ -150,4 +149,10 @@ public class Image {
     public HttpResponse inspect() {
         return dockerGet("images", name, Client.getClient().noParameters());
     }
+
+    public String getName() {
+        return name;
+    }
+
+
 }
