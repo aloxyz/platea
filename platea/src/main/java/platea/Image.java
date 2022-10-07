@@ -2,6 +2,8 @@ package platea;
 
 import org.json.JSONObject;
 import platea.exceptions.docker.CreateImageException;
+import platea.exceptions.docker.DeleteContainerException;
+import platea.exceptions.docker.DeleteImageException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -15,10 +17,10 @@ import static platea.Client.*;
 
 public class Image {
     private final String name;
-    private final String endpoint;
-    private final boolean source;
-    private final boolean script;
-    private final JSONObject labels;
+    private String endpoint;
+    private boolean source;
+    private boolean script;
+    private JSONObject labels;
 
     Image(JSONObject config, String jobName) throws CreateImageException {
         this.name = config.getString("name");
@@ -34,13 +36,16 @@ public class Image {
         create();
     }
 
+    Image(String name) {
+        this.name = name;
+    }
+
     public HttpResponse create() throws CreateImageException {
         HttpResponse createImageResponse;
 
         if (this.source) {
             createImageResponse = build();
-        }
-        else {
+        } else {
             createImageResponse = pull();
         }
 
@@ -127,17 +132,22 @@ public class Image {
         return createImageResponse;
     }
 
-    public HttpResponse delete(String force) throws Exception {
-        HashMap<String, String> params = new HashMap<String, String>();
+    public HttpResponse delete(String force) throws DeleteImageException {
+        HashMap<String, String> params = new HashMap<>();
         params.put("force", force);
 
-        //Database.getDatabase().delete(this.getClass(), "images");
-        return
-                dockerDelete("images", name, params);
+        HttpResponse deleteImageResponse = dockerDelete("images", name, params);
+
+
+        if (deleteImageResponse.statusCode() != 200) {
+            String message = new JSONObject(deleteImageResponse.body().toString()).getString("message");
+            throw new DeleteImageException("Could not delete image: " + message);
+        }
+
+        return deleteImageResponse;
     }
 
     public HttpResponse inspect() {
-        return
-                dockerGet("images", name, Client.getClient().noParameters());
+        return dockerGet("images", name, Client.getClient().noParameters());
     }
 }
