@@ -44,8 +44,7 @@ public class Job {
             this.containers = new ArrayList<>(Arrays.asList(dbContainers));
             this.images = new ArrayList<>(Arrays.asList(dbImages));
 
-        }
-        catch (NullPointerException e) {
+        } catch (NullPointerException e) {
             throw new CreateJobException("Job does not exist");
 
         } catch (GetException | SQLException e) {
@@ -132,6 +131,33 @@ public class Job {
         }
     }
 
+    public Map<String, HttpResponse> start() throws StartContainerException, StopContainerException {
+        Map<String, HttpResponse> responses = new HashMap<>();
+
+        try {
+            for (String id : containers) {
+                // start container and add response to responses
+                responses.put(id, new Container(id).start());
+            }
+
+            return responses;
+
+        } catch (StartContainerException e) {
+            stop();
+            throw new StartContainerException("Could not start job: " + e.getMessage());
+        }
+    }
+
+    public Map<String, HttpResponse> stop() throws StopContainerException {
+        Map<String, HttpResponse> responses = new HashMap<>();
+
+        for (String id : containers) {
+            // stop container and add response to responses
+            responses.put(id, new Container(id).stop());
+        }
+
+        return responses;
+    }
 
     public JSONObject getConfig() {
         return this.config;

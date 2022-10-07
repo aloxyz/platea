@@ -4,6 +4,8 @@ import picocli.CommandLine;
 import platea.Job;
 import platea.exceptions.CreateJobException;
 import platea.exceptions.docker.DeleteJobException;
+import platea.exceptions.docker.StartContainerException;
+import platea.exceptions.docker.StopContainerException;
 
 import java.util.concurrent.Callable;
 
@@ -60,11 +62,11 @@ public class JobsCommand implements Callable<Integer> {
             } else if (purge) {
                 new Job(jobName).purge();
             } else if (start) {
-                //new Job(jobName).start();
+                new Job(jobName).start();
             } else if (stop) {
-                //new Job(jobName).stop();
+                new Job(jobName).stop();
             }
-        } catch (DeleteJobException | CreateJobException e) {
+        } catch (DeleteJobException | CreateJobException | StartContainerException | StopContainerException e) {
             System.out.println(e.getMessage());
         }
 
