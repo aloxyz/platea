@@ -2,15 +2,17 @@ package platea;
 
 import org.json.JSONObject;
 import platea.exceptions.docker.CreateImageException;
-import platea.exceptions.docker.DeleteContainerException;
 import platea.exceptions.docker.DeleteImageException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.HashMap;
 
 import static platea.Client.*;
@@ -19,13 +21,17 @@ public class Image {
     private final String name;
     private String endpoint;
     private boolean source;
-    private boolean script;
     private JSONObject labels;
+    private File script = null;
+
+    Image(String name) {
+        this.name = name;
+    }
+
     Image(JSONObject config, String jobName) throws CreateImageException {
         this.name = config.getString("name");
         this.endpoint = config.getString("endpoint");
         this.source = config.getBoolean("source");
-        this.script = config.getBoolean("script");
 
         // Labels object setup
         this.labels = new JSONObject();
@@ -35,8 +41,20 @@ public class Image {
         create();
     }
 
-    Image(String name) {
-        this.name = name;
+    Image(JSONObject config, File script, String jobName) throws CreateImageException {
+        /* Create an image given a configuration script */
+
+            this.name = config.getString("name");
+            this.endpoint = config.getString("endpoint");
+            this.source = config.getBoolean("source");
+            this.script = script;
+
+            // Labels object setup
+            this.labels = new JSONObject();
+            this.labels.put("service", "platea");
+            this.labels.put("job", jobName);
+
+            create();
     }
 
     public HttpResponse create() throws CreateImageException {
@@ -44,6 +62,7 @@ public class Image {
 
         if (this.source) {
             createImageResponse = build();
+
         } else {
             createImageResponse = pull();
         }
@@ -59,26 +78,28 @@ public class Image {
     }
 
     public HttpResponse build() {
-        /*Build image from source*/
+        /* Build image from source */
 
         HttpResponse createImageResponse = null;
-        String tmpPath = Config.getConfig().getEnv().get("TMP_PATH") + "/";
-        String scriptsPath = Config.getConfig().getEnv().get("CONFIGS_PATH") + "/scripts";
 
         try {
+            String tmpPath = Config.getConfig().getEnv().get("TMP_PATH") + "/";
             String trimmedName = this.name.substring(
                     this.name.lastIndexOf("/") + 1);
+
+            new File(tmpPath);
 
             // Pull image source from repo
             FileUtils.bash(String.format("git clone %s %s", this.endpoint, tmpPath + trimmedName));
 
+            // Run script if necessary
+            if (this.script != null) {
+                FileUtils.bash(this.script.getAbsolutePath());
+            }
+
             // Make tarball from source
             File tar = FileUtils.tar(tmpPath + trimmedName, tmpPath, trimmedName);
             Path tarPath = Paths.get(tar.getAbsolutePath());
-
-            if (this.script) {
-                FileUtils.bash(scriptsPath + this.name);
-            }
 
             // Setting parameters
             HashMap<String, String> params = new HashMap<>();
@@ -90,10 +111,19 @@ public class Image {
                     HttpRequest.BodyPublishers.ofFile(tarPath),
                     "application/x-tar");
 
-            FileUtils.cleanup();
+            // tmp directory cleanup
+            Files.walk(Paths.get(tmpPath))
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
 
         } catch (FileNotFoundException e) {
             System.out.println("Tarball was not found");
+            System.exit(1);
+
+        } catch (IOException e) {
+            System.out.println("Could not run setup script");
+            System.exit(1);
         }
 
         return createImageResponse;
@@ -123,12 +153,10 @@ public class Image {
         params.put("tag", "latest");
         params.put("labels", this.labels.toString());
 
-        HttpResponse createImageResponse = dockerPost("images/create", "",
+        return dockerPost("images/create", "",
                 params,
                 Client.getClient().noBody(),
                 "application/x-www-form-urlencoded");
-
-        return createImageResponse;
     }
 
     public HttpResponse delete(String force) throws DeleteImageException {
