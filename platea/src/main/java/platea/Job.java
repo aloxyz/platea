@@ -70,10 +70,10 @@ public class Job {
             for (int i = 0; i < images.length(); i++) {
                 JSONObject imageConfig = (JSONObject) images.get(i);
                 Image image;
-                String scriptName = imageConfig.getString("script");
 
                 // If script is needed, look for it in the context path
-                if (scriptName != null) {
+                if (!imageConfig.isNull("script")) {
+                    String scriptName = imageConfig.getString("script");
                     File script = new File(context.getAbsolutePath() + "/" + scriptName);
 
                     if (!script.exists()) throw new CreateImageException("Specified script file does not exist");
