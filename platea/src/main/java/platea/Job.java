@@ -111,21 +111,32 @@ public class Job {
         /* Delete containers from Docker Engine and then from database. Lastly, removes job from database */
 
         Map<String, HttpResponse> responses = new HashMap<>();
+        Container container = null;
 
         try {
             for (String id : containers) {
                 // delete container from Docker Engine and add response to responses
-                responses.put(id, new Container(id).delete("true"));
-                Database.getDatabase().deleteContainer(id);
+                try {
+                    container = new Container(id);
+                    responses.put(id, container.delete("true"));
+                    Database.getDatabase().deleteContainer(id);
+
+                    System.out.println("Deleted container " + ConsoleColors.GREEN + container.getName() + ConsoleColors.RESET);
+
+                } catch (DeleteContainerException e) {
+                    System.out.println(ConsoleColors.YELLOW + container.getName() + ConsoleColors.RESET + ": " + e.getMessage());
+                }
+
 
             }
-
             Database.getDatabase().deleteJob(this.name);
-            return responses;
+            System.out.println("Deleted job " + ConsoleColors.BLUE_BRIGHT + this.name + ConsoleColors.RESET);
 
-        } catch (DeleteContainerException | DeleteException e) {
-            throw new DeleteJobException("Could not delete job: " + e.getMessage());
+        } catch (DeleteException e) {
+            System.out.println(ConsoleColors.RED + container.getName() + ConsoleColors.RESET + ": " + e.getMessage());
         }
+
+        return responses;
     }
 
     public Map<String, Map<String, HttpResponse>> purge() throws DeleteJobException {
@@ -153,27 +164,38 @@ public class Job {
 
     public Map<String, HttpResponse> start() throws StartContainerException, StopContainerException {
         Map<String, HttpResponse> responses = new HashMap<>();
+        Container container = null;
 
-        try {
-            for (String id : containers) {
-                // start container and add response to responses
-                responses.put(id, new Container(id).start());
+        for (String id : containers) {
+            // start container and add response to responses
+            try {
+                container = new Container(id);
+                responses.put(id, container.start());
+                System.out.println("Started container " + ConsoleColors.GREEN + container.getName() + ConsoleColors.RESET);
+
+            } catch (StartContainerException e) {
+                System.out.println(ConsoleColors.YELLOW + container.getName() + ConsoleColors.RESET + ": " + e.getMessage());
             }
 
-            return responses;
-
-        } catch (StartContainerException e) {
-            stop();
-            throw new StartContainerException("Could not start job: " + e.getMessage());
         }
+
+        return responses;
     }
 
     public Map<String, HttpResponse> stop() throws StopContainerException {
         Map<String, HttpResponse> responses = new HashMap<>();
+        Container container = null;
 
         for (String id : containers) {
             // stop container and add response to responses
-            responses.put(id, new Container(id).stop());
+            try {
+                container = new Container(id);
+                responses.put(id, container.stop());
+                System.out.println("Stopped container " + ConsoleColors.GREEN + container.getName() + ConsoleColors.RESET);
+
+            } catch (StopContainerException e) {
+                System.out.println(ConsoleColors.YELLOW + container.getName() + ConsoleColors.RESET + ": " + e.getMessage());
+            }
         }
 
         return responses;

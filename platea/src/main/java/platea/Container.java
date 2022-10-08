@@ -10,10 +10,12 @@ import platea.exceptions.docker.StopContainerException;
 
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.UUID;
 
 import static platea.Client.*;
+import static platea.Database.getDatabase;
 
 
 public class Container {
@@ -40,10 +42,8 @@ public class Container {
             JSONObject createContainerResponseJson = new JSONObject(create().body().toString());
             this.id = createContainerResponseJson.getString("Id");
 
-            Database.getDatabase().insertContainer(this, jobName);
-        }
-
-        catch (InsertException e) {
+            getDatabase().insertContainer(this, jobName);
+        } catch (InsertException e) {
             System.out.printf("Could not create container \"name\": %s%n", e.getMessage());
         }
     }
@@ -54,9 +54,8 @@ public class Container {
         this.id = id;
 
         try {
-            Database.getDatabase().getContainer(id);
-        }
-        catch (GetException e) {
+            this.name = getDatabase().getContainer(id).getString("name");
+        } catch (GetException | SQLException e) {
             System.out.printf("Could not initialize container \"name\": %s%n", e.getMessage());
             System.exit(1);
         }

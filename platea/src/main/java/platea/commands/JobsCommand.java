@@ -59,30 +59,23 @@ public class JobsCommand implements Callable<Integer> {
     public Integer call() {
         try {
             if (delete) {
-                System.out.print("Deleting job " + ConsoleColors.BLUE_BRIGHT + jobName + ConsoleColors.RESET + "... ");
+                System.out.println("Deleting job " + ConsoleColors.BLUE_BRIGHT + jobName + ConsoleColors.RESET + "... ");
                 new Job(jobName).delete();
-                System.out.print(ConsoleColors.GREEN_BRIGHT + "done" + ConsoleColors.RESET);
 
             } else if (purge) {
-                System.out.print("Purging job " + ConsoleColors.BLUE_BRIGHT + jobName + ConsoleColors.RESET + "... ");
-
+                System.out.println("Purging job " + ConsoleColors.BLUE_BRIGHT + jobName + ConsoleColors.RESET + "... ");
                 new Job(jobName).purge();
-                System.out.print(ConsoleColors.GREEN_BRIGHT + "done" + ConsoleColors.RESET);
 
             } else if (start) {
-                System.out.print("Starting job " + ConsoleColors.BLUE_BRIGHT + jobName + ConsoleColors.RESET + "... ");
-
+                System.out.println("Starting job " + ConsoleColors.BLUE_BRIGHT + jobName + ConsoleColors.RESET + "... ");
                 new Job(jobName).start();
-                System.out.print(ConsoleColors.GREEN_BRIGHT + "done" + ConsoleColors.RESET);
 
             } else if (stop) {
-                System.out.print("Stopping job " + ConsoleColors.BLUE_BRIGHT + jobName + ConsoleColors.RESET + "... ");
-
+                System.out.println("Stopping job " + ConsoleColors.BLUE_BRIGHT + jobName + ConsoleColors.RESET + "... ");
                 new Job(jobName).stop();
-                System.out.print(ConsoleColors.GREEN_BRIGHT + "done" + ConsoleColors.RESET);
             }
         } catch (DeleteJobException | CreateJobException | StartContainerException | StopContainerException e) {
-            System.out.println(ConsoleColors.RED + "\n" + e.getMessage() + ConsoleColors.RESET);
+            System.out.println(ConsoleColors.RED + e.getMessage() + ConsoleColors.RESET);
             System.exit(1);
         }
 
