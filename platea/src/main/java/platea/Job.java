@@ -57,6 +57,7 @@ public class Job {
     }
 
     private HttpResponse build() throws CreateJobException {
+        System.out.println("Creating job " + ConsoleColors.BLUE_BRIGHT + this.name + ConsoleColors.RESET + ": ");
 
         try {
             JSONArray images = this.config.getJSONArray("images");
@@ -102,6 +103,7 @@ public class Job {
             throw new CreateJobException(String.format("Could not build job \"name\": %s%n", e.getMessage()));
         }
 
+        System.out.println(ConsoleColors.GREEN_BRIGHT + "done" + ConsoleColors.RESET);
         return null;
     }
 
@@ -122,8 +124,7 @@ public class Job {
             return responses;
 
         } catch (DeleteContainerException | DeleteException e) {
-            System.out.println(e.getMessage());
-            throw new DeleteJobException(e.getMessage());
+            throw new DeleteJobException("Could not delete job: " + e.getMessage());
         }
     }
 

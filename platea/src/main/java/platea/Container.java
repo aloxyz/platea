@@ -63,6 +63,8 @@ public class Container {
     }
 
     private HttpResponse create() throws CreateContainerException {
+        System.out.print("Creating container " + this.name + "... ");
+
         // Setting up parameters
         HashMap<String, String> params = new HashMap<>();
         params.put("name", this.name);
@@ -87,6 +89,7 @@ public class Container {
             throw new CreateContainerException("Could not create container: " + responseMessage);
         }
 
+        System.out.println(ConsoleColors.GREEN_BRIGHT + "done" + ConsoleColors.RESET);
         return createContainerResponse;
     }
 

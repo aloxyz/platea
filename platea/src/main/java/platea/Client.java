@@ -130,20 +130,6 @@ public class Client {
                         BodyHandlers.ofString());
     }
 
-    public HttpResponse sendRequest(HttpRequest method, BodyHandler bHandler) {
-        HttpResponse tmp = null;
-
-        try {
-            tmp = this.httpClient.send(method, bHandler);
-
-        } catch (InterruptedException | IOException e) {
-            System.out.println("Error while sending request to Docker Engine: " + e.getMessage());
-            System.exit(1);
-        }
-
-        return tmp;
-    }
-
     public static HttpResponse dockerGet(String endpoint, String id, Map<String, String> params) {
         //System.out.println("GET: "+String.format("/%s/%s", endpoint, id));
         if (!id.isEmpty()) {
@@ -185,6 +171,20 @@ public class Client {
                         .deleteResource(
                                 String.format("/%s/%s", endpoint, id),
                                 parameters);
+    }
+
+    public HttpResponse sendRequest(HttpRequest method, BodyHandler bHandler) {
+        HttpResponse tmp = null;
+
+        try {
+            tmp = this.httpClient.send(method, bHandler);
+
+        } catch (InterruptedException | IOException e) {
+            System.out.println("Error while sending request to Docker Engine: " + e.getMessage());
+            System.exit(1);
+        }
+
+        return tmp;
     }
 
     public BodyPublisher noBody() {

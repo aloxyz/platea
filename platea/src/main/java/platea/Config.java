@@ -14,8 +14,6 @@ public class Config {
                     .directory(basePath + "/.env")
                     .load();
 
-            System.out.println(env.toString());
-
         } catch (NullPointerException e) {
             System.out.println("Could read platea config path: " + e.getMessage());
             System.exit(3);

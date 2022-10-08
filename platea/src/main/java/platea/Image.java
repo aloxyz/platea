@@ -58,6 +58,8 @@ public class Image {
     }
 
     public HttpResponse create() throws CreateImageException {
+        System.out.print("Creating image " + this.name + "... ");
+
         HttpResponse createImageResponse;
 
         if (this.source) {
@@ -74,6 +76,7 @@ public class Image {
             throw new CreateImageException();
         }
 
+        System.out.println(ConsoleColors.GREEN_BRIGHT + " done" + ConsoleColors.RESET);
         return createImageResponse;
     }
 
@@ -92,6 +95,7 @@ public class Image {
             // Run script if necessary
             if (this.script != null) {
                 FileUtils.bash(this.script.getAbsolutePath());
+                //System.out.println((Files.readString(Paths.get("/home/alo/.config/platea/tmp/smtpclient-microservice/app/conf.yaml"))));
             }
 
             // Make tarball from source
