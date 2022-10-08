@@ -44,17 +44,17 @@ public class Image {
     Image(JSONObject config, File script, String jobName) throws CreateImageException {
         /* Create an image given a configuration script */
 
-            this.name = config.getString("name");
-            this.endpoint = config.getString("endpoint");
-            this.source = config.getBoolean("source");
-            this.script = script;
+        this.name = config.getString("name");
+        this.endpoint = config.getString("endpoint");
+        this.source = config.getBoolean("source");
+        this.script = script;
 
-            // Labels object setup
-            this.labels = new JSONObject();
-            this.labels.put("service", "platea");
-            this.labels.put("job", jobName);
+        // Labels object setup
+        this.labels = new JSONObject();
+        this.labels.put("service", "platea");
+        this.labels.put("job", jobName);
 
-            create();
+        create();
     }
 
     public HttpResponse create() throws CreateImageException {
@@ -107,10 +107,11 @@ public class Image {
             params.put("t", this.name);
             params.put("labels", this.labels.toString());
 
-            createImageResponse = dockerPost("build", "",
-                    params,
-                    HttpRequest.BodyPublishers.ofFile(tarPath),
-                    "application/x-tar");
+            createImageResponse =
+                    getClient().postResource("/build",
+                            params,
+                            HttpRequest.BodyPublishers.ofFile(tarPath),
+                            "application/x-tar");
 
             // tmp directory cleanup
             Files.walk(Paths.get(tmpPath))
@@ -139,10 +140,11 @@ public class Image {
         params.put("labels", this.labels.toString());
 
         // Build image
-        createImageResponse = dockerPost("build", "",
-                params,
-                Client.getClient().noBody(),
-                "application/x-www-form-urlencoded");
+        createImageResponse =
+                getClient().postResource("/build",
+                        params,
+                        getClient().noBody(),
+                        "application/x-www-form-urlencoded");
 
         return createImageResponse;
     }
@@ -154,9 +156,9 @@ public class Image {
         params.put("tag", "latest");
         params.put("labels", this.labels.toString());
 
-        return dockerPost("images/create", "",
+        return getClient().postResource("/images/create",
                 params,
-                Client.getClient().noBody(),
+                getClient().noBody(),
                 "application/x-www-form-urlencoded");
     }
 
@@ -164,7 +166,7 @@ public class Image {
         HashMap<String, String> params = new HashMap<>();
         params.put("force", force);
 
-        HttpResponse deleteImageResponse = dockerDelete("images", name, params);
+        HttpResponse deleteImageResponse = getClient().deleteResource("/images/" + this.name, params);
 
 
         if (deleteImageResponse.statusCode() != 200) {
@@ -176,7 +178,7 @@ public class Image {
     }
 
     public HttpResponse inspect() {
-        return dockerGet("images", name, Client.getClient().noParameters());
+        return getClient().getResource("/images/" + this.name + "/json", Client.getClient().noParameters());
     }
 
     public String getName() {

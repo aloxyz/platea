@@ -74,11 +74,10 @@ public class Container {
         String responseMessage;
 
         createContainerResponse =
-                dockerPost("containers/create", "",
+                getClient().postResource("/containers/create",
                         params,
                         BodyPublishers.ofString(this.config.toString()),
-                        "application/json;charset=UTF-8"
-                );
+                        "application/json;charset=UTF-8");
 
         JSONObject createContainerJsonObject = new JSONObject((createContainerResponse.body().toString()));
 
@@ -95,11 +94,10 @@ public class Container {
 
     public HttpResponse start() throws StartContainerException {
         HttpResponse startContainerResponse =
-                dockerPost("containers", this.id + "/start",
-                        Client.getClient().noParameters(),
-                        Client.getClient().noBody(),
-                        "application/json;charset=UTF-8"
-                );
+                getClient().postResource("/containers/" + this.id + "/start",
+                        getClient().noParameters(),
+                        getClient().noBody(),
+                        "application/json;charset=UTF-8");
 
         if (startContainerResponse.statusCode() == 304) {
             throw new StartContainerException("Container already started");
@@ -114,11 +112,11 @@ public class Container {
 
     public HttpResponse stop() throws StopContainerException {
         HttpResponse stopContainerResponse =
-                dockerPost("containers", id + "/stop",
-                        Client.getClient().noParameters(),
-                        Client.getClient().noBody(),
-                        "application/json;charset=UTF-8"
-                );
+                getClient().postResource("/containers/" + this.id + "/stop",
+                        getClient().noParameters(),
+                        getClient().noBody(),
+                        "application/json;charset=UTF-8");
+
         if (stopContainerResponse.statusCode() == 304) {
             throw new StopContainerException("Container already stopped");
 
@@ -134,7 +132,7 @@ public class Container {
         HashMap<String, String> params = new HashMap<>();
         params.put("force", force);
 
-        HttpResponse deleteContainerResponse = dockerDelete("containers", this.id, params);
+        HttpResponse deleteContainerResponse = getClient().deleteResource("/containers/" + this.id, params);
 
         if (deleteContainerResponse.statusCode() != 204) {
             String message = new JSONObject(deleteContainerResponse.body().toString()).getString("message");
@@ -149,7 +147,7 @@ public class Container {
         params.put("filters", "{\"label\":[\"instance\"]}");
 
         return
-                dockerGet("containers", id, params);
+                getClient().getResource("/containers/" + this.id + "/json", params);
     }
 
     public String getId() {

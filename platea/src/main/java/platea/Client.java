@@ -53,7 +53,7 @@ public class Client {
         return client;
     }
 
-    public URI uriBuilder(String path, Map<String, String> params) {
+    private URI uriBuilder(String path, Map<String, String> params) {
         URI tmp = null;
 
         try {
@@ -82,7 +82,21 @@ public class Client {
         return tmp;
     }
 
-    public HttpRequest get(URI uri) {
+    private HttpResponse sendRequest(HttpRequest method, BodyHandler bHandler) {
+        HttpResponse tmp = null;
+
+        try {
+            tmp = this.httpClient.send(method, bHandler);
+
+        } catch (InterruptedException | IOException e) {
+            System.out.println("Error while sending request to Docker Engine: " + e.getMessage());
+            System.exit(1);
+        }
+
+        return tmp;
+    }
+
+    private HttpRequest get(URI uri) {
         /* Generic GET method */
         return
                 HttpRequest.newBuilder(uri)
@@ -91,7 +105,7 @@ public class Client {
                         .build();
     }
 
-    public HttpRequest post(URI uri, BodyPublisher body, String headers) {
+    private HttpRequest post(URI uri, BodyPublisher body, String headers) {
         /* Generic POST method */
         return
                 HttpRequest.newBuilder(uri)
@@ -101,7 +115,7 @@ public class Client {
                         .build();
     }
 
-    public HttpRequest delete(URI uri) {
+    private HttpRequest delete(URI uri) {
         /* Generic DELETE method */
         return
                 HttpRequest.newBuilder(uri)
@@ -128,63 +142,6 @@ public class Client {
         return
                 sendRequest(delete(uriBuilder(path, params)),
                         BodyHandlers.ofString());
-    }
-
-    public static HttpResponse dockerGet(String endpoint, String id, Map<String, String> params) {
-        //System.out.println("GET: "+String.format("/%s/%s", endpoint, id));
-        if (!id.isEmpty()) {
-            return
-                    Client.getClient()
-                            .getResource(
-                                    String.format("/%s/%s/json", endpoint, id),
-                                    params);
-        } else {
-            return
-                    Client.getClient()
-                            .getResource(
-                                    String.format("/%s/json", endpoint),
-                                    params);
-        }
-    }
-
-    public static HttpResponse dockerPost(String endpoint, String id, Map<String, String> parameters, BodyPublisher body, String headers) {
-        //System.out.println("POST: "+String.format("/%s/%s", endpoint, id));
-        if (!id.isEmpty()) {
-            return
-                    Client.getClient()
-                            .postResource(
-                                    String.format("/%s/%s", endpoint, id),
-                                    parameters, body, headers);
-        } else {
-            return
-                    Client.getClient()
-                            .postResource(
-                                    String.format("/%s", endpoint),
-                                    parameters, body, headers);
-        }
-    }
-
-    public static HttpResponse dockerDelete(String endpoint, String id, Map<String, String> parameters) {
-        //System.out.println("DELETE: "+String.format("/%s/%s", endpoint, id));
-        return
-                Client.getClient()
-                        .deleteResource(
-                                String.format("/%s/%s", endpoint, id),
-                                parameters);
-    }
-
-    public HttpResponse sendRequest(HttpRequest method, BodyHandler bHandler) {
-        HttpResponse tmp = null;
-
-        try {
-            tmp = this.httpClient.send(method, bHandler);
-
-        } catch (InterruptedException | IOException e) {
-            System.out.println("Error while sending request to Docker Engine: " + e.getMessage());
-            System.exit(1);
-        }
-
-        return tmp;
     }
 
     public BodyPublisher noBody() {
