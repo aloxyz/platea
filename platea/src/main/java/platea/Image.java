@@ -84,13 +84,10 @@ public class Image {
 
         try {
             String tmpPath = Config.getConfig().getEnv().get("TMP_PATH") + "/";
-            String trimmedName = this.name.substring(
-                    this.name.lastIndexOf("/") + 1);
-
             new File(tmpPath);
 
             // Pull image source from repo
-            FileUtils.bash(String.format("git clone %s %s", this.endpoint, tmpPath + trimmedName));
+            FileUtils.bash(String.format("git clone %s %s", this.endpoint, tmpPath + this.name));
 
             // Run script if necessary
             if (this.script != null) {
@@ -98,12 +95,12 @@ public class Image {
             }
 
             // Make tarball from source
-            File tar = FileUtils.tar(tmpPath + trimmedName, tmpPath, trimmedName);
+            File tar = FileUtils.tar(tmpPath + this.name, tmpPath, this.name);
             Path tarPath = Paths.get(tar.getAbsolutePath());
 
             // Setting parameters
             HashMap<String, String> params = new HashMap<>();
-            params.put("t", trimmedName);
+            params.put("t", this.name);
             params.put("labels", this.labels.toString());
 
             createImageResponse = dockerPost("build", "",

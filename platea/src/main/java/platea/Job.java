@@ -136,8 +136,6 @@ public class Job {
         try {
             responses.put("containers", delete()); // delete containers and put response into responses
 
-            JSONArray images = this.config.getJSONArray("images");
-
             for (String image : this.images) {
                 // delete images and put response into imagesResponses
                 imagesResponses.put(image, new Image(image).delete("true"));
