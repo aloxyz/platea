@@ -9,24 +9,27 @@ import platea.exceptions.database.InsertException;
 import platea.exceptions.database.UpdateException;
 import platea.exceptions.docker.*;
 
+import java.io.File;
 import java.net.http.HttpResponse;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 
 public class Job {
     private JSONObject config;
     private final String name;
     private ArrayList<String> containers = new ArrayList<>();
     private ArrayList<String> images = new ArrayList<>();
+    private File context;
 
-    public Job(String name, JSONObject config) throws CreateJobException {
+    public Job(String name, JSONObject config, File context) throws CreateJobException {
         /* Create Job that does not yet exist in database */
         this.config = config;
         this.name = name;
+        this.context = context;
+
         build();
     }
 
@@ -53,17 +56,34 @@ public class Job {
     }
 
     private HttpResponse build() throws CreateJobException {
+
         try {
             JSONArray images = this.config.getJSONArray("images");
             JSONArray containers = this.config.getJSONArray("containers");
 
             Database.getDatabase().insertJob(this);
 
+            // todo build() returns Map<String, Httpresponse>;
+
             // Create images
             for (int i = 0; i < images.length(); i++) {
                 JSONObject imageConfig = (JSONObject) images.get(i);
+                Image image;
+                String scriptName = imageConfig.getString("script");
 
-                Image image = new Image(imageConfig, this.name);
+                // If script is needed, look for it in the context path
+                if (scriptName != null) {
+                    File script = new File(context.getAbsolutePath() + "/" + scriptName);
+
+                    if (!script.exists()) throw new CreateImageException("Specified script file does not exist");
+
+                    // If script file exists, pass it to constructor and build a new image
+                    image = new Image(imageConfig, script, this.name);
+
+                } else {
+                    image = new Image(imageConfig, this.name);
+
+                }
                 this.images.add(image.getName());
             }
 

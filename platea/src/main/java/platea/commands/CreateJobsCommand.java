@@ -30,19 +30,18 @@ public class CreateJobsCommand implements Callable<Integer> {
     @CommandLine.Option(
             names = {"-f", "--file"},
             description =
-                    "Config file to build the job instance. " +
+                    "Configuration file to build the job instance. " +
                             "If the --local flag is on, " +
                             "a fully qualified path for the json file must be specified instead.",
             paramLabel = "<config>",
             required = true)
     File configFile;
 
-    @CommandLine.Option(
-            names = {"-s", "--script"},
+    @CommandLine.Parameters(
             description =
-                    "Configuration script used to build the image. Required if specified in job config file.",
-            paramLabel = "<script>")
-    File scriptFile;
+                    "Build context path. Required if the specified configuration needs auxiliary scripts to build images.",
+            paramLabel = "<context>")
+    File context;
 
     @CommandLine.Option(
             names = {"-l", "--local"},
@@ -68,7 +67,7 @@ public class CreateJobsCommand implements Callable<Integer> {
                 config = new JSONObject(Files.readString(Paths.get(path)));
             }
 
-            new Job(jobName, config);
+            new Job(jobName, config, context);
         }
 
         return 0;

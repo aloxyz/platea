@@ -10,7 +10,6 @@ import platea.exceptions.docker.StopContainerException;
 
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -19,7 +18,7 @@ import static platea.Client.*;
 
 public class Container {
     private JSONObject config;
-    private JSONObject labels = new JSONObject();
+    private final JSONObject labels = new JSONObject();
     private String name;
     private String id;
 
