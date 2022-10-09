@@ -143,6 +143,25 @@ public class Database {
         return null;
     }
 
+    public ResultSet getJobs() throws GetException {
+        String query;
+        ResultSet rs;
+
+        try {
+            Statement st = this.connection.createStatement();
+            query = "SELECT * FROM jobs";
+            rs = st.executeQuery(query);
+
+            if (rs.next()) return rs;
+
+        } catch (SQLException e) {
+            String state = e.getSQLState();
+            if (state.equals(UNDEFINED_TABLE.toString())) throw new GetException("Table does not exist in database");
+        }
+
+        return null;
+    }
+
     public ResultSet getJob(String name) throws GetException {
 
         String query;

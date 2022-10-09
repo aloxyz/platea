@@ -148,22 +148,25 @@ public class Job {
 
         Map<String, Map<String, HttpResponse>> responses = new HashMap<>();
         Map<String, HttpResponse> imagesResponses = new HashMap<>();
+        Image image = null;
 
-        try {
-            responses.put("containers", delete()); // delete containers and put response into responses
+        responses.put("containers", delete()); // delete containers and put response into responses
 
-            for (String image : this.images) {
-                // delete images and put response into imagesResponses
-                imagesResponses.put(image, new Image(image).delete("true"));
+        for (String imageName : this.images) {
+            // delete images and put response into imagesResponses
+            try {
+                image = new Image(imageName);
+                imagesResponses.put(imageName, image.delete("true"));
+                System.out.println("Deleted image " + ConsoleColors.GREEN + image.getName() + ConsoleColors.RESET);
+
+            } catch (DeleteImageException e) {
+                System.out.println(ConsoleColors.YELLOW + image.getName() + ConsoleColors.RESET + ": " + e.getMessage());
             }
-
-            responses.put("images", imagesResponses); //put imagesResponses into full responses Map
-
-            return responses;
-
-        } catch (DeleteImageException e) {
-            throw new DeleteJobException("Could not purge job: " + e.getMessage());
         }
+
+        responses.put("images", imagesResponses); //put imagesResponses into full responses Map
+
+        return responses;
     }
 
     public Map<String, HttpResponse> start() throws StartContainerException, StopContainerException {

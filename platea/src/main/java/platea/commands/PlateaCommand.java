@@ -14,7 +14,7 @@ import java.util.concurrent.Callable;
         commandListHeading = "\nSubcommands\n",
         mixinStandardHelpOptions = true,
         requiredOptionMarker = '*',
-        subcommands = {JobsCommand.class})
+        subcommands = {JobsCommand.class, ListCommand.class})
 public class PlateaCommand implements Callable<Integer> {
     final Integer SUCCESS = 0;
     final Integer FAILURE = 1;
@@ -33,11 +33,6 @@ public class PlateaCommand implements Callable<Integer> {
             names = {"--list-configs"},
             description = "List available job configs downloaded from the official remote repository.")
     boolean list;
-
-    @CommandLine.Option(
-            names = {"--ps"},
-            description = "List running platea jobs.")
-    boolean ps;
 
     public static void main(final String[] args) {
         int status = new CommandLine(new PlateaCommand()).execute(args);
