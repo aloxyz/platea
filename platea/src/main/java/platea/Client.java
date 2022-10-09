@@ -42,7 +42,7 @@ public class Client {
 
         } catch (IOException e) {
             System.out.println(e.getMessage());
-            System.exit(1);
+            System.exit(2);
         }
     }
 
@@ -72,11 +72,11 @@ public class Client {
 
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
-            System.exit(1);
+            System.exit(2);
 
         } catch (URISyntaxException e) {
             System.out.println(e.getMessage());
-            System.exit(1);
+            System.exit(2);
         }
 
         return tmp;
@@ -90,7 +90,7 @@ public class Client {
 
         } catch (InterruptedException | IOException e) {
             System.out.println("Error while sending request to Docker Engine: " + e.getMessage());
-            System.exit(1);
+            System.exit(2);
         }
 
         return tmp;

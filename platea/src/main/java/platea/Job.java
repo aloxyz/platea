@@ -77,7 +77,11 @@ public class Job {
                     String scriptName = imageConfig.getString("script");
                     File script = new File(context.getAbsolutePath() + "/" + scriptName);
 
-                    if (!script.exists()) throw new CreateImageException("Specified script file does not exist");
+                    if (!script.exists())
+                        throw new CreateImageException("Specified script file does not exist");
+
+                    if (!script.setExecutable(true))
+                        throw new CreateImageException("Cannot make " + scriptName + " executable");
 
                     // If script file exists, pass it to constructor and build a new image
                     image = new Image(imageConfig, script, this.name);

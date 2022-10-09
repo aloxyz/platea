@@ -22,7 +22,7 @@ public class Image {
     private String endpoint;
     private boolean source;
     private JSONObject labels;
-    private File script = null;
+    private File script;
 
     Image(String name) {
         this.name = name;
@@ -95,7 +95,6 @@ public class Image {
             // Run script if necessary
             if (this.script != null) {
                 FileUtils.bash(this.script.getAbsolutePath());
-                //System.out.println((Files.readString(Paths.get("/home/alo/.config/platea/tmp/smtpclient-microservice/app/conf.yaml"))));
             }
 
             // Make tarball from source

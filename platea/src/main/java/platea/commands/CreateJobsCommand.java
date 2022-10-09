@@ -37,17 +37,17 @@ public class CreateJobsCommand implements Callable<Integer> {
             required = true)
     File configFile;
 
-    @CommandLine.Parameters(
-            description =
-                    "Build context path. Required if the specified configuration needs auxiliary scripts to build images.",
-            paramLabel = "<context>")
-    File context;
-
     @CommandLine.Option(
             names = {"-l", "--local"},
             description = "Use a local file.",
             paramLabel = "<name>")
     boolean local;
+
+    @CommandLine.Parameters(
+            description =
+                    "Build context path. Required if the specified configuration needs auxiliary scripts to build images.",
+            paramLabel = "<context>")
+    File context;
 
     @Override
     public Integer call() throws Exception {

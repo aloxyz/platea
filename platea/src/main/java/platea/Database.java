@@ -37,7 +37,7 @@ public class Database {
 
         } catch (ConnectionException e) {
             System.out.println("Could not connect to database: " + e.getMessage());
-            System.exit(2);
+            System.exit(3);
         }
 
         return null;
@@ -65,7 +65,7 @@ public class Database {
 
         } catch (GetException e) {
             System.out.println(e.getMessage());
-            System.exit(1);
+            System.exit(3);
 
         } catch (SQLException e) {
             String state = e.getSQLState();
@@ -100,7 +100,7 @@ public class Database {
 
         } catch (GetException e) {
             System.out.println(e.getMessage());
-            System.exit(1);
+            System.exit(3);
 
         } catch (SQLException e) {
             String state = e.getSQLState();
@@ -131,7 +131,7 @@ public class Database {
 
         } catch (GetException e) {
             System.out.println(e.getMessage());
-            System.exit(1);
+            System.exit(3);
 
         } catch (SQLException e) {
             String state = e.getSQLState();
