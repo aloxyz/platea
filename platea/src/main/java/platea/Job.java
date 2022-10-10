@@ -1,6 +1,7 @@
 package platea;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import platea.exceptions.CreateJobException;
 import platea.exceptions.database.DeleteException;
@@ -78,7 +79,7 @@ public class Job {
                     File script = new File(context.getAbsolutePath() + "/" + scriptName);
 
                     if (!script.exists())
-                        throw new CreateImageException("Specified script file does not exist");
+                        throw new CreateImageException("Script file \"" + scriptName + "\" does not exist");
 
                     if (!script.setExecutable(true))
                         throw new CreateImageException("Cannot make " + scriptName + " executable");
@@ -103,8 +104,14 @@ public class Job {
 
             Database.getDatabase().updateJob(this);
 
-        } catch (CreateImageException | CreateContainerException | UpdateException | InsertException e) {
-            throw new CreateJobException(String.format("Could not build job \"name\": %s%n", e.getMessage()));
+        } catch (CreateImageException | CreateContainerException | UpdateException | InsertException |
+                 JSONException e) {
+            throw new CreateJobException(String.format(
+                            "Could not build job "
+                            + ConsoleColors.BLUE_BRIGHT
+                            + this.name
+                            + ConsoleColors.RESET
+                            + ": %s%n", e.getMessage()));
         }
 
         System.out.println(ConsoleColors.GREEN_BRIGHT + "done" + ConsoleColors.RESET);

@@ -50,6 +50,8 @@ public class Jobs {
             }
         } catch (CreateJobException | GetException | SQLException e) {
             throw new RuntimeException("Something went wrong: " + e.getMessage());
+        } catch (NullPointerException e) {
+            System.out.println("No Platea jobs");
         }
     }
 }
