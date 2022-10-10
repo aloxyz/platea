@@ -7,7 +7,6 @@ import platea.exceptions.database.GetException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import static platea.Database.getDatabase;
 
@@ -19,14 +18,14 @@ public class Jobs {
             ArrayList<Job> jobs = new ArrayList<>();
 
             // Set up jobs ArrayList from database records
-            while (rs.next()) {
                 String jobName = rs.getString("name");
                 jobs.add(new Job(jobName));
-            }
 
             for (Job job : jobs) {
-                System.out.println(ConsoleColors.BLUE_BRIGHT + job.getName() + ConsoleColors.RESET);
-                System.out.format("%-36s %-8s\n", "Name", "Status");
+                System.out.println(ConsoleColors.BLUE_BOLD_BRIGHT + job.getName() + ConsoleColors.RESET);
+                System.out.format("%-46s %-8s\n",
+                        ConsoleColors.WHITE_BOLD_BRIGHT + "Name" + ConsoleColors.RESET,
+                        ConsoleColors.WHITE_BOLD_BRIGHT + "Status" + ConsoleColors.RESET);
 
                 for (String id : job.getContainers()) {
                     Container container = new Container(id);
