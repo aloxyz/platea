@@ -12,7 +12,8 @@ import java.util.concurrent.Callable;
         name = "list",
         aliases = {"ls", "l"},
         header = "List platea jobs.",
-        optionListHeading = "\nOptions\n",
+        description = "If --name is not specified, all platea jobs will be listed.",
+        optionListHeading= "\nOptions\n",
         mixinStandardHelpOptions = true,
         requiredOptionMarker = '*',
         subcommands = {CreateJobsCommand.class})
@@ -20,18 +21,18 @@ public class ListCommand implements Callable<Integer> {
 
     @CommandLine.Option(
             names = {"-n", "--name"},
-            description = "Inspect a particular job",
+            description = "Job to inspect",
             paramLabel = "<name>")
     String jobName;
 
-    @CommandLine.Option(
-            names = {"--running"},
-            description = "List only running platea containers")
-    boolean running;
-
     @Override
     public Integer call() {
+        if (jobName == null) {
             Jobs.list();
+
+        } else {
+            Jobs.list(jobName);
+        }
 
         return 0;
     }
