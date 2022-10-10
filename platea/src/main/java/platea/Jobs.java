@@ -16,10 +16,14 @@ public class Jobs {
         try {
             ResultSet rs = getDatabase().getJobs();
             ArrayList<Job> jobs = new ArrayList<>();
+            String jobName;
 
             // Set up jobs ArrayList from database records
-                String jobName = rs.getString("name");
+            while(!rs.isAfterLast()) {
+                jobName = rs.getString("name");
                 jobs.add(new Job(jobName));
+                rs.next();
+            }
 
             for (Job job : jobs) {
                 System.out.println(ConsoleColors.BLUE_BOLD_BRIGHT + job.getName() + ConsoleColors.RESET);
@@ -46,6 +50,7 @@ public class Jobs {
 
                     System.out.println(status + ConsoleColors.RESET);
                 }
+                System.out.println();
             }
         } catch (CreateJobException | GetException | SQLException e) {
             throw new RuntimeException("Something went wrong: " + e.getMessage());
