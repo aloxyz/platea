@@ -1,20 +1,45 @@
 # Platea - Docker orchestrator
 
-## fetch-instances
+## Setup
+### Dependencies
+- socat
+- docker
+
+### Run the Postgresql database
+```
+docker run \
+    --name pgdb \
+    --env-file .env \
+    -P -p 5432:5432 \
+    -v $PWD/.dbdata:/var/lib/postgresql/data:Z \
+    -v $PWD/schema.sql:/docker-entrypoint-initdb.d/schema.sql:Z \
+    -d postgres
+```
+### Example dotenv
+```
+POSTGRES_PASSWORD=platea
+POSTGRES_USER=platea
+POSTGRES_DB=platea
+POSTGRES_URL=jdbc:postgresql:platea
+```
+
+## Usage
+
+### fetch-instances
 	platea --fetch-instances
 	fetching from the remote repository [url]...
-## list-instances
+### list-instances
 	platea --list-instances
 		- lcarnevale
 		- config2
 		- config3
-## build
+### build
 	platea build INSTANCE
-## start
+### start
 	platea start INSTANCE
-## run
+### run
 	platea run INSTANCE
-## stop
+### stop
 	platea stop INSTANCE
 
 # UML Scheme
