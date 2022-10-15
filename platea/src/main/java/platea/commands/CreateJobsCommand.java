@@ -1,10 +1,11 @@
 package platea.commands;
 
-import org.json.JSONException;
+import io.github.cdimascio.dotenv.Dotenv;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import picocli.CommandLine;
-import platea.Config;
 import platea.Database;
+import platea.FileUtils;
 import platea.Job;
 import platea.exceptions.CreateJobException;
 import platea.exceptions.database.GetException;
@@ -13,8 +14,10 @@ import platea.exceptions.docker.DeleteJobException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.concurrent.Callable;
+
+import static platea.Config.getConfig;
 
 @CommandLine.Command(
         name = "create",
@@ -58,19 +61,47 @@ public class CreateJobsCommand implements Callable<Integer> {
     public Integer call() {
         try {
             Database db = Database.getDatabase();
+            Dotenv env = getConfig().getEnv();
 
             if (db.getJob(jobName) != null) { // if job exists in database
                 new Job(jobName);
+            }
 
-            } else {
+            else {
                 JSONObject config;
 
                 if (local) {
                     config = new JSONObject(Files.readString(configFile.toPath()));
 
                 } else {
-                    String path = Config.getConfig().getEnv().get("CONFIGS_PATH") + configFile.getName();
-                    config = new JSONObject(Files.readString(Paths.get(path)));
+                    // Read config from repo into String
+                    String baseUrl = env.get("REMOTE_URL") + "/-/raw/main/";
+                    config = new JSONObject(FileUtils.get(baseUrl + "sample.json"));
+
+                    JSONArray images = config.getJSONArray("images");
+                    HashMap<String, File> scripts = new HashMap<>();
+
+                    // If image in config.images has a script
+                    for (int i = 0; i < images.length(); i++) {
+                        JSONObject image = (JSONObject) images.get(i);
+
+                        if (!image.isNull("script")) {
+                            String scriptName = image.getString("script");
+
+                            // Build url to download the script from
+                            FileUtils.wget(
+                                    baseUrl + scriptName,
+                                    env.get("TMP_PATH" + scriptName)
+                            );
+
+                            scripts.put(
+                                    "scriptName",
+                                    new File(env.get("TMP_PATH" + scriptName)));
+                        }
+                    }
+
+                    new Job(jobName, config, scripts);
+                    return 0;
                 }
 
                 new Job(jobName, config, context);

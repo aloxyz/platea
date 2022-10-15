@@ -18,7 +18,7 @@ CONFIGS_PATH=$CONFIGS_PATH
 TMP_PATH=$TMP_PATH
 RC_PATH=$RC_PATH
 
-REMOTE_URL=git@gitlab.com:aloxyz/platea-configs.git
+REMOTE_URL=https://gitlab.com/aloxyz/platea-configs
 DOCKER_SOCKET=unix:/var/run/docker.sock
 DOCKER_URL=localhost:2375
 
