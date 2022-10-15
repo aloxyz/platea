@@ -43,7 +43,7 @@ public class CreateJobsCommand implements Callable<Integer> {
                             "a fully qualified path for the json file must be specified instead.",
             paramLabel = "<config>",
             required = true)
-    File configFile;
+    String configName;
 
     @CommandLine.Option(
             names = {"-l", "--local"},
@@ -51,7 +51,8 @@ public class CreateJobsCommand implements Callable<Integer> {
             paramLabel = "<name>")
     boolean local;
 
-    @CommandLine.Parameters(
+    @CommandLine.Option(
+            names = {"-c", "--context"},
             description =
                     "Build context path. Required if the specified configuration needs auxiliary scripts to build images.",
             paramLabel = "<context>")
@@ -71,12 +72,13 @@ public class CreateJobsCommand implements Callable<Integer> {
                 JSONObject config;
 
                 if (local) {
-                    config = new JSONObject(Files.readString(configFile.toPath()));
+                    config = new JSONObject(Files.readString(
+                            new File(configName).toPath()));
 
                 } else {
                     // Read config from repo into String
                     String baseUrl = env.get("REMOTE_URL") + "/-/raw/main/";
-                    config = new JSONObject(FileUtils.get(baseUrl + "sample.json"));
+                    config = new JSONObject(FileUtils.get(baseUrl + configName));
 
                     JSONArray images = config.getJSONArray("images");
                     HashMap<String, File> scripts = new HashMap<>();
@@ -91,12 +93,12 @@ public class CreateJobsCommand implements Callable<Integer> {
                             // Build url to download the script from
                             FileUtils.wget(
                                     baseUrl + scriptName,
-                                    env.get("TMP_PATH" + scriptName)
+                                    env.get("TMP_PATH") + scriptName
                             );
 
                             scripts.put(
-                                    "scriptName",
-                                    new File(env.get("TMP_PATH" + scriptName)));
+                                    scriptName,
+                                    new File(env.get("TMP_PATH") + scriptName));
                         }
                     }
 
