@@ -26,6 +26,27 @@ public class FileUtils {
         return new File(path);
     }
 
+    public static String get(String url) {
+        try {
+            BufferedInputStream stream = new BufferedInputStream(new URL(url).openStream());
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+            StringBuilder builder = new StringBuilder();
+
+            // Build string from InputStream with StringBuilder
+            String line;
+            while((line =  reader.readLine()) != null) builder.append(line);
+            stream.close();
+
+            return builder.toString();
+
+        } catch (Exception e) {
+            System.out.println("Could not elaborate url object " + url);
+        }
+
+        return null;
+    }
+
     public static File tar(String src, String dest, String name) {
         File tmp = null;
 

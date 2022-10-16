@@ -25,12 +25,22 @@ public class Job {
     private ArrayList<String> containers = new ArrayList<>();
     private ArrayList<String> images = new ArrayList<>();
     private File context;
+    private HashMap<String, File> scripts; // Needed to build from remote repository
 
     public Job(String name, JSONObject config, File context) throws CreateJobException {
         /* Create Job that does not yet exist in database */
         this.config = config;
         this.name = name;
         this.context = context;
+
+        build();
+    }
+
+    public Job(String name, JSONObject config, HashMap<String, File> scripts) throws CreateJobException {
+        /* Create Job that does not yet exist in database, from remote repository */
+        this.config = config;
+        this.name = name;
+        this.scripts = scripts;
 
         build();
     }
@@ -75,14 +85,23 @@ public class Job {
 
                 // If script is needed, look for it in the context path
                 if (!imageConfig.isNull("script")) {
+                    File script;
                     String scriptName = imageConfig.getString("script");
-                    File script = new File(context.getAbsolutePath() + "/" + scriptName);
+
+                    //If building from remote repo
+                    if (this.scripts != null) {
+                        script = this.scripts.get(scriptName);
+
+                    } else {
+                        script = new File(context.getAbsolutePath() + "/" + scriptName);
+                    }
 
                     if (!script.exists())
                         throw new CreateImageException("Script file \"" + scriptName + "\" does not exist");
 
                     if (!script.setExecutable(true))
                         throw new CreateImageException("Cannot make " + scriptName + " executable");
+
 
                     // If script file exists, pass it to constructor and build a new image
                     image = new Image(imageConfig, script, this.name);
@@ -107,7 +126,7 @@ public class Job {
         } catch (CreateImageException | CreateContainerException | UpdateException | InsertException |
                  JSONException e) {
             throw new CreateJobException(String.format(
-                            "Could not build job "
+                    "Could not build job "
                             + ConsoleColors.BLUE_BRIGHT
                             + this.name
                             + ConsoleColors.RESET
