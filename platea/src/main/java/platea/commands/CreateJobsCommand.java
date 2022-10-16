@@ -8,12 +8,14 @@ import platea.Database;
 import platea.FileUtils;
 import platea.Job;
 import platea.exceptions.CreateJobException;
+import platea.exceptions.CreateJobExistsException;
 import platea.exceptions.database.GetException;
 import platea.exceptions.docker.DeleteJobException;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
@@ -65,7 +67,7 @@ public class CreateJobsCommand implements Callable<Integer> {
             Dotenv env = getConfig().getEnv();
 
             if (db.getJob(jobName) != null) { // if job exists in database
-                new Job(jobName);
+                throw new CreateJobExistsException("Job \"" + jobName + "\" already exists");
             }
 
             else {
@@ -102,13 +104,13 @@ public class CreateJobsCommand implements Callable<Integer> {
                         }
                     }
 
-                    new Job(jobName, config, scripts);
+                    new Job(jobName, config, scripts); // Create job from remote
                     return 0;
                 }
 
-                new Job(jobName, config, context);
+                new Job(jobName, config, context); // Create job from local context
             }
-        } catch (GetException | IOException e) {
+        } catch (GetException | IOException | CreateJobExistsException e) {
             System.out.println(e.getMessage());
 
         } catch (CreateJobException e) {
