@@ -12,18 +12,40 @@
     - [Diagramma UML](#diagramma-uml)
   - [Classi](#classi)
     - [platea.Client](#plateaclient)
+      - [Attributi](#attributi)
+      - [Metodi](#metodi)
     - [platea.Config](#plateaconfig)
+      - [Attributi](#attributi-1)
+      - [Metodi](#metodi-1)
     - [platea.ConsoleColors](#plateaconsolecolors)
     - [platea.Container](#plateacontainer)
+      - [Attributi](#attributi-2)
+      - [Metodi](#metodi-2)
     - [platea.Database](#plateadatabase)
+      - [Attributi](#attributi-3)
+      - [Metodi](#metodi-3)
     - [platea.FileUtils](#plateafileutils)
+      - [Metodi](#metodi-4)
     - [platea.Image](#plateaimage)
+      - [Attributi](#attributi-4)
+      - [Metodi](#metodi-5)
     - [platea.Job](#plateajob)
+      - [Attributi](#attributi-5)
+      - [Metodi](#metodi-6)
     - [platea.Jobs](#plateajobs)
+      - [Metodi](#metodi-7)
     - [commands.CreateJobsCommand](#commandscreatejobscommand)
+      - [Attributi](#attributi-6)
+      - [Metodi](#metodi-8)
     - [commands.JobsCommand](#commandsjobscommand)
+      - [Attributi](#attributi-7)
+      - [Metodi](#metodi-9)
     - [commands.ListCommand](#commandslistcommand)
+      - [Attributi](#attributi-8)
+      - [Metodi](#metodi-10)
     - [commands.PlateaCommand](#commandsplateacommand)
+      - [Attributi](#attributi-9)
+      - [Metodi](#metodi-11)
     - [Exceptions](#exceptions)
       - [Docker](#docker)
       - [Database](#database)
@@ -106,11 +128,11 @@ Per ogni inserzione del database viene prima eseguito un controllo per verificar
 
 Classe statica singleton per la gestione della connessione al Docker Engine
 
-**Attributi**
+#### Attributi
 - `private final HttpClient httpClient`
 - `private static Client client`
 
-**Metodi**
+#### Metodi
 - `private Client()`
 - `public static synchronized Client getClient()`
 - `private URI uriBuilder(String path, Map<String, String> params)`
@@ -129,11 +151,11 @@ Classe statica singleton per la gestione della connessione al Docker Engine
 
 Classe statica singleton per la gestione delle configurazioni di Platea con un dotenv
 
-**Attributi**
+#### Attributi
 - `private static Config config`
 - `Dotenv env`
 
-**Metodi**
+#### Metodi
 - `Config()`
 - `public static synchronized Config getConfig()`
 - `public Dotenv getEnv()`
@@ -148,13 +170,13 @@ Definizione di costanti per l'utilizzo dei colori di stampa a schermo del tipo:
 `public class Container()`
 
 Classe che rappresenta un Docker container
-**Attributi**
+#### Attributi
 - `private JSONObject config`
 - `private final JSONObject labels`
 - `private String name`
 - `private String id`
 
-**Metodi**
+#### Metodi
 - `Container(JSONObject config, String jobName) throws CreateContainerException`
 - `Container(String id)`
 - `private HttpResponse create() throws CreateContainerException`
@@ -170,11 +192,11 @@ Classe che rappresenta un Docker container
 
 Classe statica singleton per la gestione della connessione al database PostgreSQL utilizzando JDBC
 
-**Attributi**
+#### Attributi
 - `private static Database database`
 - `private final Connection connection`
 
-**Metodi**
+#### Metodi
 - `Database() throws ConnectionException`
 - `public static synchronized Database getDatabase()`
 - `public ResultSet updateJob(Job job) throws UpdateException`
@@ -190,7 +212,7 @@ Classe statica singleton per la gestione della connessione al database PostgreSQ
 `public class FileUtils()`
 
 Classe statica per la gestione dei file
-**Metodi**
+#### Metodi
 - `public static File wget(String url, String path)`
 - `public static String get(String url)`
 - `public static File tar(String src, String dest, String name)`
@@ -202,14 +224,14 @@ Classe statica per la gestione dei file
 `public class Image()`
 
 Classe che rappresenta una Docker image
-**Attributi**
+#### Attributi
 - `private final String name`
 - `private String endpoint`
 - `private boolean source`
 - `private JSONObject labels`
 - `private File script`
 
-**Metodi**
+#### Metodi
 - `Image(String name)`
 - `Image(JSONObject config, String jobName) throws CreateImageException`
 - `Image(JSONObject config, File script, String jobName) throws CreateImageException`
@@ -226,7 +248,7 @@ Classe che rappresenta una Docker image
 
 Classe per la gestione di container e immagini Docker in modalità cluster
 
-**Attributi**
+#### Attributi
 - `private JSONObject config`
 - `private final String name`
 - `private ArrayList<String> containers`
@@ -234,7 +256,7 @@ Classe per la gestione di container e immagini Docker in modalità cluster
 - `private File context`
 - `private HashMap<String, File> scripts`
 
-**Metodi**
+#### Metodi
 - `public Job(String name, JSONObject config, File context) throws CreateJobException`
 - `public Job(String name, JSONObject config, HashMap<String, File> scripts) throws CreateJobException`
 - `public Job(String name) throws CreateJobException`
@@ -253,56 +275,56 @@ Classe per la gestione di container e immagini Docker in modalità cluster
 
 Collezione di metodi statici inerenti a `Job`
 
-**Metodi**
+#### Metodi
 - `public static void list()`
 - `public static void list(String jobName)`
 
 ### commands.CreateJobsCommand
 `@CommandLine.Command() public class CreateJobsCommand implements Callable<Integer>`
 
-**Attributi**
+#### Attributi
 - `@CommandLine.Option() String jobName`
 - `@CommandLine.Option() String configName`
 - `@CommandLine.Option() boolean local`
 - `@CommandLine.Option() File context`
   
-**Metodi**
+#### Metodi
 - `@Override public Integer call()`
 
 
 ### commands.JobsCommand
 `@CommandLine.Command() public class JobsCommand implements Callable<Integer>`
 
-**Attributi**
+#### Attributi
 - `@CommandLine.Option() boolean delete`
 - `@CommandLine.Option() boolean purge`
 - `@CommandLine.Option() boolean start`
 - `@CommandLine.Option() boolean stop`
 - `@CommandLine.Option() jobName`
 
-**Metodi**
+#### Metodi
 - `@Override public Integer call()`
 
 ### commands.ListCommand
 `@CommandLine.Command() public class ListCommand implements Callable<Integer>`
 
-**Attributi**
+#### Attributi
 - `@CommandLine.Option() String jobName`
 
-**Metodi**
+#### Metodi
 - `@Override public Integer call()`
 
 ### commands.PlateaCommand
 `@CommandLine.Command() public class PlateaCommand implements Callable<Integer>`
 
-**Attributi**
+#### Attributi
 - `final Integer SUCCESS = 0`
 - `final Integer FAILURE = 1`
 - `@CommandLine.Option() boolean verbose`
 - `@CommandLine.Option() boolean fetch`
 - `@CommandLine.Option() boolean list`
 
-**Metodi**
+#### Metodi
 - `public static void main(final String[] args)`
 - `public Integer call()`
 
